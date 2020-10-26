@@ -5,7 +5,7 @@ class PluginManager {
     constructor(client) {
         this.client = client;
         this.plugins = new Map();
-        this.events = new Set(); // tipo un Array ma automaticamente unico
+        this.events = new Set(); // Set is like array but more flexible
     }
 
     init() {
