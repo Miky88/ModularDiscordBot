@@ -21,4 +21,4 @@ class Example extends BasePlugin {
     }
 }
 
-module.exports = Example;```
+module.exports = Example;
