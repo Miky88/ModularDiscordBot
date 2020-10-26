@@ -17,7 +17,7 @@ class Example extends BasePlugin {
     }
 
     async run(client, ...args) { // args are the arguments of Discord.js Events (es. for presenceUpdate you would have [oldPresence, newPresence]
-      console.log("Hi!")
+        console.log("Hi!")
     }
 }
 
