@@ -17,6 +17,9 @@
     "discord.js": "^12.4.0",
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
-    "lokijs": "^1.5.11"
+    "lokijs": "^1.5.11",
+    "moment": "^2.29.1",
+    "moment-duration-format": "^2.3.2",
+    "superagent": "^6.1.0"
   }
 }

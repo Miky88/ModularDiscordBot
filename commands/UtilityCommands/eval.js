@@ -14,7 +14,7 @@ exports.run = async (client, message, args) => {
         });
       }
     
-      if (result.includes(client.token)) result = result.replace(client.token, 'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0');
+      if (result.includes(client.token)) result = `${result}`.split(client.token).join('mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0');
 
       if (result.length > 2048) {
         console.log(result);
@@ -45,13 +45,12 @@ exports.run = async (client, message, args) => {
 };
 
 exports.help = {
-  name: "eval",
+  name: ":computer:eval",
   info: "Evaluates albitrary JavaScript",
   usage: "[code]"
 };
 
 exports.config = {
   aliases: ["ev","js"], // Array of aliases
-  cooldown: 3, // Command cooldown
-  ownerOnly: true
+  cooldown: 3 // Command cooldown
 };

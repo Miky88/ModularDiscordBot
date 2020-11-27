@@ -1,20 +1,16 @@
 // Imports
 const Discord = require('discord.js');
 const fs = require('fs')
-require('./base/Functions.js')
+require('./modules/Functions.js')
 require('dotenv').config()
-//const PluginLoader = require('./base/PluginLoader.js')
-const PluginManager = require('./base/PluginManager.js')
+const PluginManager = require('./modules/PluginManager.js')
 
 // Discord
 const client = new Discord.Client();
 client.config = require('./config.js');
 client.commands = new Discord.Collection();
-//client.plugins = new Discord.Collection();
 
 // Discord Events and Plugins
-//client.Loader = new PluginLoader(client)
-//client.Loader.init(client)
 client.PluginManager = new PluginManager(client)
 client.PluginManager.init()
 
