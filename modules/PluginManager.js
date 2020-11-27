@@ -35,13 +35,9 @@ class PluginManager {
             const event = plugin.conf.event
             this.events.add(event);
             this.client.on(event, async (...args) => {
-<<<<<<< HEAD:modules/PluginManager.js
-                // Esegue tutti i plugin abilitati
-                for (let [_name, plugin] of this.plugins) {
-=======
+
                 // Executes all enabled plugins
                 for (let [name, plugin] of this.plugins) {
->>>>>>> e08773e1fee5af9f34019877d99d31c6e80b0159:base/PluginManager.js
                     if (plugin.conf.enabled && plugin.conf.event == event)
                         await plugin.run(this.client, ...args);
                 }
