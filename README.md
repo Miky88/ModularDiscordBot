@@ -1,6 +1,8 @@
 # ModularBot
 Discord Modular Bot with Custom Plugin support.
 
+# WARNING: THIS BOT IS STILL WIP AND IT IS VERY VULNERABLE TO SAFETY ISSUES
+
 ## Making a Plugin
 Plugins are stored in plugins/ directory and are loaded into the bot on startup. Enabled plugins are also runned when they get triggered by respective event.
 ```js
