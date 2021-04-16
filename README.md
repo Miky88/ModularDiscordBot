@@ -6,7 +6,7 @@ Discord Modular Bot with Custom Plugin support.
 ## Making a Plugin
 Plugins are stored in plugins/ directory and are loaded into the bot on startup. Enabled plugins are also runned when they get triggered by respective event.
 ```js
-const BasePlugin = require("../base/BasePlugin.js"); // Import the base plugin
+const BasePlugin = require("../modules/BasePlugin.js"); // Import the base plugin
 
 class Example extends BasePlugin {
     constructor() {
@@ -24,3 +24,4 @@ class Example extends BasePlugin {
 }
 
 module.exports = Example;
+```
