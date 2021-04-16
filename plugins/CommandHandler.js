@@ -17,7 +17,7 @@ class CommandHandler extends BasePlugin {
    */
   async run(client, message) {
 
-    message.mods = {}
+    message.data = {}
     // Ignore bots and non-commands
     if (message.author.bot) return;
     if (!message.content.startsWith(client.config.prefix)) return;
@@ -28,7 +28,7 @@ class CommandHandler extends BasePlugin {
     // Define flags
     let flags = args.filter(e => e.startsWith("--"))
     flags.forEach(x => args.remove(x))
-    message.mods.flags = flags
+    message.data.flags = flags
 
     //Define command
     const command = args.shift().toLowerCase();

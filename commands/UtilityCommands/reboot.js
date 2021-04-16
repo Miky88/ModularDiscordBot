@@ -3,9 +3,8 @@ const {loading} = require('../../modules/Emojis')
 exports.run = async (client, message, args) => {
   const {promisify} = require("util");
   const write = promisify(require("fs").writeFile);
-  //logHook.send(`:mobile_phone_off: ${client.utils.escapeMarkdown(message.author.tag)} (\`${message.author.id}\`) shut the bot down`)
   const m = await message.channel.send(loading + " Rebooting...");
-  await write('./reboot.json', `{"id": "${m.id}", "channel": "${m.channel.id}"}`).catch(console.error); //io ci metterei un .then
+  await write('./reboot.json', `{"id": "${m.id}", "channel": "${m.channel.id}"}`).catch(console.error);
   
   process.exit(1);
 }
