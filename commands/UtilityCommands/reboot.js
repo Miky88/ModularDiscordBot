@@ -1,5 +1,5 @@
 //const {logHook} = require('../modules/logging')
-const {loading} = require('../../modules/emojis')
+const {loading} = require('../../modules/Emojis')
 exports.run = async (client, message, args) => {
   const {promisify} = require("util");
   const write = promisify(require("fs").writeFile);
@@ -11,7 +11,7 @@ exports.run = async (client, message, args) => {
 }
 
 exports.help = {
-  name: ':robot:reboot',
+  name: ':battery:reboot',
   info: 'Reboot the bot',
   usage: '',
 }

@@ -15,8 +15,7 @@ exports.run = async (client, message, args) => {
     let embed = new Discord.MessageEmbed()
         .setColor("RANDOM")
         .setTitle("STATISTICS")
-        .setDescription(`${client.user.username} v88`)
-        .setFooter("Stole by a Samplasion code")
+        .setDescription(`${client.user.username}`)
         .addFields(
             {
                 name: "⚙️ Memory Usage",

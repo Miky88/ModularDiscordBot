@@ -1,10 +1,11 @@
 const BasePlugin = require("../modules/BasePlugin.js");
+const fs = require("fs");
 
-class UtilityCommands extends BasePlugin {
+class UncategorizedCommands extends BasePlugin {
     constructor() {
         super({
-            name: "UtilityCommands",
-            info: "Manages the Utility commands",
+            name: "UncategorizedCommands",
+            info: "Loads commands that don't have a parent category",
             enabled: true,
             event: "ready"
         })
@@ -19,4 +20,4 @@ class UtilityCommands extends BasePlugin {
     }
 }
 
-module.exports = UtilityCommands;
+module.exports = UncategorizedCommands;

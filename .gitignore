@@ -1,6 +1,5 @@
 .env
 node_modules
 .vscode
-comms
 reboot.json
-config.js
+package-lock.json

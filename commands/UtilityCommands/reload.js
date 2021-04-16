@@ -18,12 +18,12 @@ exports.run = async (client, message, args) => {
 }
 
 exports.help = {
-  name: ':robot:reload',
+  name: ':arrows_counterclockwise:reload',
   info: 'Reloads a command',
   usage: '<command>',
 }
 
 exports.config = {
   aliases: [], // Array of aliases
-  cooldown: 0, // Command cooldown
+  cooldown: 3, // Command cooldown
 };

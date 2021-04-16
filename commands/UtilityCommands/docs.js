@@ -9,7 +9,7 @@ exports.run = async (client, message, args) => {
 };
 
 exports.help = {
-  name: ":computer:docs",
+  name: ":notebook_with_decorative_cover:docs",
   info: "Search on Discord.js Docs",
   usage: "[code]",
 };

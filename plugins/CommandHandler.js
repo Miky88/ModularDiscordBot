@@ -34,18 +34,12 @@ class CommandHandler extends BasePlugin {
     const command = args.shift().toLowerCase();
 
     // Command check
-    const cmd = client.PluginManager.getCommand(command); /* client.commands.get(command) || 
-    client.commands.find(c => c.config.aliases.includes(command)) */ /*|| 
-    client.PluginManager.plugins
-      .filter(p => p.commands.size > 0 && p.commands.includes(command))
-      .first()
-      .commands.get(command);*/
-
+    const cmd = client.PluginManager.getCommand(command);
     if (!cmd) return;
 
     // Cooldown check
     const limitFlag = `${message.author.id}-${cmd.help.name}`;
-    if (this.cooldownCache.has(limitFlag)) return message.channel.send(":timer: You are on cooldown. Please try again in " + (this.cooldownCache.get(limitFlag) / 1000) + "s");
+    if (this.cooldownCache.has(limitFlag)) return message.channel.send(":timer: You are on cooldown. Please try again in " + ((this.cooldownCache.get(limitFlag) - Date.now()) / 1000).toFixed(1) + "s");
 
     //Run command
     try {

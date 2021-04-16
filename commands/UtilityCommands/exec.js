@@ -51,8 +51,8 @@ exports.run = async (client, message, args) => {
 };
 
 exports.help = {
-  name: ":computer:exec",
-  info: "Executes stuff",
+  name: ":floppy_disk:exec",
+  info: "Runs shell commands on the host machine",
   usage: "[code]",
 };
 

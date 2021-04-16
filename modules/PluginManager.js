@@ -45,6 +45,10 @@ class PluginManager {
         }
     }
 
+    reload(pluginName) {
+        return this.unload(pluginName) ? (this.load(pluginName)?.error ? false : true) : false
+    }
+    
     unload(pluginName) {
         let tru = (pluginName) => { console.log(`[Plugin Manager] ${pluginName} unloaded`); return true }
         return this.plugins.delete(pluginName) ? tru(pluginName) : false;

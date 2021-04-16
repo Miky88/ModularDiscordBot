@@ -11,7 +11,7 @@ module.exports = async (client) => {
         autosave: true,
         autoloadCallback: loadCollections,
         autosaveInterval: 1000
-    }) // ez db xd lol
+    })
 
     const collections = ['users']
     /**
@@ -32,9 +32,6 @@ module.exports = async (client) => {
      * @typedef {Collection<UsersCollectionData>} UsersCollection
      */
 
-    /**
-     * callback function idk lol
-     */
     function loadCollections() {
         collections.forEach(x => {
             let coll = db.addCollection(x)

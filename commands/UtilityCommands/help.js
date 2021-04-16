@@ -9,13 +9,13 @@ exports.run = async (client, message, args) => {
                     .map(c => `${c.help.name} - \`${c.help.info}\``)
                     .join("\n")
             )
-            .setFooter("Use -help <command> to view help for a specific command.");
+            .setFooter(`Use ${client.config.prefix}help <command> to view help for a specific command.`);
         message.channel.send(embed);
 
         return;
     }
 
-    const command = client.PluginManager.getCommand(args[0]);// client.commands.get(args[0]) || client.commands.find(c => c.config.aliases.includes(args[0]));
+    const command = client.PluginManager.getCommand(args[0]);
     if (!command) return message.channel.send(`:x: Unknown command`);
 
     const embed1 = new Discord.MessageEmbed()
@@ -28,7 +28,7 @@ exports.run = async (client, message, args) => {
 
 exports.help = {
     name: ":grey_question:help",
-    info: "See a list of commands or more informations about a command",
+    info: "Shows a list of commands or informations about a command",
     usage: "[command]"
 };
 
