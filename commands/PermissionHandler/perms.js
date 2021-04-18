@@ -10,6 +10,6 @@ exports.help = {
 }
 
 exports.config = {
-  aliases: ['restart'], // Array of aliases
+  aliases: [], // Array of aliases
   cooldown: 0, // Command cooldown
 };

@@ -4,8 +4,8 @@ exports.run = async (client, message, args) => {
 
 exports.help = {
     name: ':man_astronaut:perms',
-    info: 'Sets an user\'s permission level',
-    usage: '<user> <level>',
+    info: 'Blacklists an user from the bot',
+    usage: '<user> <reason>',
 }
 
 exports.config = {
