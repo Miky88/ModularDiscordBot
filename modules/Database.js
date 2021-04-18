@@ -2,7 +2,6 @@ const loki = require('lokijs');
 const cache = new Map(); // TradeMark
 
 const collections = ['users']
-
 let db = new loki('database.db', {
     autoload: true,
     autosave: true,

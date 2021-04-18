@@ -1,9 +1,7 @@
 const { inspect } = require("util");
-const { Discord, MessageEmbed } = require("discord.js");
+const { MessageEmbed } = require("discord.js");
 
 exports.run = async (client, message, args) => {
-
-  const { inspect } = require('util');
   const content = args.join(' ').replace(/client\.token/gmi, '\'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0\'');
 
   try {

@@ -1,4 +1,5 @@
 let Discord = require("discord.js");
+
 exports.run = async (client, message, args) => {
     if (args < 1) {
         let embed = new Discord.MessageEmbed()

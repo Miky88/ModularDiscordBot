@@ -1,9 +1,7 @@
-const { inspect } = require("util");
-const { Discord, MessageEmbed, MessageAttachment } = require("discord.js");
+const { MessageAttachment } = require("discord.js");
 const exec = require("util").promisify(require("child_process").exec);
 
 exports.run = async (client, message, args) => {
-  
   let script = args.join(" ");
   
   try {

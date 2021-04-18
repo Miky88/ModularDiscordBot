@@ -1,5 +1,4 @@
 exports.run = async (client, message, args) => {
-
   if(!args || args.size < 1) return message.channel.send(`:warning: Please specify a command name`)
   const commandName = args[0]
 
@@ -8,7 +7,6 @@ exports.run = async (client, message, args) => {
     const props = require(`./${commandName}.js`)
 
     client.commands.set(commandName, props)
-
     message.channel.send(`:white_check_mark: Command \`${commandName}\` has been reloaded`)
   } catch (error) {
     if(error.code == "MODULE_NOT_FOUND")

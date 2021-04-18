@@ -2,6 +2,7 @@ const { version } = require("discord.js");
 const moment = require("moment");
 require("moment-duration-format");
 const Discord = require('discord.js')
+
 exports.run = async (client, message, args) => {
     const duration = moment
         .duration(client.uptime)
@@ -46,4 +47,3 @@ exports.config = {
     aliases: ["status","state"], // Array of aliases
     cooldown: 3, // Command cooldown
 };
-

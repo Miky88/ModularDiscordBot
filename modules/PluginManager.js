@@ -105,4 +105,5 @@ class PluginManager {
         }).map(plugin => plugin.commands.array()).flat();
     }
 }
+
 module.exports = PluginManager

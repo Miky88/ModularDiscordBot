@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
 const fs = require('fs')
+
 class BasePlugin {
     constructor({
         name = null,
@@ -21,4 +22,5 @@ class BasePlugin {
         }
     }
 }
+
 module.exports = BasePlugin;
