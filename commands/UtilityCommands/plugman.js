@@ -7,7 +7,7 @@ exports.run = async (client, message, args) => {
     let response
     let embed = new Discord.MessageEmbed()
     .setTitle("Plugin Manager")
-    .setFooter("PluginManager v1.5")
+    .setFooter("PluginManager "+ process.env.PLUGMAN_VERSION)
     switch (action) {
         case "load":
             response = await Manager.load(pluginName)
@@ -37,7 +37,7 @@ exports.run = async (client, message, args) => {
             if(response) return message.channel.send(embed)
             embed
                 .setColor(0xFF0000)
-                .setDescription(`${Emojis.redTick} There was an error trying to reload **${pluginName}**`)
+                .setDescription(`${Emojis.redTick} There was an error trying to reload **${pluginName}**, is it even loaded?`)
             return message.channel.send(embed)
         case "enable":
             response = await Manager.enable(pluginName)
@@ -96,6 +96,6 @@ exports.help = {
 };
 
 exports.config = {
-    aliases: ["plugin"], // Array of aliases
+    aliases: ["plugin","pluginmanager","pman"], // Array of aliases
     cooldown: 3 // Command cooldown
 };

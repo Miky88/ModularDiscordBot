@@ -20,7 +20,9 @@ class PluginManager {
     load(pluginName) {
         try {
             const plugin = require(`../plugins/${pluginName}`);
-            this.add(new plugin)
+            const _plugin = new plugin;
+            _plugin.loadCommands()
+            this.add(_plugin)
         } catch (error) {
             console.error("[Plugin Manager] Unable to load " + pluginName + ": " + error)
             return { error }
