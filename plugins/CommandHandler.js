@@ -6,7 +6,8 @@ class CommandHandler extends BasePlugin {
       name: "CommandHandler",
       info: "Loads commands into the bot.",
       enabled: true,
-      event: "message"
+      event: "message",
+      system: true
     })
     /** @type {Map<string, number>} */
     this.cooldownCache = new Map();
@@ -17,7 +18,10 @@ class CommandHandler extends BasePlugin {
    */
   async run(client, message) {
 
+    // Initialize custom datas
     message.data = {}
+    message.author.data = await client.db.forceUser(message.author.id)
+
     // Ignore bots and non-commands
     if (message.author.bot) return;
     if (!message.content.startsWith(client.config.prefix)) return;
@@ -43,14 +47,14 @@ class CommandHandler extends BasePlugin {
 
     //Run command
     try {
-        this.cooldownCache.set(limitFlag, Date.now() + cmd.config.cooldown * 1000);
-        setTimeout(() => {
-            this.cooldownCache.delete(limitFlag);
-        }, cmd.config.cooldown * 1000);
-        await cmd.run(client, message, args);
+      this.cooldownCache.set(limitFlag, Date.now() + cmd.config.cooldown * 1000);
+      setTimeout(() => {
+        this.cooldownCache.delete(limitFlag);
+      }, cmd.config.cooldown * 1000);
+      await cmd.run(client, message, args);
     } catch (e) {
-        message.channel.send()
-        console.error(e)
+      message.channel.send()
+      console.error(e)
     }
   }
 }

@@ -6,7 +6,8 @@ class ReadyLog extends BasePlugin {
             name: "ReadyLog",
             info: "Logs informations once ready and sets the custom status",
             enabled: true,
-            event: "ready"
+            event: "ready",
+            system: true
         })
     }
 

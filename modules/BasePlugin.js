@@ -5,9 +5,10 @@ class BasePlugin {
         name = null,
         info = "No description provided.",
         enabled = false,
-        event = "ready"
+        event = "ready",
+        system = false
     }) {
-        this.conf = { enabled, event };
+        this.conf = { enabled, event, system };
         this.about = { name, info };
         
         this.commands = new Discord.Collection()

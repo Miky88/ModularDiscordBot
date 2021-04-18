@@ -11,18 +11,40 @@ let db = new loki('database.db', {
 })
 
 module.exports = {
-    addUser: async (id) => {
+    addUser: async (userID) => {
         const user = await db.users.insert({
-            id: id,
-            level: 0,
+            id: userID,
+            powerlevel: 0,
+            blacklistReason: null
         })
         await this.cacheUser(user)
         return user;
     },
 
-    cacheUser: async (user) => {
+    cacheUser: (user) => {
         cache.set(user.id, user)
         return true;
+    },
+
+    getUser: async (userID) => {
+        const data = cache.get(userID) || db.users.findOne({ id: userID })
+        if (data) await cacheUser(data)
+        return data
+    },
+
+    forceUser: async (userID) => {
+        const user = await getUser(userID)
+        if (user) return user
+        return await addUser(user)
+    },
+
+    updateUser: async (data) => {
+        delete data.user
+        db.users.update(data)
+
+        const update = await db.users.findOne({id: data.id})
+        await cacheUser(update)
+        return update
     },
 
     _raw: db

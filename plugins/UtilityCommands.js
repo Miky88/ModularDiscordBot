@@ -5,7 +5,7 @@ class UtilityCommands extends BasePlugin {
         super({
             name: "UtilityCommands",
             info: "Manages the Utility commands",
-            enabled: true,
+            enabled: true
         })
     }
 
