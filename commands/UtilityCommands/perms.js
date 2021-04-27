@@ -1,12 +1,18 @@
-const { yellowtick } = require('../../modules/Emojis')
+const { yellowTick } = require('../../modules/Emojis')
 let { MessageEmbed, Util } = require('discord.js')
 
 exports.run = async (client, message, args) => {
-  const data = await client.database.forceUser((args[0] || message.author.id).replace(/\D/gmi, ''))
-
+  let user;
+  const raw = (args[0] || message.author.id).replace(/\D/gmi, '')
+  try {
+    user = await client.users.fetch(raw)
+  } catch (e) {
+    return message.channel.send(`${yellowTick} There's no user in database matching your query`)
+  }
+  
+  const data = await client.database.forceUser(user.id)
   if (!data) return message.channel.send(`${yellowtick} There's no user in database matching your query`)
   if (message.author.data.powerlevel < 0 && data.user.id !== message.author.id) return
-  const user = await client.users.fetch(data.id)
 
   let level = client.config.powerlevels.find(pl=>pl.level == data.powerlevel) || client.config.powerlevels.find(pl=>pl.level == 0)
   const embed = new MessageEmbed()
