@@ -3,7 +3,7 @@ module.exports = {
     token: process.env.TOKEN, // Bot's token
     activity: '-help', // Bot's Status
     owners: ["311929179186790400"], // Bot Owner IDs (For security reasons you can't set this with the setlevel command)
-    permissions: [ // Please don't touch level numbers of -1, 0 and 10
+    powerlevels: [ // Please don't touch level numbers of -1, 0 and 10
         {
             level: '-1',
             name: 'Blacklisted',
