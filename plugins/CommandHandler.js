@@ -20,7 +20,7 @@ class CommandHandler extends BasePlugin {
 
     // Initialize custom datas
     message.data = {}
-    message.author.data = await client.db.forceUser(message.author.id)
+    message.author.data = await client.database.forceUser(message.author.id)
 
     // Ignore bots and non-commands
     if (message.author.bot) return;
@@ -40,6 +40,17 @@ class CommandHandler extends BasePlugin {
     // Command check
     const cmd = client.PluginManager.getCommand(command);
     if (!cmd) return;
+
+    // System Permission check
+    if (message.author.data.powerlevel < cmd.config.minLevel)
+      return message.channel.send(":no_entry: You don't have permission to perform this command. Minimum system permission required is " + cmd.config.minLevel + " and your system permission is " + message.author.data.powerlevel)
+    // Server and Channel Permission check
+    if(!message.channel.permissionsFor(message.author.id).has(cmd.config.reqPerms))
+      return message.channel.send(":no_entry: You don't have the required permissions to perform this command: " + cmd.config.reqPerms.map(p => "`" + p.replace("_", " ").toProperCase() + "`").join(", "))
+    // Bot Server and Channel Permission check
+    if(!message.channel.permissionsFor(message.author.id).has(cmd.config.botPerms))
+      return message.channel.send(":no_entry: The bot doesn't have the required permissions to perform this command: " + cmd.config.botPerms.map(p => "`" + p.replace("_", " ").toProperCase() + "`").join(", "))
+
 
     // Cooldown check
     const limitFlag = `${message.author.id}-${cmd.help.name}`;

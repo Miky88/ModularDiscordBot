@@ -1,50 +1,63 @@
 const loki = require('lokijs');
-const cache = new Map(); // TradeMark
+const cache = new Map();
 
-const collections = ['users']
-let db = new loki('database.db', {
-    autoload: true,
-    autosave: true,
-    autoloadCallback: () => collections.forEach(x => db[x] = db.addCollection(x)),
-    autosaveInterval: 1000
-})
+class Database {
+    constructor(client) {
+        this.client = client;
+        this.collections = ['users'];
+        this.db = new loki('database.db', {
+            autoload: true,
+            autosave: true,
+            autoloadCallback: () => this.collections.forEach(x => this.db[x] = this.db.addCollection(x)),
+            autosaveInterval: 1000
+        });
+    }
 
-module.exports = {
-    addUser: async (userID) => {
-        const user = await db.users.insert({
+    async addUser(userID) {
+        const user = await this.db.users.insert({
             id: userID,
-            powerlevel: 0,
+            powerlevel: this.client.config.owners.includes(userID) ? 10 : 0,
             blacklistReason: null
         })
-        await this.cacheUser(user)
+        this.cacheUser(user)
         return user;
-    },
+    }
 
-    cacheUser: (user) => {
+    cacheUser(user) {
         cache.set(user.id, user)
         return true;
-    },
+    }
 
-    getUser: async (userID) => {
-        const data = cache.get(userID) || db.users.findOne({ id: userID })
-        if (data) await cacheUser(data)
+    getUser(userID) {
+        const data = cache.get(userID) || this.db.users.findOne({ id: userID })
+        if (data) this.cacheUser(data)
         return data
-    },
+    }
 
-    forceUser: async (userID) => {
-        const user = await getUser(userID)
-        if (user) return user
-        return await addUser(user)
-    },
+    async forceUser(userID) {
+        let user = await this.getUser(userID)
+        if (user) {
+            if (this.client.config.owners.includes(user.id) && user.powerlevel != 10) {
+                user.powerlevel = 10;
+                await this.updateUser(user);
+            }
+            else if (!this.client.config.owners.includes(user.id) && user.powerlevel == 10) {
+                user.powerlevel = 0;
+                await this.updateUser(user);
+            }
+            return user;
+        }
+        return await this.addUser(userID)
+    }
 
-    updateUser: async (data) => {
+    async updateUser(data) {
         delete data.user
-        db.users.update(data)
+        this.db.users.update(data)
 
-        const update = await db.users.findOne({id: data.id})
-        await cacheUser(update)
+        const update = await this.db.users.findOne({ id: data.id })
+        this.cacheUser(update)
         return update
-    },
-
-    _raw: db
+    }
 }
+
+module.exports = Database;
