@@ -1,5 +1,5 @@
 let Discord = require('discord.js')
-let Emojis = require('../../modules/Emojis.js')
+let Emojis = require('../modules/Emojis.js')
 
 exports.run = async (client, message, args) => {
     let [action, pluginName] = args
