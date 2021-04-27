@@ -1,9 +1,9 @@
 exports.run = async (client, message, args) => {
-    // TODO: .
+
 }
 
 exports.help = {
-    name: ':man_astronaut:perms',
+    name: ':magic_wand:setlevel',
     info: 'Sets an user\'s permission level',
     usage: '<user> <level>',
 }

@@ -3,7 +3,7 @@ exports.run = async (client, message, args) => {
 }
 
 exports.help = {
-    name: ':man_astronaut:perms',
+    name: ':notebook:blacklist',
     info: 'Blacklists an user from the bot',
     usage: '<user> <reason>',
 }

@@ -1,6 +1,19 @@
+const { yellowtick, redtick } = require('../includes/emotes')
+let util = require('discord.js').Util
+let {MessageEmbed} = require('discord.js')
 exports.run = async (client, message, args) => {
-  let perm = message.author.data.powerlevel
-  // TODO: .
+  const user = client.database.fetchUser((args[0] || message.author.id).replace(/\D/gmi, ''))
+
+  if (!data) return message.channel.send(`${yellowtick} There's no user in database matching your query`)
+  if (message.author.data.powerlevel < 0 && data.user.id !== message.author.id) return
+
+  const embed = new MessageEmbed()
+    .setTitle(`${data.user.tag}'s Powerlevel`)
+    .setThumbnail(data.user.displayAvatarURL())
+    .addField('Power level', client.pl.getLevelTag(data.powerlevel))
+  if (data.blacklistReason && data.powerlevel < 0)
+    embed.addField('Blacklist reason', `\`\`\`${util.escapeMarkdown(data.blacklistReason)}\`\`\``)
+
 }
 
 exports.help = {
