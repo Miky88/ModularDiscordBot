@@ -16,7 +16,10 @@ exports.run = async (client, message, args) => {
 
     const data = await client.database.forceUser(user.id)
     if (!data) return message.channel.send(`${yellowtick} There's no user in database matching your query`)
-    
+
+    if(message.author.data.powerlevel <= data.powerlevel)
+        return message.channel.send(`${redTick} You can't blacklist this user.`)
+
     let blacklistLevel = client.config.powerlevels.find(pl => pl.level == -1)
     data.powerlevel = blacklistLevel.level
     data.blacklistReason = _reason.join(" ")

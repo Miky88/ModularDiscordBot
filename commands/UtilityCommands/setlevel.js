@@ -17,6 +17,9 @@ exports.run = async (client, message, args) => {
     const data = await client.database.forceUser(user.id)
     if (!data) return message.channel.send(`${yellowtick} There's no user in database matching your query`)
     
+    if(message.author.data.powerlevel <= data.powerlevel)
+        return message.channel.send(`${redTick} You can't manage this user's powerlevel.`)
+
     let newlevel = client.config.powerlevels.find(pl => pl.level == _level[0]) || client.config.powerlevels.find(pl => pl.name.toLowerCase() == _level.join(' ').toLowerCase())
     if(!newlevel) return message.channel.send(`${yellowTick} You entered an invalid powerlevel. Here's a list of available powerlevels:\n>>> ${client.config.powerlevels.map(pl => `\`${pl.level}\` - \`${pl.name}\``).join("\n")}`)
 
