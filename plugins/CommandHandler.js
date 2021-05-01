@@ -42,8 +42,11 @@ class CommandHandler extends BasePlugin {
     if (!cmd) return;
 
     // System Permission check
-    if (message.author.data.powerlevel < cmd.config.minLevel)
-      return message.channel.send(":no_entry: You don't have permission to perform this command. Minimum system permission required is " + cmd.config.minLevel + " and your system permission is " + message.author.data.powerlevel)
+    if (message.author.data.powerlevel < cmd.config.minLevel) {
+      let reqLevel = client.config.powerlevels.find(pl => pl.level == cmd.config.minLevel)
+      let usrLevel = client.config.powerlevels.find(pl => pl.level == message.author.data.powerlevel)
+      return message.channel.send(`:no_entry: You don't have permission to perform this command. Minimum system permission required is **${reqLevel.icon} ${reqLevel.level} - ${reqLevel.name}** and your system permission is **${usrLevel.icon} ${usrLevel.level} - ${usrLevel.name}**`)
+    }
     // Server and Channel Permission check
     if(!message.channel.permissionsFor(message.author.id).has(cmd.config.reqPerms))
       return message.channel.send(":no_entry: You don't have the required permissions to perform this command: " + cmd.config.reqPerms.map(p => "`" + p.replace("_", " ").toProperCase() + "`").join(", "))

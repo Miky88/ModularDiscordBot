@@ -3,18 +3,20 @@ let { MessageEmbed, Util } = require('discord.js')
 
 exports.run = async (client, message, args) => {
   let user;
-  const raw = (args[0] || message.author.id).replace(/\D/gmi, '')
   try {
-    user = await client.users.fetch(raw)
+    user = await client.users.fetch((args[0] || message.author.id).replace(/\D/gmi, ''))
   } catch (e) {
-    return message.channel.send(`${yellowTick} There's no user in database matching your query`)
+    if (e.httpStatus == 404)
+      return message.channel.send(`${yellowTick} There's no user matching your query`)
+    else
+      return message.channel.send(`${yellowTick} Something went wrong while fetching the user from the Discord API`)
   }
-  
+
   const data = await client.database.forceUser(user.id)
   if (!data) return message.channel.send(`${yellowtick} There's no user in database matching your query`)
   if (message.author.data.powerlevel < 0 && data.user.id !== message.author.id) return
 
-  let level = client.config.powerlevels.find(pl=>pl.level == data.powerlevel) || client.config.powerlevels.find(pl=>pl.level == 0)
+  let level = client.config.powerlevels.find(pl => pl.level == data.powerlevel) || client.config.powerlevels.find(pl => pl.level == 0)
   const embed = new MessageEmbed()
     .setTitle(`${user.tag}'s Powerlevel`)
     .setThumbnail(user.displayAvatarURL())
