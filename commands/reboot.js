@@ -1,4 +1,4 @@
-const {loading} = require('../../modules/Emojis')
+const {loading} = require('../modules/Emojis')
 
 exports.run = async (client, message, args) => {
   const {promisify} = require("util");
@@ -18,4 +18,7 @@ exports.help = {
 exports.config = {
   aliases: ['restart'], // Array of aliases
   cooldown: 0, // Command cooldown
+  minLevel: 9, // Minimum level require to execute the command
+  reqPerms: [], // Array of required user permissions to perform the command
+  botPerms: [] // Array of required bot permissions to perform the command
 };

@@ -11,5 +11,8 @@ exports.help = {
 
 exports.config = {
   aliases: ["pong"], // Array of aliases
-  cooldown: 3 // Command cooldown
+  cooldown: 3, // Command cooldown
+  minLevel: 0, // Minimum level require to execute the command
+  reqPerms: [], // Array of required user permissions to perform the command
+  botPerms: [] // Array of required bot permissions to perform the command
 };

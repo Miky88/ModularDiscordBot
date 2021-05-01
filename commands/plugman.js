@@ -1,5 +1,5 @@
 let Discord = require('discord.js')
-let Emojis = require('../../modules/Emojis.js')
+let Emojis = require('../modules/Emojis.js')
 
 exports.run = async (client, message, args) => {
     let [action, pluginName] = args
@@ -97,5 +97,8 @@ exports.help = {
 
 exports.config = {
     aliases: ["plugin","pluginmanager","pman"], // Array of aliases
-    cooldown: 3 // Command cooldown
+    cooldown: 3, // Command cooldown
+    minLevel: 9, // Minimum level require to execute the command
+    reqPerms: [], // Array of required user permissions to perform the command
+    botPerms: [] // Array of required bot permissions to perform the command
 };
