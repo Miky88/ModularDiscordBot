@@ -1,0 +1,6 @@
+.env
+node_modules
+.vscode
+reboot.json
+# package-lock.json # https://stackoverflow.com/questions/44206782/do-i-commit-the-package-lock-json-file-created-by-npm-5
+database.db
