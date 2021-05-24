@@ -31,4 +31,3 @@ class Example extends BasePlugin {
 
 module.exports = Example;
 ```
-`
