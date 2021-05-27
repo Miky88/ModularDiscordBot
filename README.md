@@ -1,3 +1,6 @@
+# Dev branch warning
+This is a development branch that's still unfinished and running with an unstable Discord.js Dev version.
+
 # ModularBot
 Discord Modular Bot with Custom Plugin support.
 ## Installation
