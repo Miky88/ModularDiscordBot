@@ -14,7 +14,7 @@
   "author": "Miky88",
   "license": "ISC",
   "dependencies": {
-    "discord.js": "^12.5.3",
+    "discord.js": "github:discordjs/discord.js",
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
     "lokijs": "^1.5.11",

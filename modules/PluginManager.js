@@ -21,7 +21,8 @@ class PluginManager {
         try {
             const plugin = require(`../plugins/${pluginName}`);
             const _plugin = new plugin;
-            _plugin.loadCommands()
+            if(_plugin.conf.enabled)
+                _plugin.loadCommands()
             this.add(_plugin)
         } catch (error) {
             console.error("[Plugin Manager] Unable to load " + pluginName + ": " + error)
@@ -33,16 +34,29 @@ class PluginManager {
     add(plugin) {
         this.plugins.set(plugin.about.name, plugin);
         console.log(`[Plugin Manager] ${plugin.about.name} loaded`)
-        if (!this.events.has(plugin.conf.event)) {
-            const event = plugin.conf.event
-            this.events.add(event);
-            this.client.on(event, async (...args) => {
-
-                // Executes all enabled plugins
-                for (let [name, plugin] of this.plugins) {
-                    if (plugin.conf.enabled && plugin.conf.event == event)
-                        await plugin.run(this.client, ...args);
-                }
+        if(typeof plugin.conf.event == "string") {
+            if (!this.events.has(plugin.conf.event)) {
+                const event = plugin.conf.event
+                this.events.add(event);
+                this.client.on(event, async (...args) => {
+                    for (let [_name, plugin] of this.plugins) {
+                        if (plugin.conf.enabled && (plugin.conf.event == event || plugin.conf.event.includes(event)))
+                            await plugin.run(this.client, ...args);
+                    }
+                })
+            }
+        } else if (typeof plugin.conf.event == "object") {
+            plugin.conf.event.forEach(evt => {
+                if (!this.events.has(evt)) {
+                    const event = evt
+                    this.events.add(event);
+                    this.client.on(event, async (...args) => {
+                        for (let [_name, plugin] of this.plugins) {
+                            if (plugin.conf.enabled && (plugin.conf.event == event || plugin.conf.event.includes(event)))
+                                await plugin.run(this.client, ...args);
+                        }
+                    })
+                }    
             })
         }
     }
