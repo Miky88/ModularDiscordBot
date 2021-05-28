@@ -27,6 +27,7 @@ class SlashCommands extends BasePlugin {
    */
   async run(client, interaction) {
     if (!interaction) {
+      // Fired on ready
       let currentCommands = await client.application.commands.fetch();
       this.slashCommands.forEach(command => {
         if(currentCommands.find(cmd => cmd.name == command.config.data.name)) return;
@@ -43,8 +44,10 @@ class SlashCommands extends BasePlugin {
     if (!interaction.isCommand()) return;
 
     let cmd = this.slashCommands.get(interaction.commandName);
-    let args = {}
-    interaction.options.forEach(option => args[option.name] = option.value)
+    let args = interaction.options.reduce((obj, option) => {
+      obj[option.name] = option.value
+      return obj
+    }, {});
 
     await cmd.run(client, interaction, args);
   }
