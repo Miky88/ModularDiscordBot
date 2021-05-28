@@ -9,7 +9,7 @@ class SlashCommands extends BasePlugin {
       info: "Adds slash commands support.",
       enabled: true,
       event: ["ready", "interaction"],
-      system: true
+      system: false
     })
     this.slashCommands = new Discord.Collection();
 
