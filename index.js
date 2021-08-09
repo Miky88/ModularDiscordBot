@@ -1,19 +1,41 @@
 // Imports
-const {Client, Collection} = require('discord.js');
-require('./modules/Functions.js');
 require('dotenv').config();
-const PluginManager = require('./modules/PluginManager.js');
+
+const { Client, Collection, Intents, TextChannel } = require('discord.js');
+require('./modules/Functions.js');
+const { PluginManager } = require('./modules/PluginManager.js');
 const Database = require('./modules/Database.js');
 
 // Discord
-const client = new Client({ intents: ['GUILDS', 'GUILD_MESSAGES'] });
+class BotClient extends Client {
+    constructor(options) {
+        super (options);
 
-client.config = require('./config.js');
-client.commands = new Collection();
-client.database = new Database(client);
+        this.config = require('./config.js');
+        this.commands = new Collection();
+        this.slashCommands = new Collection();
+        this.PluginManager = new PluginManager(this);
+        this.PluginManager.init();
 
-// Discord Events and Plugins
-client.PluginManager = new PluginManager(client);
-client.PluginManager.init();
+        this.database = new Database(this);
+    }
+
+    logError(...data) {
+        console.error(...data);
+        /** @type {TextChannel} */
+        const channel = this.channels.resolve(this.config.debug);
+        channel.send(":no_entry: " + require("util").format(...data)).catch(() => null);
+    }
+
+    logDebug(...data) {
+        /** @type {TextChannel} */
+        const channel = this.channels.resolve(this.config.debug);
+        channel.send(":information_source: " + require("util").format(...data)).catch(() => null);
+    }
+};
+
+const client = new BotClient({ intents: Object.values(Intents.FLAGS).reduce((a, b) => a | b), partials: ['REACTION', 'MESSAGE'] });
 
 client.login(client.config.token);
+
+module.exports = BotClient;

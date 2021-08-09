@@ -1,9 +1,9 @@
 module.exports = {
-    prefix: "-", // Prefix for bot commands
+    prefix: process.env.PREFIX || "-", // Prefix for bot commands
     token: process.env.TOKEN, // Bot's token
-    activity: '-help', // Bot's Status
+    activity: `${process.env.PREFIX || "!"}help`, // Bot's Status
     owners: ["311929179186790400"], // Bot Owner IDs (For security reasons you can't set this with the setlevel command)
-    powerlevels: [ // Please don't touch level numbers of -1, 0 and 10
+    powerlevels: [
         {
             level: '-1',
             name: 'Blacklisted',

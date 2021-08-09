@@ -1,52 +1,52 @@
 const { yellowTick, redTick } = require('../../modules/Emojis')
 let { MessageEmbed } = require('discord.js')
+const config = require('../../config')
+const BaseCommand = require('../../modules/BaseCommand')
 
-exports.run = async (client, message, args) => {
-    let [_user, ..._level] = args;
-    if(!_user || !_level) return message.channel.send(`${yellowTick} You need to type a valid user and a powerlevel in order to set an user's powerlevel.`)
-    let user;
-    try {
-        user = await client.users.fetch((_user || message.author.id).replace(/\D/gmi, ''))
-    } catch (e) {
-        if (e.httpStatus == 404)
-            return message.channel.send(`${yellowTick} There's no user matching your query`)
-        else
-            return message.channel.send(`${yellowTick} Something went wrong while fetching the user from the Discord API`)
+module.exports = class SetLevelCommand extends BaseCommand {
+    constructor() {
+        super({
+            name: ':magic_wand:setlevel',
+            info: 'Sets an user\'s permission level',
+            usage: '<user> <level>',
+            minLevel: 9, // Minimum level require to execute the command
+            args: [
+                {
+                    name: "user",
+                    type: "user"
+                },
+                {
+                    name: "level",
+                    type: "string",
+                    oneOf: config.powerlevels.map(c => c.name).concat(config.powerlevels.map(c => c.level))
+                },
+            ]
+        })
     }
 
-    const data = await client.database.forceUser(user.id)
-    if (!data) return message.channel.send(`${yellowTick} There's no user in database matching your query`)
-    
-    if(message.author.data.powerlevel <= data.powerlevel)
-        return message.channel.send(`${redTick} You can't manage this user's powerlevel.`)
-    
-    let newlevel = client.config.powerlevels.find(pl => pl.level == _level[0]) || client.config.powerlevels.find(pl => pl.name.toLowerCase() == _level.join(' ').toLowerCase())
-    if(!newlevel)
-        return message.channel.send(`${yellowTick} You entered an invalid powerlevel. Here's a list of available powerlevels:\n>>> ${client.config.powerlevels.map(pl => `\`${pl.level}\` - \`${pl.name}\``).join("\n")}`)
-    if(newlevel.level > 9)
-        return message.channel.send(`${redTick} For security reasons Bot Owners can be empowered only from the configuration file.`)
-    data.powerlevel = newlevel.level
-    client.database.updateUser(data)
+    async run(client, message, args) {
+        const { user, level } = args
 
-    const embed = new MessageEmbed()
-        .setTitle(`${user.tag}'s new Powerlevel`)
-        .setThumbnail(user.displayAvatarURL())
-        .setDescription(`**${newlevel.icon} ${newlevel.level} - ${newlevel.name}**\n${newlevel.description}`)
-        .setColor("RANDOM")
+        const data = await client.database.forceUser(user.id)
+        if (!data) return message.channel.send(`${yellowTick} There's no user in database matching your query`)
 
-    message.channel.send(embed)
+        if (message.author.data.powerlevel <= data.powerlevel)
+            return message.channel.send(`${redTick} You can't manage this user's powerlevel.`)
+
+        let newlevel = client.config.powerlevels.find(pl => pl.level == level) || client.config.powerlevels.find(pl => pl.name.toLowerCase() == level.toLowerCase())
+        if (!newlevel)
+            return message.channel.send(`${yellowTick} You entered an invalid powerlevel. Here's a list of available powerlevels:\n>>> ${client.config.powerlevels.map(pl => `\`${pl.level}\` - \`${pl.name}\``).join("\n")}`)
+        if (newlevel.level > 9)
+            return message.channel.send(`${redTick} For security reasons Bot Owners can be empowered only from the configuration file.`)
+        data.powerlevel = newlevel.level
+        client.database.updateUser(data)
+
+        const embed = new MessageEmbed()
+            .setTitle(`${user.tag}'s new Powerlevel`)
+            .setThumbnail(user.displayAvatarURL())
+            .setDescription(`**${newlevel.icon} ${newlevel.level} - ${newlevel.name}**\n${newlevel.description}`)
+            .setColor("RANDOM")
+
+        message.channel.send({ embeds: [embed] })
+    }
 }
-
-exports.help = {
-    name: ':magic_wand:setlevel',
-    info: 'Sets an user\'s permission level',
-    usage: '<user> <level>',
-}
-
-exports.config = {
-    aliases: [], // Array of aliases
-    cooldown: 0, // Command cooldown
-    minLevel: 9, // Minimum level require to execute the command
-    reqPerms: [], // Array of required user permissions to perform the command
-    botPerms: [] // Array of required bot permissions to perform the command
-};

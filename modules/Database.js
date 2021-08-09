@@ -1,10 +1,20 @@
 const loki = require('lokijs');
+const BotClient = require('..');
 const cache = new Map();
 
 class Database {
+    /**
+     * @param {BotClient} client 
+     */
     constructor(client) {
         this.client = client;
         this.collections = ['users'];
+
+        for (let plugin of client.PluginManager.plugins.values()) {
+            if (plugin.conf.usesDB)
+                this.collections.push(`plugin_${plugin.about.name}`)
+        }
+
         this.db = new loki('database.db', {
             autoload: true,
             autosave: true,

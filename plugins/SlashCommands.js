@@ -1,56 +1,64 @@
-const Discord = require('discord.js')
+const Discord = require('discord.js');
 const BasePlugin = require("../modules/BasePlugin.js");
-const fs = require('fs')
+const fs = require('fs');
+const BotClient = require('../index.js');
 
 class SlashCommands extends BasePlugin {
-  constructor() {
-    super({
-      name: "SlashCommands",
-      info: "Adds slash commands support.",
-      enabled: true,
-      event: ["ready", "interaction"],
-      system: false
-    })
-    this.slashCommands = new Discord.Collection();
-
-    this.loadCommands = async () => {
-      const commands = fs.existsSync(`./commands/${this.about.name}`) ? fs.readdirSync(`./commands/${this.about.name}`).filter(file => file.endsWith(".js")) : [];
-      commands.forEach(file => {
-        this.slashCommands.set(file.split(".")[0], require(`../commands/${this.about.name}/${file}`))
-        console.log(`[Plugin Manager] Loaded slash command ${file} from ${this.about.name}`)
-      });
+    constructor(client) {
+        super(client, {
+            name: "SlashCommands",
+            info: "Adds slash commands support.",
+            enabled: true,
+            event: ["ready", "interactionCreate"],
+            system: false
+        });
     }
-  }
+    
+    /**
+     * @param {BotClient} client 
+     */
+    async ready(client) {
+        // Fired on ready
+        let currentCommands = await client.application.commands.fetch();
+        [...client.PluginManager.slashCommands.values()].forEach(command => {
+            if (currentCommands.find(cmd => cmd.name == command.data.name)) return;
 
-  /**
-   * @param {import("discord.js").Client & { commands: Map, PluginManager: import("../modules/PluginManager") }} client
-   */
-  async run(client, interaction) {
-    if (!interaction) {
-      // Fired on ready
-      let currentCommands = await client.application.commands.fetch();
-      this.slashCommands.forEach(command => {
-        if(currentCommands.find(cmd => cmd.name == command.config.data.name)) return;
-        
-        client.application.commands.create(command.config.data);
-      })
-      currentCommands.forEach(cmd => {
-        if(this.slashCommands.has(cmd.name)) return;
+            console.log(`[Slash Commands] Adding command /${command.data.name} to bot`)
+            
+            client.guilds.cache.forEach(guild => guild.commands.create(command.data))
+        });
+        [...currentCommands.values()].forEach(cmd => {
+            if (this.client.slashCommands.has(cmd.name)) return;
+            
+            console.log(`[Slash Commands] Deleting inexistent command /${cmd.name} from bot`)
 
-        client.application.commands.delete(cmd);
-      })
-      return;
+            client.guilds.cache.forEach(guild => guild.commands.delete(cmd).catch(Function()))
+        })
+        return;
     }
-    if (!interaction.isCommand()) return;
 
-    let cmd = this.slashCommands.get(interaction.commandName);
-    let args = interaction.options.reduce((obj, option) => {
-      obj[option.name] = option.value
-      return obj
-    }, {});
+    /**
+     * @param {BotClient} client
+     * @param {Discord.CommandInteraction} interaction
+     */
+    async interactionCreate(client, interaction) {
+        if (!interaction.isCommand()) return;
 
-    await cmd.run(client, interaction, args);
-  }
+        const { powerlevel } = client.database.getUser(interaction.user.id)
+        if(!client.config.channelWhitelist.includes(interaction.channel.id) && !client.config.channelWhitelist.includes(interaction.channel.parentId) && powerlevel < 10) {
+            return interaction.reply({ content: ":x: Non puoi usare alcun comando in questo canale.", ephemeral: true });
+        }
+
+        let [cmd, plugin] = this.client.PluginManager.getSlashCommand(interaction.commandName);
+        if (!cmd) return
+
+        let args = interaction.options.data.reduce((obj, option) => {
+            obj[option.name] = option.value
+            return obj
+        }, {});
+
+        await cmd.run(client, interaction, args, plugin);
+    }
 }
 
 module.exports = SlashCommands;

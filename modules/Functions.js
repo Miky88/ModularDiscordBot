@@ -1,3 +1,5 @@
+const { Message } = require("discord.js");
+
 Array.prototype.random = function () {
     return this[Math.floor(Math.random() * this.length)];
 };
@@ -11,3 +13,6 @@ String.prototype.toProperCase = function () {
         return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
     });
 };
+Message.prototype.deleteAfter = function(ms) {
+    setTimeout(() => this.delete(), ms);
+}

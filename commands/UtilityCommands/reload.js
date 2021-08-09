@@ -1,33 +1,36 @@
-exports.run = async (client, message, args) => {
-  if(!args || args.size < 1) return message.channel.send(`:warning: Please specify a command name`)
-  const commandName = args[0]
+const BaseCommand = require('../../modules/BaseCommand')
 
-  try {
-    delete require.cache[require.resolve(`./${commandName}.js`)]
-    const props = require(`./${commandName}.js`)
+module.exports = class ReloadCommand extends BaseCommand {
+    constructor() {
+        super({
+            name: ':arrows_counterclockwise:reload',
+            info: 'Reloads a command',
+            usage: '<command>',
+            cooldown: 3, // Command cooldown
+            minLevel: 9, // Minimum level require to execute the command
+            args: [
+                {
+                    name: "command",
+                    type: "string"
+                }
+            ]
+        })
+    }
 
-    client.commands.set(commandName, props)
-    message.channel.send(`:white_check_mark: Command \`${commandName}\` has been reloaded`)
-  } catch (error) {
-    if(error.code == "MODULE_NOT_FOUND")
-      return message.channel.send(`:x: Command \`${commandName}\` does not exist or it's not at the same directory of this reload command, if you were trying to reload a plugin command just reload the entire plugin with plugman command`)
+    async run(client, message, args) {
+        // if (!args || args.size < 1) return message.channel.send(`:warning: Please specify a command name`)
+        const commandName = args.command
 
-    message.channel.send(`:x: An error occured while reloading the command:
+        try {
+            const [_, plugin] = client.PluginManager.getCommand(commandName);
+            client.PluginManager.reload(plugin.about.name);
+            message.channel.send(`:white_check_mark: Command \`${commandName}\` and plugin \`${plugin.about.name}\` have been reloaded`)
+        } catch (error) {
+            if (error.code == "MODULE_NOT_FOUND")
+                return message.channel.send(`:x: Command \`${commandName}\` does not exist or it's not in the same directory of this reload command, if you were trying to reload a plugin just reload it with the \`plugman\` command`)
+
+            message.channel.send(`:x: An error occured while reloading the command:
         \`\`\`${error.name}: ${error.message}\`\`\``)
-  }
-
+        }
+    }
 }
-
-exports.help = {
-  name: ':arrows_counterclockwise:reload',
-  info: 'Reloads a command',
-  usage: '<command>',
-}
-
-exports.config = {
-  aliases: [], // Array of aliases
-  cooldown: 3, // Command cooldown
-  minLevel: 9, // Minimum level require to execute the command
-  reqPerms: [], // Array of required user permissions to perform the command
-  botPerms: [] // Array of required bot permissions to perform the command
-};

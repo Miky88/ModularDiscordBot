@@ -1,24 +1,31 @@
-const {loading} = require('../modules/Emojis')
+const BaseCommand = require('../modules/BaseCommand.js');
 
-exports.run = async (client, message, args) => {
-  const {promisify} = require("util");
-  const write = promisify(require("fs").writeFile);
-  const m = await message.channel.send(loading + " Rebooting...");
-  await write('./reboot.json', `{"id": "${m.id}", "channel": "${m.channel.id}"}`).catch(console.error);
-  
-  process.exit(1);
+const { loading } = require('../modules/Emojis.js');
+
+class Reboot extends BaseCommand {
+    constructor() {
+        super ({
+            name: ':battery:reboot',
+            info: 'Reboots the bot if running under PM2',
+            aliases: ['restart'],
+            minLevel: 9
+        });
+    }
+
+    /**
+     * 
+     * @param {import('..')} client 
+     * @param {import('discord.js').Message} message 
+     * @param {*} args 
+     */
+    async run(client, message, args) {
+        const { promisify } = require("util");
+        const write = promisify(require("fs").writeFile);
+        const m = await message.channel.send(loading + " Rebooting...");
+        await write('./reboot.json', `{"id": "${m.id}", "channel": "${m.channel.id}"}`).catch(console.error);
+        
+        process.exit(1);
+    }
 }
 
-exports.help = {
-  name: ':battery:reboot',
-  info: 'Reboot the bot',
-  usage: '',
-}
-
-exports.config = {
-  aliases: ['restart'], // Array of aliases
-  cooldown: 0, // Command cooldown
-  minLevel: 9, // Minimum level require to execute the command
-  reqPerms: [], // Array of required user permissions to perform the command
-  botPerms: [] // Array of required bot permissions to perform the command
-};
+module.exports = Reboot;

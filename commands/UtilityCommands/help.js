@@ -1,7 +1,30 @@
-let Discord = require("discord.js");
+const Discord = require("discord.js");
+const BotClient = require("../..");
+const BaseCommand = require('../../modules/BaseCommand')
 
-exports.run = async (client, message, args) => {
-    if (args < 1) {
+module.exports = class HelpCommand extends BaseCommand {
+    constructor() {
+        super({
+            name: ":grey_question:help",
+            info: "Shows a list of commands or informations about a command",
+            usage: "[command]",
+            cooldown: 3, // Command cooldown
+            args: [
+                {
+                    name: "command",
+                    type: "string",
+                    default: ""
+                }
+            ]
+        })
+    }
+
+    /**
+     * @param {BotClient} client 
+     * @param {Discord.Message} message 
+     * @param {*} args 
+     */
+    async run(client, message, args) {
         let embed = new Discord.MessageEmbed()
             .setTitle("Help Command List")
             .setDescription(
@@ -11,32 +34,19 @@ exports.run = async (client, message, args) => {
                     .join("\n")
             )
             .setFooter(`Use ${client.config.prefix}help <command> to view help for a specific command.`);
-        message.channel.send(embed);
 
-        return;
+        if (!args.command) return message.channel.send({ embeds: [embed] });
+
+        const [command, _plugin] = client.PluginManager.getCommand(args.command);
+        if (!command) return message.channel.send(`:x: Unknown command`, { embeds: [embed] });
+
+        const commandEmbed = new Discord.MessageEmbed()
+            .setColor("RANDOM")
+            .addField(":notepad_spiral: Description", command.help.info)
+            
+        if (command.help.usage?.trim()) commandEmbed.addField(":pencil: Usage", `\`${client.config.prefix}${args.command} ${command.help.usage}\``)
+        if (command.config.aliases.length) commandEmbed.addField(":izakaya_lantern: Aliases", command.config.aliases.map(a => `\`${a}\``).join(", ") || "None");
+        
+        message.channel.send({ embeds: [commandEmbed] })
     }
-
-    const command = client.PluginManager.getCommand(args[0]);
-    if (!command) return message.channel.send(`:x: Unknown command`);
-
-    const embed1 = new Discord.MessageEmbed()
-        .setColor("RANDOM")
-        .addField("Description", command.help.info)
-        .addField("Usage", `${client.config.prefix}${args[0]} ${command.help.usage}`)
-        .addField("Aliases", command.config.aliases.map(a => `\`${a}\``).join(", ") || "None");
-    message.channel.send(embed1)
-};
-
-exports.help = {
-    name: ":grey_question:help",
-    info: "Shows a list of commands or informations about a command",
-    usage: "[command]"
-};
-
-exports.config = {
-    aliases: [], // Array of aliases
-    cooldown: 3, // Command cooldown
-    minLevel: 0, // Minimum level require to execute the command
-    reqPerms: [], // Array of required user permissions to perform the command
-    botPerms: [] // Array of required bot permissions to perform the command
-};
+}
