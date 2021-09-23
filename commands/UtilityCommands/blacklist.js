@@ -7,7 +7,7 @@ module.exports = class BlacklistCommand extends BaseCommand {
             name: ':notebook:blacklist',
             info: 'Blacklists an user from the bot',
             usage: '<user> <reason>',
-            minLevel: 6, // Command cooldown
+            minLevel: 6,
             args: [
                 {
                     name: "user",

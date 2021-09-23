@@ -1,4 +1,4 @@
-const Emojis = require('./Emojis');
+const { emojis } = require('../config.js');
 const fs = require('fs');
 const BaseCommand = require('./BaseCommand');
 const BasePlugin = require('./BasePlugin');
@@ -12,8 +12,16 @@ class PluginManager {
         this.events = new Set();
     }
 
+    /**
+     * Logs something on the console
+     * @param {String} message 
+     */
+    log(message) {
+        console.log(`[${this.constructor.name}] ${message}`)
+    }
+
     init() {
-        console.log(`[Plugin Manager] Loading plugins...`)
+        this.log(`Loading plugins...`)
         const plugins = fs.readdirSync("./plugins").filter(file => file.endsWith(".js"));
         plugins.forEach(file => {
             this.load(file)
@@ -25,12 +33,12 @@ class PluginManager {
             const plugin = require(`../plugins/${pluginName}`);
             delete require.cache[require.resolve(`../plugins/${pluginName}`)];
             const _plugin = new plugin(this.client);
-            if(_plugin.conf.enabled)
+            if (_plugin.conf.enabled)
                 _plugin.loadCommands()
             this.add(_plugin)
         } catch (error) {
             console.error(error.stack)
-            console.error("[Plugin Manager] Unable to load " + pluginName + ": " + error)
+            this.log("Unable to load " + pluginName + ": " + error)
             return { error }
         }
         return {}
@@ -38,7 +46,7 @@ class PluginManager {
 
     add(plugin) {
         this.plugins.set(plugin.about.name, plugin);
-        console.log(`[Plugin Manager] ${plugin.about.name} loaded`)
+        this.log(`${plugin.about.name} loaded`)
 
         const eventCallback = event => async (...args) => {
             for (let [_name, plugin] of new Map([...this.plugins.entries()].sort((a, b) => b[1].conf.priority - a[1].conf.priority))) {
@@ -56,7 +64,7 @@ class PluginManager {
             }
         }
 
-        if(typeof plugin.conf.event == "string") {
+        if (typeof plugin.conf.event == "string") {
             if (!this.events.has(plugin.conf.event)) {
                 const event = plugin.conf.event
                 this.events.add(event);
@@ -68,7 +76,7 @@ class PluginManager {
                     const event = evt
                     this.events.add(event);
                     this.client.on(event, eventCallback(event))
-                }    
+                }
             })
         }
     }
@@ -76,21 +84,21 @@ class PluginManager {
     reload(pluginName) {
         return this.unload(pluginName) ? (this.load(pluginName)?.error ? false : true) : false
     }
-    
+
     unload(pluginName) {
-        let tru = (pluginName) => { console.log(`[Plugin Manager] ${pluginName} unloaded`); return true }
+        let tru = (pluginName) => { this.log(`${pluginName} unloaded`); return true }
         return this.plugins.delete(pluginName) ? tru(pluginName) : false;
     }
 
     enable(pluginName) {
-        if(!this.plugins.get(pluginName)) return false
-        let tru = (pluginName) => { console.log(`[Plugin Manager] ${pluginName} enabled`); return true }
+        if (!this.plugins.get(pluginName)) return false
+        let tru = (pluginName) => { this.log(`${pluginName} enabled`); return true }
         return this.plugins.get(pluginName).conf.enabled = true ? tru(pluginName) : false;
     }
 
     disable(pluginName) {
-        if(!this.plugins.get(pluginName)) return false
-        let tru = (pluginName) => { console.log(`[Plugin Manager] ${pluginName} disabled`); return true }
+        if (!this.plugins.get(pluginName)) return false
+        let tru = (pluginName) => { this.log(`${pluginName} disabled`); return true }
         return !(this.plugins.get(pluginName).conf.enabled = false) ? tru(pluginName) : false;
     }
 
@@ -99,7 +107,7 @@ class PluginManager {
     }
 
     info(pluginName) {
-        if(!this.plugins.get(pluginName)) return {error: "Invalid plugin name"}
+        if (!this.plugins.get(pluginName)) return { error: "Invalid plugin name" }
         return {
             description: this.plugins.get(pluginName).about.info,
             enabled: this.plugins.get(pluginName).conf.enabled,
@@ -107,10 +115,10 @@ class PluginManager {
             event: this.plugins.get(pluginName).conf.event
         }
     }
-    
+
     get list() {
         return {
-            loaded: [...this.plugins.values()].map(plugin => `${this.isLoaded(plugin.about.name) ? Emojis.greenTick : Emojis.redTick} **${plugin.about.name}**`).join("\n"),
+            loaded: [...this.plugins.values()].map(plugin => `${this.isLoaded(plugin.about.name) ? emojis.greenTick : emojis.redTick} **${plugin.about.name}**`).join("\n"),
             unloaded: fs.readdirSync("./plugins").filter(file => file.endsWith(".js")).map(fl => fl.split(".")[0]).filter(plg => ![...this.plugins.keys()].includes(plg)).map(plugin => `**${plugin}**`).join("\n")
         }
     }

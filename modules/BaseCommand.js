@@ -13,12 +13,13 @@ class BaseCommand extends Command {
         minLevel = 0,
         reqPerms = [],
         botPerms = [],
-        args = []
+        args = [],
+        disabled = false
     }) {
         super(false);
         
         this.help = { name, info, usage };
-        this.config = { aliases, cooldown, minLevel, reqPerms, botPerms, args };
+        this.config = { aliases, cooldown, minLevel, reqPerms, botPerms, args, disabled };
     }
 
     /**
@@ -29,6 +30,14 @@ class BaseCommand extends Command {
      * @returns {Promise<any>}
      */
     run(client, message, args, plugin) {}
+
+    /**
+     * Logs something on the console
+     * @param {String} message 
+     */
+    log(message) {
+        console.log(`[${this.help.name}] ${message}`)
+    }
 }
 
 module.exports = BaseCommand;

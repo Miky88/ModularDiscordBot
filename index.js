@@ -19,19 +19,6 @@ class BotClient extends Client {
 
         this.database = new Database(this);
     }
-
-    logError(...data) {
-        console.error(...data);
-        /** @type {TextChannel} */
-        const channel = this.channels.resolve(this.config.debug);
-        channel.send(":no_entry: " + require("util").format(...data)).catch(() => null);
-    }
-
-    logDebug(...data) {
-        /** @type {TextChannel} */
-        const channel = this.channels.resolve(this.config.debug);
-        channel.send(":information_source: " + require("util").format(...data)).catch(() => null);
-    }
 };
 
 const client = new BotClient({ intents: Object.values(Intents.FLAGS).reduce((a, b) => a | b), partials: ['REACTION', 'MESSAGE'] });

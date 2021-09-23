@@ -1,6 +1,6 @@
 const BaseCommand = require('../modules/BaseCommand.js');
 
-const { loading } = require('../modules/Emojis.js');
+const { emojis } = require('../config.js');
 
 class Reboot extends BaseCommand {
     constructor() {
@@ -21,7 +21,7 @@ class Reboot extends BaseCommand {
     async run(client, message, args) {
         const { promisify } = require("util");
         const write = promisify(require("fs").writeFile);
-        const m = await message.channel.send(loading + " Rebooting...");
+        const m = await message.channel.send(emojis.loading + " Rebooting...");
         await write('./reboot.json', `{"id": "${m.id}", "channel": "${m.channel.id}"}`).catch(console.error);
         
         process.exit(1);

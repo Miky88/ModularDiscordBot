@@ -2,7 +2,7 @@ const loki = require('lokijs');
 const BotClient = require('..');
 const cache = new Map();
 
-class Database {
+module.exports = class Database {
     /**
      * @param {BotClient} client 
      */
@@ -69,5 +69,3 @@ class Database {
         return update
     }
 }
-
-module.exports = Database;

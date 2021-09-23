@@ -42,14 +42,14 @@ module.exports = class ExecCommand extends BaseCommand {
                 );
 
             if (output.length > 1990) {
-                return message.channel.send(
+                return message.channel.send({ attachments: [
                     new MessageAttachment(Buffer.from(output), "output.txt")
-                );
+                ]});
             }
             if (outerr.length > 1990) {
-                return message.channel.send(
+                return message.channel.send({ attachments: [
                     new MessageAttachment(Buffer.from(outerr), "outerr.txt")
-                );
+                ]});
             }
 
             message.channel.send(!!outerr ? outerr : output);

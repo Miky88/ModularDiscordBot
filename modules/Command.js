@@ -1,8 +1,8 @@
 module.exports = class Command {
     /**
-     * @param {boolean} slash Whether this is a slash command.
+     * @param {boolean} integration Whether this is a slash command.
      */
-    constructor(slash) {
-        this.slash = slash;
+    constructor(integration) {
+        this.integration = integration;
     }
 }

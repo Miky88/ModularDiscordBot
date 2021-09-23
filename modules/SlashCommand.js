@@ -1,4 +1,4 @@
-const { Message, Interaction } = require("discord.js");
+const { Interaction } = require("discord.js");
 const BotClient = require("..");
 const BasePlugin = require("./BasePlugin");
 const Command = require("./Command");

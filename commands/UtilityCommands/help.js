@@ -8,7 +8,7 @@ module.exports = class HelpCommand extends BaseCommand {
             name: ":grey_question:help",
             info: "Shows a list of commands or informations about a command",
             usage: "[command]",
-            cooldown: 3, // Command cooldown
+            cooldown: 3,
             args: [
                 {
                     name: "command",

@@ -7,10 +7,10 @@ module.exports = class ExecCommand extends BaseCommand {
     constructor() {
         super({
             name: "update",
-            info: "Aggiorna le modifiche e riavvia il bot",
+            info: "Pulls commits from git and reboots the bot",
             usage: "",
-            cooldown: 3, // Command cooldown
-            minLevel: 10, // Minimum level require to execute the command
+            cooldown: 3,
+            minLevel: 10,
             args: []
         })
     }
@@ -21,13 +21,13 @@ module.exports = class ExecCommand extends BaseCommand {
     async run(client, message, args) {
         const [exec] = client.PluginManager.getCommand("exec");
         if (!exec)
-            return message.reply("Non esiste il comando `exec`, impossibile continuare.");
+            return message.reply("Unknown command `exec`, aborting.");
 
         await exec.run(client, message, { code: "git pull --no-rebase" });
 
         const [reboot] = client.PluginManager.getCommand("reboot");
         if (!reboot)
-            return message.reply("Non esiste il comando `reboot`, impossibile continuare.");
+            return message.reply("Unknown command `reboot`, aborting.");
 
         await reboot.run(client, message, {});
     }

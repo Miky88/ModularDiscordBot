@@ -6,8 +6,8 @@ module.exports = class ReloadCommand extends BaseCommand {
             name: ':arrows_counterclockwise:reload',
             info: 'Reloads a command',
             usage: '<command>',
-            cooldown: 3, // Command cooldown
-            minLevel: 9, // Minimum level require to execute the command
+            cooldown: 3,
+            minLevel: 9,
             args: [
                 {
                     name: "command",
@@ -18,9 +18,7 @@ module.exports = class ReloadCommand extends BaseCommand {
     }
 
     async run(client, message, args) {
-        // if (!args || args.size < 1) return message.channel.send(`:warning: Please specify a command name`)
         const commandName = args.command
-
         try {
             const [_, plugin] = client.PluginManager.getCommand(commandName);
             client.PluginManager.reload(plugin.about.name);

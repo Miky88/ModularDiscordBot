@@ -26,7 +26,7 @@ class CommandHandler extends BasePlugin {
             files.forEach(async file => {
                 const type = require(`../types/${file}`)
                 this.types.set(type.name, type)
-                console.log(`[Plugin Manager] Loaded type ${type.name} from ${this.about.name}`);
+                this.log(`Loaded type ${type.name} from ${this.about.name}`);
             })
         })
     }
@@ -71,26 +71,26 @@ class CommandHandler extends BasePlugin {
             let error;
 
             switch (e.id) {
-                case "ARG_EMPTY": error = `L'argomento \`${e.name}\` è vuoto.`; break;
-                case "ARG_NULL": error = `L'argomento richiesto \`${e.name}\` è vuoto.`; break;
-                case "ARG_ONEOF_NOT_IN_LIST": error = `L'argomento \`${e.name}\` deve essere uno dei seguenti valori: [${e.oneOf.map(e => `\`${e}\``).join(", ")}].`; break;
+                case "ARG_EMPTY": error = `The argument \`${e.name}\` is empty.`; break;
+                case "ARG_NULL": error = `The required argument \`${e.name}\` is empty.`; break;
+                case "ARG_ONEOF_NOT_IN_LIST": error = `The argument \`${e.name}\` needs to be one of the following values: [${e.oneOf.map(e => `\`${e}\``).join(", ")}].`; break;
                 case "ARG_OOB_FLOAT_MAX":
-                case "ARG_OOB_INT_MAX": error = `L'argomento \`${e.name}\` deve essere al massimo ${e.max}.`; break;
+                case "ARG_OOB_INT_MAX": error = `The argument \`${e.name}\` can't be greater than ${e.max}.`; break;
                 case "ARG_OOB_FLOAT_MIN":
-                case "ARG_OOB_INT_MIN": error = `L'argomento \`${e.name}\` deve essere almeno ${e.min}.`; break;
+                case "ARG_OOB_INT_MIN": error = `The argument \`${e.name}\` needs to be atleast ${e.min}.`; break;
                 case "ARG_OOB_FLOAT":
-                case "ARG_OOB_INT": error = `L'argomento \`${e.name}\` deve essere un valore compreso tra ${e.min} e ${e.max}.`; break;
-                case "ARG_OOB_LEN_MAX": error = `La lunghezza dell'argomento \`${e.name}\` deve essere al massimo ${e.max}.`; break;
-                case "ARG_OOB_LEN_MIN": error = `La lunghezza dell'argomento \`${e.name}\` deve essere almeno ${e.min}.`; break;
-                case "ARG_OOB_LEN": error = `La lunghezza dell'argomento \`${e.name}\` deve essere un valore compreso tra ${e.min} e ${e.max}.`; break;
+                case "ARG_OOB_INT": error = `The argument \`${e.name}\` needs to be a value within ${e.min} and ${e.max}.`; break;
+                case "ARG_OOB_LEN_MAX": error = `The length of the argument \`${e.name}\` can't be greather than ${e.max}.`; break;
+                case "ARG_OOB_LEN_MIN": error = `The length of the argument\`${e.name}\` needs to be atleast ${e.min}.`; break;
+                case "ARG_OOB_LEN": error = `The length of the argument \`${e.name}\` needs to be a value within ${e.min} and ${e.max}.`; break;
                 case "GENERIC_INVALID":
                 default:
-                    error = `L'argomento \`${e.name}\` non è valido.`; break;
+                    error = `The argument \`${e.name}\` is invalid.`; break;
             }
 
             return message.channel.send(stripIndents`
         :no_entry: | ${error}
-        :information_source: | Il formato corretto è \`${client.config.prefix}${command} ${cmd.help.usage}\`
+        :information_source: | The correct syntax is \`${client.config.prefix}${command} ${cmd.help.usage}\`
         `);
         }
 
@@ -120,7 +120,7 @@ class CommandHandler extends BasePlugin {
             }, cmd.config.cooldown * 1000);
             await cmd.run(client, message, args, plugin);
         } catch (e) {
-            message.channel.send(":no_entry: Si è verificato un errore durante l'esecuzione del comando: \n```js\n" + (e?.stacktrace ?? e) + "\n```")
+            message.channel.send(":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers.")
             console.error(e)
         }
         

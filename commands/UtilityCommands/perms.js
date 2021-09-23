@@ -7,7 +7,7 @@ module.exports = class PermsCommand extends BaseCommand {
             name: ':man_astronaut:perms',
             info: 'Shows yours or another user\'s permission level',
             usage: '[user]',
-            minLevel: '-1', // Minimum level require to execute the command
+            minLevel: '-1',
             args: [
                 {
                     name: "user",
@@ -19,16 +19,6 @@ module.exports = class PermsCommand extends BaseCommand {
     }
 
     async run(client, message, args) {
-        //   let user;
-        //   try {
-        //     user = await client.users.fetch((args[0] || message.author.id).replace(/\D/gmi, ''))
-        //   } catch (e) {
-        //     if (e.httpStatus == 404)
-        //       return message.channel.send(`${yellowTick} There's no user matching your query`)
-        //     else
-        //       return message.channel.send(`${yellowTick} Something went wrong while fetching the user from the Discord API`)
-        //   }
-
         const { user } = args;
 
         const data = await client.database.forceUser(user.id)

@@ -1,7 +1,7 @@
 const BaseCommand = require('../modules/BaseCommand.js');
 
 let Discord = require('discord.js');
-let Emojis = require('../modules/Emojis.js');
+let { emojis } = require('../config.js');
 
 class PlugMan extends BaseCommand {
     constructor() {
@@ -45,51 +45,51 @@ class PlugMan extends BaseCommand {
                 response = await Manager.load(pluginName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`${Emojis.greenTick} **${pluginName}** succefully loaded`)
+                    .setDescription(`${emojis.greenTick} **${pluginName}** succefully loaded`)
                 if(!response.error) return message.channel.send({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`${Emojis.redTick} There was an error trying to load **${pluginName}**:\`\`\`${response.error}\`\`\``)
+                    .setDescription(`${emojis.redTick} There was an error trying to load **${pluginName}**:\`\`\`${response.error}\`\`\``)
                 return message.channel.send({ embeds: [embed] })
             case "unload":
                 response = await Manager.unload(pluginName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`${Emojis.greenTick} **${pluginName}** succefully unloaded`)
+                    .setDescription(`${emojis.greenTick} **${pluginName}** succefully unloaded`)
                 if(response) return message.channel.send({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`${Emojis.redTick} There was an error trying to unload **${pluginName}**, is it even loaded?`)
+                    .setDescription(`${emojis.redTick} There was an error trying to unload **${pluginName}**, is it even loaded?`)
                 return message.channel.send({ embeds: [embed] })
             case "reload":
                 response = await Manager.reload(pluginName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`${Emojis.greenTick} **${pluginName}** succefully reloaded`)
+                    .setDescription(`${emojis.greenTick} **${pluginName}** succefully reloaded`)
                 if(response) return message.channel.send({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`${Emojis.redTick} There was an error trying to reload **${pluginName}**, is it even loaded?`)
+                    .setDescription(`${emojis.redTick} There was an error trying to reload **${pluginName}**, is it even loaded?`)
                 return message.channel.send({ embeds: [embed] })
             case "enable":
                 response = await Manager.enable(pluginName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`${Emojis.greenTick} **${pluginName}** succefully enabled and executed`)
+                    .setDescription(`${emojis.greenTick} **${pluginName}** succefully enabled and executed`)
                 if(response) return message.channel.send({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`${Emojis.redTick} There was an error trying to enable **${pluginName}**, is it even loaded?`)
+                    .setDescription(`${emojis.redTick} There was an error trying to enable **${pluginName}**, is it even loaded?`)
                 return message.channel.send({ embeds: [embed] })
             case "disable":
                 response = await Manager.disable(pluginName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`${Emojis.greenTick} **${pluginName}** succefully disabled`)
+                    .setDescription(`${emojis.greenTick} **${pluginName}** succefully disabled`)
                 if(response) return message.channel.send({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`${Emojis.redTick} There was an error trying to disable **${pluginName}**, is it even loaded?`)
+                    .setDescription(`${emojis.redTick} There was an error trying to disable **${pluginName}**, is it even loaded?`)
                 return message.channel.send({ embeds: [embed] })
             case "info":
                 response = await Manager.info(pluginName)
@@ -97,7 +97,7 @@ class PlugMan extends BaseCommand {
                 embed
                     .setTitle(`Plugin Manager`)
                     .setColor(0xFF0000)
-                    .setDescription(`${Emojis.redTick} There was an error trying to fetch informations from **${pluginName}**:\`\`\`${response.error}\`\`\``)
+                    .setDescription(`${emojis.redTick} There was an error trying to fetch informations from **${pluginName}**:\`\`\`${response.error}\`\`\``)
                 if(response.error) return message.channel.send({ embeds: [embed] })
     
                 embed
@@ -117,7 +117,7 @@ class PlugMan extends BaseCommand {
                 message.channel.send({ embeds: [embed] })
                 break;
             default:
-                message.channel.send(`${Emojis.yellowTick} Correct usage \`plugman (list|load|unload|enable|disable|info) <plugin name>\``)
+                message.channel.send(`${emojis.yellowTick} Correct usage \`plugman (list|load|unload|enable|disable|info) <plugin name>\``)
                 break;
         }
     }

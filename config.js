@@ -3,6 +3,12 @@ module.exports = {
     token: process.env.TOKEN, // Bot's token
     activity: `${process.env.PREFIX || "!"}help`, // Bot's Status
     owners: ["311929179186790400"], // Bot Owner IDs (For security reasons you can't set this with the setlevel command)
+    emojis: {
+        greenTick: "<:greentick:466238645095890945>",
+        redTick: "<:redtick:466238619997175811>",
+        yellowTick: "<:yellowtick:517062281805299712>",
+        loading: "<a:loading:628968304484286474>"    
+    },
     powerlevels: [
         {
             level: '-1',

@@ -4,14 +4,14 @@ const { Collection } = require('lokijs');
 const BotClient = require('..');
 const PluginPriorities = require('./PluginPriorities');
 
-class BasePlugin {
+module.exports = class BasePlugin {
     /**
      * @param {BotClient} client 
      * @param {object} options
      * @param {string | string[]} [options.event]
      */
     constructor(client, {
-        name = null,
+        name = this.constructor.name,
         info = "No description provided.",
         enabled = false,
         event = "ready",
@@ -35,12 +35,12 @@ class BasePlugin {
                 const command = new (require(`../commands/${this.about.name}/${file}`));
                 delete require.cache[require.resolve(`../commands/${this.about.name}/${file}`)];
 
-                if (command.slash)
+                if (command.integration)
                     this.slashCommands.set(file.split(".")[0], command);
                 else this.commands.set(file.split(".")[0], command);
-                console.log(`[Plugin Manager] Loaded ${command.slash ? "slash " : ''}command ${command.slash ? "/" : ''}${file.substr(0, file.length-3)} from ${this.about.name}`);
+                this.log(`Loaded ${command.integration ? "integration " : ''}command ${command.integration ? "/" : ''}${file.substr(0, file.length-3)} from ${this.about.name}`);
             } catch (e) {
-                console.error(`[Plugin Manager] Failed to load command ${file} from ${this.about.name}: ${e.stack || e}`);
+                this.log(`Failed to load command ${file} from ${this.about.name}: ${e.stack || e}`);
             }
         }); 
     }
@@ -53,6 +53,14 @@ class BasePlugin {
                 return console.error(`[${this.about.name}] There was no configured method for the ${event} event.`);
             return method.call(this, client, ...args);
         }
+    }
+
+    /**
+     * Logs something on the console
+     * @param {String} message 
+     */
+    log(message) {
+        console.log(`[${this.constructor.name}] ${message}`)
     }
 
     /**
@@ -76,5 +84,3 @@ class BasePlugin {
         else this.db.add(data);
     }
 }
-
-module.exports = BasePlugin;

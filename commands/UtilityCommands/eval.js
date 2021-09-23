@@ -8,9 +8,9 @@ module.exports = class EvalCommand extends BaseCommand {
             name: ":computer:eval",
             info: "Evaluates albitrary JavaScript",
             usage: "[code]",
-            aliases: ["ev", "js"], // Array of aliases
-            cooldown: 3, // Command cooldown
-            minLevel: 10, // Minimum level require to execute the command
+            aliases: ["ev", "js"],
+            cooldown: 3,
+            minLevel: 10,
             args: [
                 {
                     name: "code",
@@ -20,7 +20,7 @@ module.exports = class EvalCommand extends BaseCommand {
         })
     }
 
-    async run(client, message, args) {
+    async run(client, message, args, plugin) {
         const content = args.code.replace(/client\.token/gmi, '\'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0\'');
 
         try {
@@ -34,13 +34,13 @@ module.exports = class EvalCommand extends BaseCommand {
             if (result.includes(client.token)) result = `${result}`.split(client.token).join('mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0');
 
             if (result.length > 2048) {
-                console.log(result);
+                this.log(result);
                 result = 'Too long to be printed (content got console logged)';
                 const embed = new MessageEmbed()
                     .setTitle('Eval - Output')
                     .setDescription(`\`\`\`js\n${result}\n\`\`\``)
                     .setColor('RANDOM')
-                return message.channel.send(embed);
+                return message.channel.send({ embeds: [embed] });
             }
 
             const embed = new MessageEmbed()

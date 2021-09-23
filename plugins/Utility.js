@@ -1,13 +1,11 @@
 const BasePlugin = require("../modules/BasePlugin.js");
 
-class UtilityCommands extends BasePlugin {
+module.exports = class Utility extends BasePlugin {
     constructor(client) {
         super(client, {
-            name: "UtilityCommands",
+            name: "Utility",
             info: "Manages the Utility commands",
             enabled: true
         })
     }
 }
-
-module.exports = UtilityCommands;
