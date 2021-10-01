@@ -2,7 +2,7 @@ const { emojis } = require('../config.js');
 const fs = require('fs');
 const BaseCommand = require('./BaseCommand');
 const BasePlugin = require('./BasePlugin');
-const SlashCommand = require('./SlashCommand');
+const InteractionCommand = require('./InteractionCommand');
 
 class PluginManager {
     constructor(client) {
@@ -138,37 +138,33 @@ class PluginManager {
 
     /**
      * @param {string} cmd 
-     * @returns {[SlashCommand, BasePlugin] | [null, null]}
+     * @returns {[InteractionCommand, BasePlugin] | [null, null]}
      */
-    getSlashCommand(cmd) {
+    getInteractionCommand(cmd) {
         const match = [...this.plugins.values()].find(plugin => {
-            return plugin?.slashCommands?.has(cmd)
+            return plugin?.interactionCommands?.has(cmd)
         });
         if (!match)
             return [null, null];
-        return [match.slashCommands.get(cmd), match];
+        return [match.interactionCommands.get(cmd), match];
     }
 
     /**
      * @type {BaseCommand[]}
      */
     get commands() {
-        return [...this.plugins.values()].filter(plugin => {
-            return plugin && plugin.commands && plugin.commands.size
-        }).map(plugin => [...plugin.commands.values()]).flat();
+        return [...this.plugins.values()].reduce((commands, plugin) => [...commands, ...plugin.commands.values()], []);
     }
 
     /**
-     * @type {SlashCommand[]}
+     * @type {InteractionCommand[]}
      */
-    get slashCommands() {
-        return [...this.plugins.values()].filter(plugin => {
-            return plugin && plugin.slashCommands && plugin.slashCommands.size
-        }).map(plugin => [...plugin.slashCommands.values()]).flat();
+    get interactionCommands() {
+        return [...this.plugins.values()].reduce((commands, plugin) => [...commands, ...plugin.interactionCommands.values()], []);
     }
 
     get allCommands() {
-        return [...this.commands, ...this.slashCommands];
+        return [...this.commands, ...this.interactionCommands];
     }
 }
 

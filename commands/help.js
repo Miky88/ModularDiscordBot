@@ -1,6 +1,6 @@
 const Discord = require("discord.js");
-const BotClient = require("../..");
-const BaseCommand = require('../../modules/BaseCommand')
+const BotClient = require("..");
+const BaseCommand = require('../modules/BaseCommand')
 
 module.exports = class HelpCommand extends BaseCommand {
     constructor() {

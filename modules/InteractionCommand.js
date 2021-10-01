@@ -3,7 +3,7 @@ const BotClient = require("..");
 const BasePlugin = require("./BasePlugin");
 const Command = require("./Command");
 
-class SlashCommand extends Command {
+module.exports = class InteractionCommand extends Command {
     /**
      * @param {object} options 
      * @param {import("discord-api-types").APIApplicationCommand["name"]} options.name
@@ -11,9 +11,10 @@ class SlashCommand extends Command {
      * @param {import("discord-api-types").APIApplicationCommand["options"]} options.options
      */
     constructor({
-        name = 'Non specificato',
-        description = 'Non specificato',
+        name = 'Unspecified',
+        description = 'Unspecified.',
         options = [],
+        type = 'CHAT_INPUT',
         cooldown = 0,
         minLevel = 0,
         reqPerms = [],
@@ -24,7 +25,8 @@ class SlashCommand extends Command {
         this.data = {
             name,
             description,
-            options
+            options,
+            type
         };
 
         this.help = { name, description };
@@ -39,6 +41,19 @@ class SlashCommand extends Command {
      * @returns {Promise<any>}
      */
     run(client, interaction, args, plugin) {}
-}
 
-module.exports = SlashCommand;
+    toJson() {
+        if (!this.interaction)
+            return null;
+
+        return (!this.data.type || this.data.type == "CHAT_INPUT") ? {
+            name: this.data.name,
+            description: this.data.description,
+            options: this.data.options,
+            type: this.data.type
+        } : {
+            name: this.data.name,
+            type: this.data.type
+        }
+    }
+}

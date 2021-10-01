@@ -14,13 +14,20 @@ module.exports = class CommandLoader extends BasePlugin {
 
         commands.forEach(file => {
             try {
+                /**
+                 * @type {import('../modules/BaseCommand')}
+                 */
                 const command = new (require(`../commands/${file}`));
                 delete require.cache[require.resolve(`../commands/${file}`)];
-            
-                this.commands.set(file.split(".")[0], command);
-                this.log(`Loaded command ${file} from ${this.about.name}`);
+                if(command.interaction) {
+                    this.interactionCommands.set(file.split(".")[0], command);
+                    this.log(`Loaded interaction command ${file}`);
+                } else {
+                    this.commands.set(file.split(".")[0], command);
+                    this.log(`Loaded command ${file}`);
+                }
             } catch (e) {
-                this.log(`Failed to load command ${file} from ${this.about.name}: ${e}`);
+                this.log(`Failed to load command ${file}:\n${e}`);
             }
         });
     }

@@ -7,7 +7,7 @@ const PluginPriorities = require("../modules/PluginPriorities.js");
 const BotClient = require("../index.js");
 const { Message } = require("discord.js");
 
-class CommandHandler extends BasePlugin {
+module.exports = class CommandHandler extends BasePlugin {
     constructor(client) {
         super(client, {
             name: "CommandHandler",
@@ -127,5 +127,3 @@ class CommandHandler extends BasePlugin {
         return { cancelEvent: true};
     }
 }
-
-module.exports = CommandHandler;

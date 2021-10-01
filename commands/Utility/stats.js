@@ -1,4 +1,4 @@
-const BaseCommand = require('../modules/BaseCommand.js');
+const BaseCommand = require('../../modules/BaseCommand.js');
 
 const { version } = require("discord.js");
 const moment = require("moment");
@@ -17,7 +17,7 @@ class Stats extends BaseCommand {
 
     /**
      * 
-     * @param {import('..')} client 
+     * @param {import('../..')} client 
      * @param {import('discord.js').Message} message 
      * @param {*} args 
      */

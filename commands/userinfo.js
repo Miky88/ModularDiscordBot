@@ -1,11 +1,10 @@
 const InteractionCommand = require('../modules/InteractionCommand');
 
-module.exports = class Ping extends InteractionCommand {
+module.exports = class Userinfo extends InteractionCommand {
     constructor() {
         super ({
-            name: 'ping',
-            description: 'Checks if the bot responds',
-            cooldown: 3
+            name: 'userinfo',
+            type: 'USER'
         });
     }
 

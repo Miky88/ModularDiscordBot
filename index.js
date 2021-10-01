@@ -13,7 +13,7 @@ class BotClient extends Client {
 
         this.config = require('./config.js');
         this.commands = new Collection();
-        this.slashCommands = new Collection();
+        this.interactionCommands = new Collection();
         this.PluginManager = new PluginManager(this);
         this.PluginManager.init();
 
