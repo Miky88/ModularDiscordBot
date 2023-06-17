@@ -1,28 +1,29 @@
-const BaseCommand = require('../modules/BaseCommand.js');
+const Command = require('../modules/Command.js');
 
-let Discord = require('discord.js');
+let { EmbedBuilder, ApplicationCommandOptionType} = require('discord.js');
 let { emojis } = require('../config.js');
 
-class PlugMan extends BaseCommand {
+class PlugMan extends Command {
     constructor() {
         super ({
-            name: ":gear:plugman",
-            info: "Manipulate Bot Plugins",
-            usage: "(load|unload|reload|enable|disable|info|list) [<plugin name>]",
-            aliases: ['plugin', 'pluginmanager', 'pman'],
+            name: "plugman",
+            description: "Manipulate Bot Plugins",
             minLevel: 9,
             cooldown: 3,
-            args: [
+            options: [
                 {
                     name: "action",
-                    type: "string",
-                    oneOf: ["load", "unload", "reload", "enable", "disable", "info", "list"]
+                    description: "Action to perform",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
+                    choices: ["load", "unload", "reload", "enable", "disable", "info", "list"].map(c => ({ name: c, value: c }))
                 },
                 {
                     name: "pluginName",
-                    type: "string",
-                    default: ""
-                },
+                    description: "Plugin to perform action on",
+                    type: ApplicationCommandOptionType.String,
+                    required: false
+                }
             ]
         });
     }
@@ -35,9 +36,9 @@ class PlugMan extends BaseCommand {
      */
     async run(client, message, args) {
         let { action, pluginName } = args
-        let Manager = client.PluginManager
+        let Manager = client.pluginManager
         let response
-        let embed = new Discord.MessageEmbed()
+        let embed = new EmbedBuilder()
         .setTitle("Plugin Manager")
         .setFooter("PluginManager "+ process.env.PLUGMAN_VERSION)
         switch (action) {

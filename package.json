@@ -4,7 +4,6 @@
   "description": "A powerfull and modular Discord Bot with custom Plugin support!",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Miky qt\"",
     "start": "node index.js"
   },
   "keywords": [
@@ -15,7 +14,7 @@
   "license": "ISC",
   "dependencies": {
     "common-tags": "^1.8.0",
-    "discord.js": "^13.1.0",
+    "discord.js": "^14.11.0",
     "dotenv": "^8.2.0",
     "fs": "0.0.1-security",
     "lokijs": "^1.5.11",

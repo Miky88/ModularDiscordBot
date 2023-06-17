@@ -1,16 +1,15 @@
-const BaseCommand = require('../../modules/BaseCommand.js');
+const Command = require('../../modules/Command.js');
 
 const { version } = require("discord.js");
 const moment = require("moment");
 require("moment-duration-format");
-const Discord = require('discord.js')
+const { EmbedBuilder } = require('discord.js')
 
-class Stats extends BaseCommand {
+class Stats extends Command {
     constructor() {
         super ({
-            name: ':bar_chart:stats',
-            info: 'See some fancy bot statistics',
-            aliases: ['status', 'state'],
+            name: 'stats',
+            setDescription: 'See some fancy bot statistics',
             cooldown: 3
         });
     }
@@ -31,7 +30,7 @@ class Stats extends BaseCommand {
                 "Y [years], D [days], H [hours], m [minutes] [and] s [seconds] [ago]"
             );
 
-        let embed = new Discord.MessageEmbed()
+        let embed = new EmbedBuilder()
             .setColor("RANDOM")
             .setTitle("STATISTICS")
             .setDescription(`${client.user.username}`)

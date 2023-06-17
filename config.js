@@ -11,7 +11,7 @@ module.exports = {
     },
     powerlevels: [
         {
-            level: '-1',
+            level: -1,
             name: 'Blacklisted',
             icon: ':white_square_button:',
             description: 'Users that are blacklisted from the bot'

@@ -1,8 +1,7 @@
 const { emojis } = require('../config.js');
 const fs = require('fs');
-const BaseCommand = require('./BaseCommand');
 const BasePlugin = require('./BasePlugin');
-const InteractionCommand = require('./InteractionCommand');
+const Command = require('./Command.js');
 
 class PluginManager {
     constructor(client) {
@@ -26,6 +25,7 @@ class PluginManager {
         plugins.forEach(file => {
             this.load(file)
         });
+        this.log(`Successfully Loaded ${this.plugins.size} plugins`)
     }
 
     load(pluginName) {
@@ -125,46 +125,22 @@ class PluginManager {
 
     /**
      * @param {string} cmd 
-     * @returns {[BaseCommand, BasePlugin] | [null, null]}
+     * @returns {[Command, BasePlugin] | [null, null]}
      */
     getCommand(cmd) {
         const match = [...this.plugins.values()].find(plugin => {
-            return plugin?.commands?.has(cmd) || plugin?.commands?.some(c => c.config?.aliases?.includes(cmd))
+            return plugin?.commands?.has(cmd)
         });
         if (!match)
             return [null, null];
-        return [match.commands.get(cmd) || match.commands.find(c => c.config?.aliases?.includes(cmd)), match];
+        return [match.commands.get(cmd), match];
     }
 
     /**
-     * @param {string} cmd 
-     * @returns {[InteractionCommand, BasePlugin] | [null, null]}
-     */
-    getInteractionCommand(cmd) {
-        const match = [...this.plugins.values()].find(plugin => {
-            return plugin?.interactionCommands?.has(cmd)
-        });
-        if (!match)
-            return [null, null];
-        return [match.interactionCommands.get(cmd), match];
-    }
-
-    /**
-     * @type {BaseCommand[]}
+     * @type {Command[]}
      */
     get commands() {
         return [...this.plugins.values()].reduce((commands, plugin) => [...commands, ...plugin.commands.values()], []);
-    }
-
-    /**
-     * @type {InteractionCommand[]}
-     */
-    get interactionCommands() {
-        return [...this.plugins.values()].reduce((commands, plugin) => [...commands, ...plugin.interactionCommands.values()], []);
-    }
-
-    get allCommands() {
-        return [...this.commands, ...this.interactionCommands];
     }
 }
 

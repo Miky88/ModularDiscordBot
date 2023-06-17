@@ -1,18 +1,18 @@
-let { MessageEmbed, Util } = require('discord.js')
-const BaseCommand = require('../../modules/BaseCommand')
+let { EmbedBuilder, Util } = require('discord.js')
+const Command = require('../../modules/Command')
 
-module.exports = class PermsCommand extends BaseCommand {
+module.exports = class PermsCommand extends Command {
     constructor() {
         super({
             name: ':man_astronaut:perms',
-            info: 'Shows yours or another user\'s permission level',
-            usage: '[user]',
-            minLevel: '-1',
-            args: [
+            description: 'Shows yours or another user\'s permission level',
+            minLevel: -1,
+            options: [
                 {
                     name: "user",
-                    type: "user",
-                    default: msg => msg.author
+                    description: "User to get powerlevel from",
+                    type: "USER",
+                    required: false
                 }
             ]
         })
@@ -26,7 +26,7 @@ module.exports = class PermsCommand extends BaseCommand {
         if (message.author.data.powerlevel < 0 && data.user.id !== message.author.id) return
 
         let level = client.config.powerlevels.find(pl => pl.level == data.powerlevel) || client.config.powerlevels.find(pl => pl.level == 0)
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle(`${user.tag}'s Powerlevel`)
             .setThumbnail(user.displayAvatarURL())
             .setDescription(`**${level.icon} ${level.level} - ${level.name}**\n${level.description}`)

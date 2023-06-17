@@ -17,9 +17,7 @@ module.exports = class InteractionCommandHandler extends BasePlugin {
      * @param {BotClient} client 
      */
     async ready(client) {
-        client.guilds.cache.forEach(g => {
-            g.commands.set(client.PluginManager.interactionCommands.map(c => c.toJson())).catch(e => console.error(require('util').inspect(e, {depth: Infinity})));
-        })
+        client.application.commands.set(client.pluginManager.commands.map(c => c.toJson()))
     }
 
     /**
@@ -31,16 +29,15 @@ module.exports = class InteractionCommandHandler extends BasePlugin {
         interaction.user.data = await client.database.forceUser(interaction.user.id);
 
         try {
-            let [cmd, plugin] = this.client.PluginManager.getInteractionCommand(interaction.commandName);
-            if (!cmd) return
-    
+            let [cmd, plugin] = this.client.pluginManager.getCommand(interaction.commandName);
+            if (!cmd) return    
 
             // System Permission check
             if (interaction.user.data.powerlevel < cmd.config.minLevel) {
                 let reqLevel = client.config.powerlevels.find(pl => pl.level == cmd.config.minLevel)
                 let usrLevel = client.config.powerlevels.find(pl => pl.level == interaction.user.data.powerlevel)
                 return interaction.reply({ content: `:no_entry: You don't have permission to perform this command. Minimum system permission required is **${reqLevel.icon} ${reqLevel.level} - ${reqLevel.name}** and your system permission is **${usrLevel.icon} ${usrLevel.level} - ${usrLevel.name}**`, ephemeral: true})
-            }
+    }
 
             let args = interaction.options.data.reduce((obj, option) => {
                 obj[option.name] = option.value

@@ -10,7 +10,7 @@ module.exports = class Database {
         this.client = client;
         this.collections = ['users'];
 
-        for (let plugin of client.PluginManager.plugins.values()) {
+        for (let plugin of client.pluginManager.plugins.values()) {
             if (plugin.conf.usesDB)
                 this.collections.push(`plugin_${plugin.about.name}`)
         }

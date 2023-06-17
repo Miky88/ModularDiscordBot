@@ -1,17 +1,13 @@
-const { MessageAttachment } = require("discord.js");
 const BotClient = require("../..");
-const exec = require("util").promisify(require("child_process").exec);
-const BaseCommand = require("../../modules/BaseCommand");
+const Command = require("../../modules/Command");
 
-module.exports = class ExecCommand extends BaseCommand {
+module.exports = class ExecCommand extends Command {
     constructor() {
         super({
             name: "update",
-            info: "Pulls commits from git and reboots the bot",
-            usage: "",
+            description: "Pulls commits from git and reboots the bot",
             cooldown: 3,
             minLevel: 10,
-            args: []
         })
     }
 
@@ -19,13 +15,13 @@ module.exports = class ExecCommand extends BaseCommand {
      * @param {BotClient} client
      */
     async run(client, message, args) {
-        const [exec] = client.PluginManager.getCommand("exec");
+        const [exec] = client.pluginManager.getCommand("exec");
         if (!exec)
             return message.reply("Unknown command `exec`, aborting.");
 
         await exec.run(client, message, { code: "git pull --no-rebase" });
 
-        const [reboot] = client.PluginManager.getCommand("reboot");
+        const [reboot] = client.pluginManager.getCommand("reboot");
         if (!reboot)
             return message.reply("Unknown command `reboot`, aborting.");
 

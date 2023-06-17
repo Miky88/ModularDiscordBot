@@ -24,7 +24,6 @@ module.exports = class BasePlugin {
         this.about = { name, info };
         
         this.commands = new Discord.Collection();
-        this.interactionCommands = new Discord.Collection();
     }
 
     async loadCommands() {
@@ -38,9 +37,7 @@ module.exports = class BasePlugin {
                 const command = new (require(`../commands/${this.about.name}/${file}`));
                 delete require.cache[require.resolve(`../commands/${this.about.name}/${file}`)];
 
-                if (command.interaction)
-                    this.interactionCommands.set(file.split(".")[0], command);
-                else this.commands.set(file.split(".")[0], command);
+                this.commands.set(file.split(".")[0], command);
                 this.log(`Loaded ${command.interaction ? "interaction " : ''}command ${command.interaction ? "/" : ''}${file.substr(0, file.length-3)} from ${this.about.name}`);
             } catch (e) {
                 this.log(`Failed to load command ${file} from ${this.about.name}: ${e.stack || e}`);

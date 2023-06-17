@@ -1,25 +1,29 @@
 const { emojis } = require('../../config.js')
-let { MessageEmbed } = require('discord.js')
+let { EmbedBuilder } = require('discord.js')
 const config = require('../../config')
-const BaseCommand = require('../../modules/BaseCommand')
+const Command = require('../../modules/Command.js')
 
-module.exports = class SetLevelCommand extends BaseCommand {
+module.exports = class SetLevelCommand extends Command {
     constructor() {
         super({
-            name: ':magic_wand:setlevel',
+            name: 'setlevel',
             info: 'Sets an user\'s permission level',
             usage: '<user> <level>',
             minLevel: 9,
-            args: [
+            options: [
                 {
                     name: "user",
-                    type: "user"
+                    description: "User to set powerlevel to",
+                    type: "USER",
+                    required: true
                 },
                 {
                     name: "level",
-                    type: "string",
-                    oneOf: config.powerlevels.map(c => c.name).concat(config.powerlevels.map(c => c.level))
-                },
+                    description: "Powerlevel to set",
+                    type: "STRING",
+                    required: true,
+                    choices: config.powerlevels.map(c => ({ name: c.name, value: c.level }))
+                }
             ]
         })
     }
@@ -41,7 +45,7 @@ module.exports = class SetLevelCommand extends BaseCommand {
         data.powerlevel = newlevel.level
         client.database.updateUser(data)
 
-        const embed = new MessageEmbed()
+        const embed = new EmbedBuilder()
             .setTitle(`${user.tag}'s new Powerlevel`)
             .setThumbnail(user.displayAvatarURL())
             .setDescription(`**${newlevel.icon} ${newlevel.level} - ${newlevel.name}**\n${newlevel.description}`)

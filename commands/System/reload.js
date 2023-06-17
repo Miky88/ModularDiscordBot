@@ -1,17 +1,18 @@
-const BaseCommand = require('../../modules/BaseCommand')
+const Command = require('../../modules/Command');
 
-module.exports = class ReloadCommand extends BaseCommand {
+module.exports = class ReloadCommand extends Command {
     constructor() {
         super({
             name: ':arrows_counterclockwise:reload',
-            info: 'Reloads a command',
-            usage: '<command>',
+            description: 'Reloads a command',
             cooldown: 3,
             minLevel: 9,
-            args: [
+            options: [
                 {
                     name: "command",
-                    type: "string"
+                    description: "Command to reload",
+                    type: "STRING",
+                    required: true,
                 }
             ]
         })
@@ -20,8 +21,8 @@ module.exports = class ReloadCommand extends BaseCommand {
     async run(client, message, args) {
         const commandName = args.command
         try {
-            const [_, plugin] = client.PluginManager.getCommand(commandName);
-            client.PluginManager.reload(plugin.about.name);
+            const [_, plugin] = client.pluginManager.getCommand(commandName);
+            client.pluginManager.reload(plugin.about.name);
             message.channel.send(`:white_check_mark: Command \`${commandName}\` and plugin \`${plugin.about.name}\` have been reloaded`)
         } catch (error) {
             if (error.code == "MODULE_NOT_FOUND")

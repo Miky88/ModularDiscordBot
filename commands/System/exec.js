@@ -1,19 +1,20 @@
-const { MessageAttachment } = require("discord.js");
+const { MessageAttachment, ApplicationCommandOptionType } = require("discord.js");
 const exec = require("util").promisify(require("child_process").exec);
-const BaseCommand = require("../../modules/BaseCommand");
+const Command = require("../../modules/Command");
 
-module.exports = class ExecCommand extends BaseCommand {
+module.exports = class ExecCommand extends Command {
     constructor() {
         super({
-            name: ":floppy_disk:exec",
+            name: "exec",
             info: "Runs shell commands on the host machine",
-            usage: "[code]",
-            cooldown: 3, // Command cooldown
-            minLevel: 10, // Minimum level require to execute the command
-            args: [
+            cooldown: 3,
+            minLevel: 10,
+            options: [
                 {
                     name: "code",
-                    type: "string"
+                    description: "Code to execute",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
                 }
             ]
         })
