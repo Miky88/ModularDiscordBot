@@ -8,7 +8,6 @@ module.exports = class SetLevelCommand extends Command {
         super({
             name: 'setlevel',
             info: 'Sets an user\'s permission level',
-            usage: '<user> <level>',
             minLevel: 9,
             options: [
                 {

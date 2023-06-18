@@ -4,7 +4,7 @@ const Command = require('../../modules/Command')
 module.exports = class PermsCommand extends Command {
     constructor() {
         super({
-            name: ':man_astronaut:perms',
+            name: 'perms',
             description: 'Shows yours or another user\'s permission level',
             minLevel: -1,
             options: [

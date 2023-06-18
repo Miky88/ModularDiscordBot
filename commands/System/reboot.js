@@ -1,12 +1,12 @@
-const Command = require('../modules/Command.js');
+const Command = require('../../modules/Command.js');
 
-const { emojis } = require('../config.js');
+const { emojis } = require('../../config.js');
 
 class Reboot extends Command {
     constructor() {
         super ({
             name: 'reboot',
-            info: 'Reboots the bot if running under PM2',
+            description: 'Reboots the bot if running under PM2',
             minLevel: 9
         });
     }

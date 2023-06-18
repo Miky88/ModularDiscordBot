@@ -3,7 +3,6 @@ const BasePlugin = require("../modules/BasePlugin.js");
 module.exports = class ReadyLog extends BasePlugin {
     constructor(client) {
         super(client, {
-            name: "ReadyLog",
             info: "Logs informations once ready and sets the custom status",
             enabled: true,
             event: "ready",

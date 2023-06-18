@@ -6,7 +6,7 @@ module.exports = class ExecCommand extends Command {
     constructor() {
         super({
             name: "exec",
-            info: "Runs shell commands on the host machine",
+            description: "Runs shell commands on the host machine",
             cooldown: 3,
             minLevel: 10,
             options: [

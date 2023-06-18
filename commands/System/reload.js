@@ -12,7 +12,7 @@ module.exports = class ReloadCommand extends Command {
                 {
                     name: "command",
                     description: "Command to reload",
-                    type: "STRING",
+                    type: ApplicationCommandOptionType.String,
                     required: true,
                 }
             ]

@@ -5,7 +5,6 @@ const BotClient = require('../index.js');
 module.exports = class InteractionCommandHandler extends BasePlugin {
     constructor(client) {
         super(client, {
-            name: "InteractionCommands",
             info: "Adds interaction commands support.",
             enabled: true,
             event: ["ready", "interactionCreate"],

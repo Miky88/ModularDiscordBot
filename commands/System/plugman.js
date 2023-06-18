@@ -1,4 +1,4 @@
-const Command = require('../modules/Command.js');
+const Command = require('../../modules/Command.js');
 
 let { EmbedBuilder, ApplicationCommandOptionType} = require('discord.js');
 let { emojis } = require('../config.js');

@@ -9,7 +9,7 @@ class Stats extends Command {
     constructor() {
         super ({
             name: 'stats',
-            setDescription: 'See some fancy bot statistics',
+            description: 'See some fancy bot statistics',
             cooldown: 3
         });
     }
@@ -17,10 +17,10 @@ class Stats extends Command {
     /**
      * 
      * @param {import('../..')} client 
-     * @param {import('discord.js').Message} message 
+     * @param {import('discord.js').CommandInteraction} interaction 
      * @param {*} args 
      */
-    async run(client, message, args) {
+    async run(client, interaction, args) {
         const duration = moment
         .duration(client.uptime)
         .format(" D [days], H [hrs], m [mins], s [secs]");
@@ -31,7 +31,7 @@ class Stats extends Command {
             );
 
         let embed = new EmbedBuilder()
-            .setColor("RANDOM")
+            .setColor("Random")
             .setTitle("STATISTICS")
             .setDescription(`${client.user.username}`)
             .addFields(
@@ -62,7 +62,7 @@ class Stats extends Command {
                 }
             );
 
-        message.channel.send({ embeds: [embed] });
+        interaction.reply({ embeds: [embed] });
     }
 }
 
