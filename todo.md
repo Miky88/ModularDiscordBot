@@ -14,7 +14,7 @@ Discord stuff
 - [ ] Ensure difference between Guild permission and System permission
 - [ ] New settings system per guild
 
-Plugin Management
+Module Management
 - [ ] Improve plugin management
 - [ ] Support for dependencies
 - [>] Discuss the possibility to move actual /modules in /structures and /plugins in /modules

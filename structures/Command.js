@@ -1,5 +1,5 @@
 const { InteractionType, ApplicationCommandType, ApplicationCommandOptionType } = require('discord.js');
-const { Plugin } = require('./Plugin.js');
+const { Module } = require('./Module.js');
 
 module.exports = class Command {
     constructor({
@@ -35,7 +35,7 @@ module.exports = class Command {
      * @param {BotClient} client 
      * @param {Interaction} interaction 
      * @param {object} args
-     * @param {Plugin} module
+     * @param {Module} module
      * @returns {Promise<any>}
      */
     run(client, interaction, args, module) {}

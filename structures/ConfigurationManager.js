@@ -1,11 +1,11 @@
 const { parse, stringify } = require('yaml')
-const Plugin = require('./Plugin.js')
+const Module = require('./Module.js')
 const fs = require('fs')
 
 module.exports = class ConfigurationManager {
     /**
      * Creates a configuration manager for a module
-     * @param {Plugin} module The module to create the configuration manager for
+     * @param {Module} module The module to create the configuration manager for
      * @param {Object} defaultConfig The default configuration for the module
      */
     constructor(module, defaultConfig) {

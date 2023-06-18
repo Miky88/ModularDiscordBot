@@ -1,12 +1,12 @@
 const { emojis } = require('../config.js');
 const fs = require('fs');
-const Plugin = require('./Plugin.js');
+const Module = require('./Module.js');
 const Command = require('./Command.js');
 
-class PluginManager {
+module.exports = class ModuleManager {
     constructor(client) {
         this.client = client;
-        /** @type {Map<string, import("./Plugin.js")>} */
+        /** @type {Map<string, import("./Module.js")>} */
         this.modules = new Map();
         this.events = new Set();
     }
@@ -28,17 +28,17 @@ class PluginManager {
         this.log(`Successfully Loaded ${this.modules.size} modules`)
     }
 
-    load(pluginName) {
+    load(moduleName) {
         try {
-            const module = require(`../modules/${pluginName}`);
-            delete require.cache[require.resolve(`../modules/${pluginName}`)];
-            const _plugin = new module(this.client);
-            if (_plugin.conf.enabled)
-                _plugin.loadCommands()
-            this.add(_plugin)
+            const module = require(`../modules/${moduleName}`);
+            delete require.cache[require.resolve(`../modules/${moduleName}`)];
+            const _module = new module(this.client);
+            if (_module.conf.enabled)
+                _module.loadCommands()
+            this.add(_module)
         } catch (error) {
             console.error(error.stack)
-            this.log("Unable to load " + pluginName + ": " + error)
+            this.log("Unable to load " + moduleName + ": " + error)
             return { error }
         }
         return {}
@@ -125,7 +125,7 @@ class PluginManager {
 
     /**
      * @param {string} cmd 
-     * @returns {[Command, Plugin] | [null, null]}
+     * @returns {[Command, Module] | [null, null]}
      */
     getCommand(cmd) {
         const match = [...this.modules.values()].find(module => {
@@ -143,5 +143,3 @@ class PluginManager {
         return [...this.modules.values()].reduce((commands, module) => [...commands, ...module.commands.values()], []);
     }
 }
-
-module.exports = { PluginManager }

@@ -1,5 +1,5 @@
 # ModularBot
-Discord Modular Bot with Custom Plugin support.
+Discord Modular Bot with Custom Module support.
 ## Installation
 1. Clone or download the repository
 2. Run `npm install` on the repo's folder
@@ -9,12 +9,12 @@ Discord Modular Bot with Custom Plugin support.
 6. Try the bot by executing `node index.js` in the repo's folder
 If you have troubles just open an issue!
 
-## Making a Plugin
+## Making a Module
 Plugins are stored in modules/ directory and are loaded into the bot on startup. Enabled modules are also runned when they get triggered by respective event.
 ```js
-const Plugin = require("../modules/Plugin.js"); // Import the base module
+const Module = require("../modules/Module.js"); // Import the base module
 
-class Example extends Plugin {
+class Example extends Module {
     constructor() {
         super({
             name: "Example", // Name of the module

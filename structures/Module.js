@@ -5,7 +5,7 @@ const BotClient = require('..');
 const PluginPriorities = require('./PluginPriorities');
 const ConfigurationManager = require('./ConfigurationManager');
 
-module.exports = class Plugin {
+module.exports = class Module {
     /**
      * @param {BotClient} client 
      * @param {object} options

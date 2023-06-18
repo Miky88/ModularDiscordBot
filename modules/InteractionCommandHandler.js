@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
-const Plugin = require("../structures/Plugin.js");
+const Module = require("../structures/Module.js");
 const BotClient = require('../index.js');
 
-module.exports = class InteractionCommandHandler extends Plugin {
+module.exports = class InteractionCommandHandler extends Module {
     constructor(client) {
         super(client, {
             info: "Adds interaction commands support.",

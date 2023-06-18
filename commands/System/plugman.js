@@ -20,7 +20,7 @@ class PlugMan extends Command {
                 },
                 {
                     name: "module",
-                    description: "Plugin to perform action on",
+                    description: "Module to perform action on",
                     type: ApplicationCommandOptionType.String,
                     required: false
                 }
@@ -39,7 +39,7 @@ class PlugMan extends Command {
         let Manager = client.pluginManager
         let response
         let embed = new EmbedBuilder()
-        .setTitle("Plugin Manager")
+        .setTitle("Module Manager")
         .setFooter("PluginManager "+ process.env.PLUGMAN_VERSION)
         switch (action) {
             case "load":
@@ -96,13 +96,13 @@ class PlugMan extends Command {
                 response = await Manager.info(pluginName)
                 
                 embed
-                    .setTitle(`Plugin Manager`)
+                    .setTitle(`Module Manager`)
                     .setColor(0xFF0000)
                     .setDescription(`${emojis.redTick} There was an error trying to fetch informations from **${pluginName}**:\`\`\`${response.error}\`\`\``)
                 if(response.error) return await interaction.reply({ embeds: [embed] })
     
                 embed
-                    .setTitle(`Plugin Manager - ${pluginName}`)
+                    .setTitle(`Module Manager - ${pluginName}`)
                     .setColor(0x0000FF)
                     .setDescription(response.description)
                     .addField("Enabled", `${response.enabled}`, true)
@@ -111,7 +111,7 @@ class PlugMan extends Command {
                 return await interaction.reply({ embeds: [embed] })
             case "list":
                 embed
-                    .setTitle("Plugin Manager")
+                    .setTitle("Module Manager")
                     .addField("Loaded", Manager.list.loaded || "_Valore vuoto_", true)
                     .setColor(0x0000FF)
                 Manager.list.unloaded ? embed.addField("Unloaded", Manager.list.unloaded, true) : undefined
