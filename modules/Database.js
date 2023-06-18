@@ -27,7 +27,9 @@ module.exports = class Database {
         const user = await this.db.users.insert({
             id: userID,
             powerlevel: this.client.config.owners.includes(userID) ? 10 : 0,
-            blacklistReason: null
+            guildlevel: 0,
+            blacklistReason: null,
+            guildBlacklistReason: null
         })
         this.cacheUser(user)
         return user;

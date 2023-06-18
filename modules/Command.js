@@ -8,6 +8,7 @@ module.exports = class Command {
         type = ApplicationCommandType.ChatInput,
         cooldown = 0,
         minLevel = 0,
+        minGuildLevel = 0,
         reqPerms = [],
         botPerms = [],
     }) {
@@ -18,7 +19,7 @@ module.exports = class Command {
             type
         };
 
-        this.config = { name, description, cooldown, minLevel, reqPerms, botPerms };
+        this.config = { name, description, cooldown, minLevel, minGuildLevel, reqPerms, botPerms };
     }
 
     /**

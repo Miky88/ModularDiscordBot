@@ -1,8 +1,8 @@
 module.exports = {
     prefix: process.env.PREFIX || "-", // Prefix for bot commands
     token: process.env.TOKEN, // Bot's token
-    activity: `${process.env.PREFIX || "!"}help`, // Bot's Status
-    owners: ["311929179186790400"], // Bot Owner IDs (For security reasons you can't set this with the setlevel command)
+    activity: `/help`, // Bot's Status
+    owners: ["311929179186790400", "422418878459674624"], // Bot Owner IDs (For security reasons you can't set this with the setlevel command)
     systemServer: "633332682578853905", // Server ID where the bot will load system commands
     emojis: {
         greenTick: "<:greentick:466238645095890945>",
@@ -41,5 +41,43 @@ module.exports = {
             icon: ':star2:',
             description: 'Bot\'s Owner has full control of the bot and access to all privileged commands'
         }
+    ],
+    guildlevels: [
+        {
+            level: -1,
+            name: 'Blacklisted',
+            icon: ':white_square_button:',
+            description: 'Users that are blacklisted from the bot'
+        },
+        {
+            level: 0,
+            name: 'Member',
+            icon: ':small_blue_diamond:',
+            description: 'Everyone that is not a bot is a user'
+        },
+        {
+            level: 7,
+            name: 'Helper',
+            icon: ':student:',
+            description: 'Helpers help Moderators in keeping the server clean'
+        },
+        {
+            level: 8,
+            name: 'Moderator',
+            icon: ':police_officer:',
+            description: 'Moderators keep the server in order through moderative actions'
+        },
+        {
+            level: 9,
+            name: 'Admin',
+            icon: ':sparkles:',
+            description: 'Admins are responsible for important administration tasks'
+        },
+        {
+            level: 10,
+            name: 'Server Owner',
+            icon: ':star2:',
+            description: 'The server owner has full control over the server and its members'
+        }   
     ]
 }
