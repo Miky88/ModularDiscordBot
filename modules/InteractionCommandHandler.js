@@ -28,7 +28,7 @@ module.exports = class InteractionCommandHandler extends Plugin {
         interaction.user.data = await client.database.forceUser(interaction.user.id);
 
         try {
-            let [cmd, plugin] = this.client.pluginManager.getCommand(interaction.commandName);
+            let [cmd, module] = this.client.pluginManager.getCommand(interaction.commandName);
             if (!cmd) return    
 
             // System Permission check
@@ -43,7 +43,7 @@ module.exports = class InteractionCommandHandler extends Plugin {
                 return obj
             }, {});
     
-            await cmd.run(client, interaction, args, plugin);  
+            await cmd.run(client, interaction, args, module);  
         } catch (e) {
             interaction.reply({
                 content: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers.",

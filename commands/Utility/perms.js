@@ -1,5 +1,5 @@
 let { EmbedBuilder, ApplicationCommandOptionType, escapeMarkdown } = require('discord.js')
-const Command = require('../../modules/Command')
+const Command = require('../../structures/Command.js')
 
 module.exports = class PermsCommand extends Command {
     constructor() {

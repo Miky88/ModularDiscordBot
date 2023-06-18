@@ -34,10 +34,10 @@ module.exports = class Command {
      * @param {BotClient} client 
      * @param {Interaction} interaction 
      * @param {object} args
-     * @param {Plugin} plugin
+     * @param {Plugin} module
      * @returns {Promise<any>}
      */
-    run(client, interaction, args, plugin) {}
+    run(client, interaction, args, module) {}
 
     toJson() {
         return (!this.data.type || this.data.type == ApplicationCommandType.ChatInput) ? {

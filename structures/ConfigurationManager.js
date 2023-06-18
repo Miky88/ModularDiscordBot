@@ -4,20 +4,20 @@ const fs = require('fs')
 
 module.exports = class ConfigurationManager {
     /**
-     * Creates a configuration manager for a plugin
-     * @param {Plugin} plugin The plugin to create the configuration manager for
-     * @param {Object} defaultConfig The default configuration for the plugin
+     * Creates a configuration manager for a module
+     * @param {Plugin} module The module to create the configuration manager for
+     * @param {Object} defaultConfig The default configuration for the module
      */
-    constructor(plugin, defaultConfig) {
+    constructor(module, defaultConfig) {
         this.defaultConfig = defaultConfig
-        this.plugin = plugin;
+        this.module = module;
 
-        // Create config file if it doesn't exist in /plugins/<plugin>/config.yml
-        if (!fs.existsSync(`../plugins/${this.plugin.constructor.name}/config.yml`)) {
-            fs.writeFileSync(`../plugins/${this.plugin.constructor.name}/config.yml`, stringify(this.defaultConfig))
+        // Create config file if it doesn't exist in /modules/<module>/config.yml
+        if (!fs.existsSync(`../modules/${this.module.constructor.name}/config.yml`)) {
+            fs.writeFileSync(`../modules/${this.module.constructor.name}/config.yml`, stringify(this.defaultConfig))
         }
 
-        this.file = parse(fs.readFileSync(`../plugins/${this.plugin.constructor.name}/config.yml`, 'utf8'))
+        this.file = parse(fs.readFileSync(`../modules/${this.module.constructor.name}/config.yml`, 'utf8'))
 
         // Check if config file has all the required fields
         for (const key in this.defaultConfig) {
@@ -43,7 +43,7 @@ module.exports = class ConfigurationManager {
      */
     set(key, value) {
         this.file[key] = value
-        fs.writeFileSync(`../plugins/${this.plugin.constructor.name}/config.yml`, stringify(this.file))
+        fs.writeFileSync(`../modules/${this.module.constructor.name}/config.yml`, stringify(this.file))
     }
 
     /**
@@ -51,7 +51,7 @@ module.exports = class ConfigurationManager {
      * @returns {Object} The new configuration file
      */
     reload() {
-        this.file = parse(fs.readFileSync(`../plugins/${this.plugin.constructor.name}/config.yml`, 'utf8'))
+        this.file = parse(fs.readFileSync(`../modules/${this.module.constructor.name}/config.yml`, 'utf8'))
         return this.file
     }
 
@@ -61,6 +61,6 @@ module.exports = class ConfigurationManager {
      */
     reset() {
         this.file = this.defaultConfig
-        fs.writeFileSync(`../plugins/${this.plugin.constructor.name}/config.yml`, stringify(this.file))
+        fs.writeFileSync(`../modules/${this.module.constructor.name}/config.yml`, stringify(this.file))
     }
 }

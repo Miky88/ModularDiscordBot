@@ -7,7 +7,7 @@ class PluginManager {
     constructor(client) {
         this.client = client;
         /** @type {Map<string, import("./Plugin.js")>} */
-        this.plugins = new Map();
+        this.modules = new Map();
         this.events = new Set();
     }
 
@@ -20,19 +20,19 @@ class PluginManager {
     }
 
     init() {
-        this.log(`Loading plugins...`)
-        const plugins = fs.readdirSync("./plugins").filter(file => file.endsWith(".js"));
-        plugins.forEach(file => {
+        this.log(`Loading modules...`)
+        const modules = fs.readdirSync("./modules").filter(file => file.endsWith(".js"));
+        modules.forEach(file => {
             this.load(file)
         });
-        this.log(`Successfully Loaded ${this.plugins.size} plugins`)
+        this.log(`Successfully Loaded ${this.modules.size} modules`)
     }
 
     load(pluginName) {
         try {
-            const plugin = require(`../plugins/${pluginName}`);
-            delete require.cache[require.resolve(`../plugins/${pluginName}`)];
-            const _plugin = new plugin(this.client);
+            const module = require(`../modules/${pluginName}`);
+            delete require.cache[require.resolve(`../modules/${pluginName}`)];
+            const _plugin = new module(this.client);
             if (_plugin.conf.enabled)
                 _plugin.loadCommands()
             this.add(_plugin)
@@ -44,19 +44,19 @@ class PluginManager {
         return {}
     }
 
-    add(plugin) {
-        this.plugins.set(plugin.about.name, plugin);
-        this.log(`${plugin.about.name} loaded`)
+    add(module) {
+        this.modules.set(module.about.name, module);
+        this.log(`${module.about.name} loaded`)
 
         const eventCallback = event => async (...args) => {
-            for (let [_name, plugin] of new Map([...this.plugins.entries()].sort((a, b) => b[1].conf.priority - a[1].conf.priority))) {
-                if (plugin.conf.enabled && (plugin.conf.event == event || plugin.conf.event.includes(event))) {
+            for (let [_name, module] of new Map([...this.modules.entries()].sort((a, b) => b[1].conf.priority - a[1].conf.priority))) {
+                if (module.conf.enabled && (module.conf.event == event || module.conf.event.includes(event))) {
                     let execution;
 
-                    if (Array.isArray(plugin.conf.event))
-                        execution = await plugin.run(this.client, event, ...args);
+                    if (Array.isArray(module.conf.event))
+                        execution = await module.run(this.client, event, ...args);
                     else
-                        execution = await plugin.run(this.client, ...args);
+                        execution = await module.run(this.client, ...args);
 
                     if (execution?.cancelEvent)
                         break;
@@ -64,14 +64,14 @@ class PluginManager {
             }
         }
 
-        if (typeof plugin.conf.event == "string") {
-            if (!this.events.has(plugin.conf.event)) {
-                const event = plugin.conf.event
+        if (typeof module.conf.event == "string") {
+            if (!this.events.has(module.conf.event)) {
+                const event = module.conf.event
                 this.events.add(event);
                 this.client.on(event, eventCallback(event))
             }
-        } else if (Array.isArray(plugin.conf.event)) {
-            plugin.conf.event.forEach(evt => {
+        } else if (Array.isArray(module.conf.event)) {
+            module.conf.event.forEach(evt => {
                 if (!this.events.has(evt)) {
                     const event = evt
                     this.events.add(event);
@@ -87,39 +87,39 @@ class PluginManager {
 
     unload(pluginName) {
         let tru = (pluginName) => { this.log(`${pluginName} unloaded`); return true }
-        return this.plugins.delete(pluginName) ? tru(pluginName) : false;
+        return this.modules.delete(pluginName) ? tru(pluginName) : false;
     }
 
     enable(pluginName) {
-        if (!this.plugins.get(pluginName)) return false
+        if (!this.modules.get(pluginName)) return false
         let tru = (pluginName) => { this.log(`${pluginName} enabled`); return true }
-        return this.plugins.get(pluginName).conf.enabled = true ? tru(pluginName) : false;
+        return this.modules.get(pluginName).conf.enabled = true ? tru(pluginName) : false;
     }
 
     disable(pluginName) {
-        if (!this.plugins.get(pluginName)) return false
+        if (!this.modules.get(pluginName)) return false
         let tru = (pluginName) => { this.log(`${pluginName} disabled`); return true }
-        return !(this.plugins.get(pluginName).conf.enabled = false) ? tru(pluginName) : false;
+        return !(this.modules.get(pluginName).conf.enabled = false) ? tru(pluginName) : false;
     }
 
     isLoaded(pluginName) {
-        return this.plugins.get(pluginName) ? this.plugins.get(pluginName).conf.enabled : false
+        return this.modules.get(pluginName) ? this.modules.get(pluginName).conf.enabled : false
     }
 
     info(pluginName) {
-        if (!this.plugins.get(pluginName)) return { error: "Invalid plugin name" }
+        if (!this.modules.get(pluginName)) return { error: "Invalid module name" }
         return {
-            description: this.plugins.get(pluginName).about.info,
-            enabled: this.plugins.get(pluginName).conf.enabled,
+            description: this.modules.get(pluginName).about.info,
+            enabled: this.modules.get(pluginName).conf.enabled,
             loaded: true,
-            event: this.plugins.get(pluginName).conf.event
+            event: this.modules.get(pluginName).conf.event
         }
     }
 
     get list() {
         return {
-            loaded: [...this.plugins.values()].map(plugin => `${this.isLoaded(plugin.about.name) ? emojis.greenTick : emojis.redTick} **${plugin.about.name}**`).join("\n"),
-            unloaded: fs.readdirSync("./plugins").filter(file => file.endsWith(".js")).map(fl => fl.split(".")[0]).filter(plg => ![...this.plugins.keys()].includes(plg)).map(plugin => `**${plugin}**`).join("\n")
+            loaded: [...this.modules.values()].map(module => `${this.isLoaded(module.about.name) ? emojis.greenTick : emojis.redTick} **${module.about.name}**`).join("\n"),
+            unloaded: fs.readdirSync("./modules").filter(file => file.endsWith(".js")).map(fl => fl.split(".")[0]).filter(plg => ![...this.modules.keys()].includes(plg)).map(module => `**${module}**`).join("\n")
         }
     }
 
@@ -128,8 +128,8 @@ class PluginManager {
      * @returns {[Command, Plugin] | [null, null]}
      */
     getCommand(cmd) {
-        const match = [...this.plugins.values()].find(plugin => {
-            return plugin?.commands?.has(cmd)
+        const match = [...this.modules.values()].find(module => {
+            return module?.commands?.has(cmd)
         });
         if (!match)
             return [null, null];
@@ -140,7 +140,7 @@ class PluginManager {
      * @type {Command[]}
      */
     get commands() {
-        return [...this.plugins.values()].reduce((commands, plugin) => [...commands, ...plugin.commands.values()], []);
+        return [...this.modules.values()].reduce((commands, module) => [...commands, ...module.commands.values()], []);
     }
 }
 
