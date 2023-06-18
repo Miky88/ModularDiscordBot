@@ -27,7 +27,7 @@ module.exports = class PermsCommand extends Command {
 
         let level = client.config.powerlevels.find(pl => pl.level == data.powerlevel) || client.config.powerlevels.find(pl => pl.level == 0)
         const embed = new EmbedBuilder()
-            .setTitle(`${user.tag}'s Powerlevel`)
+            .setTitle(`${user.username}'s Powerlevel`)
             .setThumbnail(user.displayAvatarURL())
             .setDescription(`**${level.icon} ${level.level} - ${level.name}**\n${level.description}`)
             .setColor("Random")
