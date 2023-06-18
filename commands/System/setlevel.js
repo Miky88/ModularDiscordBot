@@ -45,7 +45,7 @@ module.exports = class SetLevelCommand extends Command {
         client.database.updateUser(data)
 
         const embed = new EmbedBuilder()
-            .setTitle(`${user.tag}'s new Powerlevel`)
+            .setTitle(`${user.username}'s new Powerlevel`)
             .setThumbnail(user.displayAvatarURL())
             .setDescription(`**${newlevel.icon} ${newlevel.level} - ${newlevel.name}**\n${newlevel.description}`)
             .setColor("Random")

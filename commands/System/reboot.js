@@ -14,13 +14,13 @@ class Reboot extends Command {
     /**
      * 
      * @param {import('..')} client 
-     * @param {import('discord.js').Message} message 
+     * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      * @param {*} args 
      */
-    async run(client, message, args) {
+    async run(client, interaction, args) {
         const { promisify } = require("util");
         const write = promisify(require("fs").writeFile);
-        const m = await message.channel.send(emojis.loading + " Rebooting...");
+        const m = await interaction.reply(emojis.loading + " Rebooting...");
         await write('./reboot.json', `{"id": "${m.id}", "channel": "${m.channel.id}"}`).catch(console.error);
         
         process.exit(1);

@@ -20,7 +20,7 @@ module.exports = class ExecCommand extends Command {
         })
     }
 
-    async run(client, message, args) {
+    async run(client, interaction, args) {
         let script = args.code
 
         try {
@@ -43,17 +43,17 @@ module.exports = class ExecCommand extends Command {
                 );
 
             if (output.length > 1990) {
-                return message.channel.send({ attachments: [
+                return await interaction.reply({ attachments: [
                     new AttachmentBuilder(Buffer.from(output), {name: "output.txt"})
                 ]});
             }
             if (outerr.length > 1990) {
-                return message.channel.send({ attachments: [
+                return await interaction.reply({ attachments: [
                     new AttachmentBuilder(Buffer.from(outerr), {name: "outerr.txt"})
                 ]});
             }
 
-            message.channel.send(!!outerr ? outerr : output);
+            await interaction.reply(!!outerr ? outerr : output);
         } catch (err) {
             console.error(err);
 
@@ -63,7 +63,7 @@ module.exports = class ExecCommand extends Command {
                     client.config.token,
                     '"If someone tried to make you output the token, you were likely being scammed."'
                 );
-            return message.channel.send(error, { code: "bash" });
+            return await interaction.reply(error, { code: "bash" });
         }
     }
 }
