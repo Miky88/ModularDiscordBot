@@ -1,6 +1,6 @@
-const BasePlugin = require("../modules/BasePlugin.js");
+const Plugin = require("../structures/Plugin.js");
 
-module.exports = class System extends BasePlugin {
+module.exports = class System extends Plugin {
     constructor(client) {
         super(client, {
             info: "Loads the system utility commands",

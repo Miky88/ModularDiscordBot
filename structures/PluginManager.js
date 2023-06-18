@@ -1,12 +1,12 @@
 const { emojis } = require('../config.js');
 const fs = require('fs');
-const BasePlugin = require('./BasePlugin');
+const Plugin = require('./Plugin.js');
 const Command = require('./Command.js');
 
 class PluginManager {
     constructor(client) {
         this.client = client;
-        /** @type {Map<string, import("./BasePlugin")>} */
+        /** @type {Map<string, import("./Plugin.js")>} */
         this.plugins = new Map();
         this.events = new Set();
     }
@@ -125,7 +125,7 @@ class PluginManager {
 
     /**
      * @param {string} cmd 
-     * @returns {[Command, BasePlugin] | [null, null]}
+     * @returns {[Command, Plugin] | [null, null]}
      */
     getCommand(cmd) {
         const match = [...this.plugins.values()].find(plugin => {

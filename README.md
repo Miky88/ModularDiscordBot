@@ -12,9 +12,9 @@ If you have troubles just open an issue!
 ## Making a Plugin
 Plugins are stored in plugins/ directory and are loaded into the bot on startup. Enabled plugins are also runned when they get triggered by respective event.
 ```js
-const BasePlugin = require("../modules/BasePlugin.js"); // Import the base plugin
+const Plugin = require("../modules/Plugin.js"); // Import the base plugin
 
-class Example extends BasePlugin {
+class Example extends Plugin {
     constructor() {
         super({
             name: "Example", // Name of the plugin

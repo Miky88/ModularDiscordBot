@@ -2,9 +2,9 @@
 require('dotenv').config();
 
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
-require('./modules/Functions.js');
-const { PluginManager } = require('./modules/PluginManager.js');
-const Database = require('./modules/Database.js');
+require('./structures/Functions.js');
+const { PluginManager } = require('./structures/PluginManager.js');
+const Database = require('./structures/Database.js');
 
 // Discord
 class BotClient extends Client {

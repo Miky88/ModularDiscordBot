@@ -1,9 +1,14 @@
+# Rewrite Discord.js v14 TODO
+[ ] = Not started
+[x] = Done
+[>] = In progress
+
 Discord stuff
-- [ ] Take to Discord.js v14
+- [x] Take to Discord.js v14
 - [ ] New username support
-- [ ] Completely rewrite commands in slash commands
+- [x] Completely rewrite commands in slash commands
 - [ ] Move commands into plugin folders
-- [ ] Create a config loader and create a YAML config for each plugin
+- [>] Create a config loader and create a YAML config for each plugin
 - [ ] Use enums for permissions (system and guild)
 - [ ] Make it support multiple guilds
 - [ ] Ensure difference between Guild permission and System permission
@@ -12,7 +17,7 @@ Discord stuff
 Plugin Management
 - [ ] Improve plugin management
 - [ ] Support for dependencies
-- [ ] Discuss the possibility to move actual /modules in /structures and /plugins in /modules
+- [>] Discuss the possibility to move actual /modules in /structures and /plugins in /modules
 
 Database Support
 - [ ] LokiJS (Already implemented, but needs improvements)

@@ -1,6 +1,6 @@
-const BasePlugin = require("../modules/BasePlugin.js");
+const Plugin = require("../structures/Plugin.js");
 
-module.exports = class ReadyLog extends BasePlugin {
+module.exports = class ReadyLog extends Plugin {
     constructor(client) {
         super(client, {
             info: "Logs informations once ready and sets the custom status",

@@ -1,6 +1,6 @@
 const { AttachmentBuilder, ApplicationCommandOptionType } = require("discord.js");
 const exec = require("util").promisify(require("child_process").exec);
-const Command = require("../../modules/Command");
+const Command = require("../../structures/Command.js");
 
 module.exports = class ExecCommand extends Command {
     constructor() {
