@@ -3,6 +3,7 @@ module.exports = {
     token: process.env.TOKEN, // Bot's token
     activity: `${process.env.PREFIX || "!"}help`, // Bot's Status
     owners: ["311929179186790400"], // Bot Owner IDs (For security reasons you can't set this with the setlevel command)
+    systemServer: "633332682578853905", // Server ID where the bot will load system commands
     emojis: {
         greenTick: "<:greentick:466238645095890945>",
         redTick: "<:redtick:466238619997175811>",

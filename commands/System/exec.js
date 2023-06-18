@@ -1,4 +1,4 @@
-const { MessageAttachment, ApplicationCommandOptionType } = require("discord.js");
+const { AttachmentBuilder, ApplicationCommandOptionType } = require("discord.js");
 const exec = require("util").promisify(require("child_process").exec);
 const Command = require("../../modules/Command");
 
@@ -44,12 +44,12 @@ module.exports = class ExecCommand extends Command {
 
             if (output.length > 1990) {
                 return message.channel.send({ attachments: [
-                    new MessageAttachment(Buffer.from(output), "output.txt")
+                    new AttachmentBuilder(Buffer.from(output), {name: "output.txt"})
                 ]});
             }
             if (outerr.length > 1990) {
                 return message.channel.send({ attachments: [
-                    new MessageAttachment(Buffer.from(outerr), "outerr.txt")
+                    new AttachmentBuilder(Buffer.from(outerr), {name: "outerr.txt"})
                 ]});
             }
 

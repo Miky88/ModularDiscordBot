@@ -1,5 +1,5 @@
 const { inspect } = require("util");
-const { EmbedBuilder, ApplicationCommandOptionType, Colors } = require("discord.js");
+const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
 const Command = require("../../modules/Command");
 
 module.exports = class EvalCommand extends Command {

@@ -1,9 +1,10 @@
 const Command = require('../../modules/Command');
+const { ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = class ReloadCommand extends Command {
     constructor() {
         super({
-            name: ':arrows_counterclockwise:reload',
+            name: 'reload',
             description: 'Reloads a command',
             cooldown: 3,
             minLevel: 9,

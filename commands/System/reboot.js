@@ -7,7 +7,6 @@ class Reboot extends Command {
         super ({
             name: 'reboot',
             info: 'Reboots the bot if running under PM2',
-            aliases: ['restart'],
             minLevel: 9
         });
     }

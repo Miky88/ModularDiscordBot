@@ -1,4 +1,4 @@
-let { EmbedBuilder, Util } = require('discord.js')
+let { EmbedBuilder, ApplicationCommandOptionType, escapeMarkdown } = require('discord.js')
 const Command = require('../../modules/Command')
 
 module.exports = class PermsCommand extends Command {
@@ -11,29 +11,29 @@ module.exports = class PermsCommand extends Command {
                 {
                     name: "user",
                     description: "User to get powerlevel from",
-                    type: "USER",
+                    type: ApplicationCommandOptionType.User,
                     required: false
                 }
             ]
         })
     }
 
-    async run(client, message, args) {
+    async run(client, interaction, args) {
         const { user } = args;
 
         const data = await client.database.forceUser(user.id)
-        if (!data) return message.channel.send(`${yellowtick} There's no user in database matching your query`)
-        if (message.author.data.powerlevel < 0 && data.user.id !== message.author.id) return
+        if (!data) return interaction.reply(`${yellowtick} There's no user in database matching your query`)
+        if (interaction.user.data.powerlevel < 0 && data.user.id !== interaction.user.id) return
 
         let level = client.config.powerlevels.find(pl => pl.level == data.powerlevel) || client.config.powerlevels.find(pl => pl.level == 0)
         const embed = new EmbedBuilder()
             .setTitle(`${user.tag}'s Powerlevel`)
             .setThumbnail(user.displayAvatarURL())
             .setDescription(`**${level.icon} ${level.level} - ${level.name}**\n${level.description}`)
-            .setColor("RANDOM")
+            .setColor("Random")
         if (data.blacklistReason && data.powerlevel < 0)
-            embed.addField('Blacklist reason', `\`\`\`${Util.escapeMarkdown(data.blacklistReason)}\`\`\``)
+            embed.addField('Blacklist reason', `\`\`\`${escapeMarkdown(data.blacklistReason)}\`\`\``)
 
-        message.channel.send({ embeds: [embed] })
+        interaction.reply({ embeds: [embed] })
     }
 }

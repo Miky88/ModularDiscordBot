@@ -14,17 +14,17 @@ module.exports = class ExecCommand extends Command {
     /**
      * @param {BotClient} client
      */
-    async run(client, message, args) {
+    async run(client, interaction, args) {
         const [exec] = client.pluginManager.getCommand("exec");
         if (!exec)
-            return message.reply("Unknown command `exec`, aborting.");
+            return interaction.reply("Unknown command `exec`, aborting.");
 
-        await exec.run(client, message, { code: "git pull --no-rebase" });
+        await exec.run(client, interaction, { code: "git pull --no-rebase" });
 
         const [reboot] = client.pluginManager.getCommand("reboot");
         if (!reboot)
-            return message.reply("Unknown command `reboot`, aborting.");
+            return interaction.reply("Unknown command `reboot`, aborting.");
 
-        await reboot.run(client, message, {});
+        await reboot.run(client, interaction, {});
     }
 }
