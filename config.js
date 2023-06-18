@@ -1,5 +1,4 @@
 module.exports = {
-    prefix: process.env.PREFIX || "-", // Prefix for bot commands
     token: process.env.TOKEN, // Bot's token
     activity: `/help`, // Bot's Status
     owners: ["311929179186790400", "422418878459674624"], // Bot Owner IDs (For security reasons you can't set this with the setlevel command)

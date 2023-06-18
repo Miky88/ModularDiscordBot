@@ -1,7 +1,7 @@
 const { emojis } = require('../../config.js')
 let { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js')
 const config = require('../../config')
-const Command = require('../../modules/Command.js')
+const Command = require('../../structures/Command.js')
 
 module.exports = class SetLevelCommand extends Command {
     constructor() {

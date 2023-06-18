@@ -1,7 +1,7 @@
-const Command = require('../../modules/Command.js');
+const Command = require('../../structures/Command.js');
 
 let { EmbedBuilder, ApplicationCommandOptionType} = require('discord.js');
-let { emojis } = require('../config.js');
+let { emojis } = require('../../config.js');
 
 class PlugMan extends Command {
     constructor() {
@@ -19,7 +19,7 @@ class PlugMan extends Command {
                     choices: ["load", "unload", "reload", "enable", "disable", "info", "list"].map(c => ({ name: c, value: c }))
                 },
                 {
-                    name: "pluginName",
+                    name: "module",
                     description: "Plugin to perform action on",
                     type: ApplicationCommandOptionType.String,
                     required: false
@@ -118,7 +118,7 @@ class PlugMan extends Command {
                 await interaction.reply({ embeds: [embed] })
                 break;
             default:
-                await interaction.reply(`${emojis.yellowTick} Correct usage \`plugman (list|load|unload|enable|disable|info) <plugin name>\``)
+                await interaction.reply(`${emojis.yellowTick} Correct usage \`plugman (list|load|unload|enable|disable|info) <module name>\``)
                 break;
         }
     }

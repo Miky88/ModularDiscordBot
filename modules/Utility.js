@@ -1,6 +1,6 @@
-const BasePlugin = require("../modules/BasePlugin.js");
+const Plugin = require("../structures/Plugin.js");
 
-module.exports = class Utility extends BasePlugin {
+module.exports = class Utility extends Plugin {
     constructor(client) {
         super(client, {
             info: "Loads the utility commands",

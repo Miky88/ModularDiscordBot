@@ -3,8 +3,9 @@ const fs = require('fs');
 const { Collection } = require('lokijs');
 const BotClient = require('..');
 const PluginPriorities = require('./PluginPriorities');
+const ConfigurationManager = require('./ConfigurationManager');
 
-module.exports = class BasePlugin {
+module.exports = class Plugin {
     /**
      * @param {BotClient} client 
      * @param {object} options
@@ -17,13 +18,16 @@ module.exports = class BasePlugin {
         event = "ready",
         system = false,
         usesDB = false,
-        priority = PluginPriorities.NORMAL
+        priority = PluginPriorities.NORMAL,
+        config = null
     }) {
         this.client = client;
         this.conf = { enabled, event, system, priority, usesDB };
         this.about = { name, info };
         
         this.commands = new Discord.Collection();
+        if(config)
+            this.config = new ConfigurationManager(this, config);
     }
 
     async loadCommands() {

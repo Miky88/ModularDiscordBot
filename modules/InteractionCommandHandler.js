@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
-const BasePlugin = require("../modules/BasePlugin.js");
+const Plugin = require("../structures/Plugin.js");
 const BotClient = require('../index.js');
 
-module.exports = class InteractionCommandHandler extends BasePlugin {
+module.exports = class InteractionCommandHandler extends Plugin {
     constructor(client) {
         super(client, {
             info: "Adds interaction commands support.",
@@ -52,7 +52,7 @@ module.exports = class InteractionCommandHandler extends BasePlugin {
                 return obj
             }, {});
     
-            await cmd.run(client, interaction, args, plugin);  
+            await cmd.run(client, interaction, args, module);  
         } catch (e) {
             interaction.reply({
                 content: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers.",

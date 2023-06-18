@@ -1,4 +1,5 @@
 const { InteractionType, ApplicationCommandType, ApplicationCommandOptionType } = require('discord.js');
+const { Plugin } = require('./Plugin.js');
 
 module.exports = class Command {
     constructor({
@@ -34,10 +35,10 @@ module.exports = class Command {
      * @param {BotClient} client 
      * @param {Interaction} interaction 
      * @param {object} args
-     * @param {BasePlugin} plugin
+     * @param {Plugin} module
      * @returns {Promise<any>}
      */
-    run(client, interaction, args, plugin) {}
+    run(client, interaction, args, module) {}
 
     toJson() {
         return (!this.data.type || this.data.type == ApplicationCommandType.ChatInput) ? {
