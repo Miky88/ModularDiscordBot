@@ -16,7 +16,7 @@ module.exports = class InteractionCommandHandler extends Module {
      * @param {BotClient} client 
      */
     async ready(client) {
-        client.application.commands.set(client.pluginManager.commands.map(c => c.toJson()))
+        client.application.commands.set(client.moduleManager.commands.map(c => c.toJson()))
     }
 
     /**
@@ -28,7 +28,7 @@ module.exports = class InteractionCommandHandler extends Module {
         interaction.user.data = await client.database.forceUser(interaction.user.id);
 
         try {
-            let [cmd, plugin] = this.client.pluginManager.getCommand(interaction.commandName);
+            let [cmd, plugin] = this.client.moduleManager.getCommand(interaction.commandName);
             if (!cmd) return
 
             // TODO: Could potentially unify system/guild check

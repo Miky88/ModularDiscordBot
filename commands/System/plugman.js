@@ -36,7 +36,7 @@ class PlugMan extends Command {
      */
     async run(client, interaction, args) {
         let { action, pluginName } = args
-        let Manager = client.pluginManager
+        let Manager = client.moduleManager
         let response
         let embed = new EmbedBuilder()
         .setTitle("Module Manager")

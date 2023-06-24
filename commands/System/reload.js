@@ -22,8 +22,8 @@ module.exports = class ReloadCommand extends Command {
     async run(client, interaction, args) {
         const commandName = args.command
         try {
-            const [_, module] = client.pluginManager.getCommand(commandName);
-            client.pluginManager.reload(module.about.name);
+            const [_, module] = client.moduleManager.getCommand(commandName);
+            client.moduleManager.reload(module.about.name);
             await interaction.reply(`:white_check_mark: Command \`${commandName}\` and module \`${module.about.name}\` have been reloaded`)
         } catch (error) {
             if (error.code == "MODULE_NOT_FOUND")
