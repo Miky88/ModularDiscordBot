@@ -3,7 +3,7 @@ require('dotenv').config();
 
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 require('./structures/Functions.js');
-const { PluginManager } = require('./structures/PluginManager.js');
+const { PluginManager } = require('./structures/ModuleManager.js');
 const Database = require('./structures/Database.js');
 
 // Discord

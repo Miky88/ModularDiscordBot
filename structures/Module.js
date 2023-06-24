@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const { Collection } = require('lokijs');
 const BotClient = require('..');
-const PluginPriorities = require('./PluginPriorities');
+const PluginPriorities = require('./ModulePriorities');
 const ConfigurationManager = require('./ConfigurationManager');
 
 module.exports = class Module {
