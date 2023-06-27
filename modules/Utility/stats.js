@@ -5,7 +5,7 @@ const moment = require("moment");
 require("moment-duration-format");
 const { EmbedBuilder } = require('discord.js');
 
-class Stats extends Command {
+module.exports = class StatsCommand extends Command {
     constructor() {
         super ({
             name: 'stats',
@@ -16,7 +16,7 @@ class Stats extends Command {
 
     /**
      * 
-     * @param {import('../..')} client 
+     * @param {import('../../index.js')} client 
      * @param {import('discord.js').CommandInteraction} interaction 
      * @param {*} args 
      */
@@ -65,5 +65,3 @@ class Stats extends Command {
         interaction.reply({ embeds: [embed] });
     }
 }
-
-module.exports = Stats;

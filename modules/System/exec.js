@@ -20,7 +20,7 @@ module.exports = class ExecCommand extends Command {
         })
     }
 
-    async run(client, interaction, args) {
+    async run(client, interaction, args, module) {
         let script = args.code
 
         try {
@@ -55,7 +55,7 @@ module.exports = class ExecCommand extends Command {
 
             await interaction.reply(!!outerr ? outerr : output);
         } catch (err) {
-            console.error(err);
+            this.logger.error(err);
 
             let error = err
                 .toString()

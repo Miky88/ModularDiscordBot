@@ -4,6 +4,8 @@ const { Collection } = require('lokijs');
 const BotClient = require('..');
 const PluginPriorities = require('./ModulePriorities');
 const ConfigurationManager = require('./ConfigurationManager');
+const Logger = require('./Logger');
+const chalk = require('chalk');
 
 module.exports = class Module {
     /**
@@ -22,59 +24,51 @@ module.exports = class Module {
         config = null
     }) {
         this.client = client;
-        this.conf = { enabled, event, system, priority, usesDB };
-        this.about = { name, info };
+        this.options = { name, info, enabled, event, system, priority, usesDB };
         
         this.commands = new Discord.Collection();
+        this.logger = new Logger(this.options.name);
         if(config)
             this.config = new ConfigurationManager(this, config);
     }
 
     async loadCommands() {
-        const commands = fs.existsSync(`./commands/${this.about.name}`) ? fs.readdirSync(`./commands/${this.about.name}`).filter(file => file.endsWith(".js")) : [];
+        const commands = fs.existsSync(`./modules/${this.options.name}`) ? fs.readdirSync(`./modules/${this.options.name}`).filter(file => file.endsWith(".js")) : [];
 
         commands.forEach(file => {
             try {
                 /**
                  * @type {import('./InteractionCommand')}
                  */
-                const command = new (require(`../commands/${this.about.name}/${file}`));
-                delete require.cache[require.resolve(`../commands/${this.about.name}/${file}`)];
+                const command = new (require(`../modules/${this.options.name}/${file}`));
+                delete require.cache[require.resolve(`../modules/${this.options.name}/${file}`)];
 
                 this.commands.set(file.split(".")[0], command);
-                this.log(`Loaded ${command.interaction ? "interaction " : ''}command ${command.interaction ? "/" : ''}${file.substr(0, file.length-3)} from ${this.about.name}`);
+                this.logger.log(`Loaded ${command.interaction ? "interaction " : ''}command ${command.interaction ? "/" : ''}${file.substr(0, file.length-3)} from ${this.options.name}`);
             } catch (e) {
-                this.log(`Failed to load command ${file} from ${this.about.name}: ${e.stack || e}`);
+                this.logger.log(`Failed to load command ${file} from ${this.options.name}: ${e.stack || e}`);
             }
         }); 
     }
 
     run(client, event, ...args) {
         // Register automatic event method caller
-        if (Array.isArray(this.conf.event)) {
+        if (Array.isArray(this.options.event)) {
             const method = this[event];
             if (!method)
-                return console.error(`[${this.about.name}] There was no configured method for the ${event} event.`);
+                return this.logger.error(`[${this.options.name}] There was no configured method for the ${event} event.`);
             return method.call(this, client, ...args);
         }
-    }
-
-    /**
-     * Logs something on the console
-     * @param {String} message 
-     */
-    log(message) {
-        console.log(`[${this.constructor.name}] ${message}`)
     }
 
     /**
      * @type {Collection}
      */
     get db() {
-        if (!this.conf.usesDB)
+        if (!this.options.usesDB)
             return null;
 
-        return this.client.database.db[`plugin_${this.about.name}`];
+        return this.client.database.db[`plugin_${this.options.name}`];
     }
 
     saveData(data) {

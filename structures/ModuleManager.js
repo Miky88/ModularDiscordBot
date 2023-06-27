@@ -2,30 +2,27 @@ const { emojis } = require('../config.js');
 const fs = require('fs');
 const Module = require('./Module.js');
 const Command = require('./Command.js');
+const Logger = require('./Logger.js');
 
 module.exports = class ModuleManager {
+    /**
+     * @param {import('..')} client 
+     */
     constructor(client) {
         this.client = client;
         /** @type {Map<string, import("./Module.js")>} */
         this.modules = new Map();
         this.events = new Set();
-    }
-
-    /**
-     * Logs something on the console
-     * @param {String} message 
-     */
-    log(message) {
-        console.log(`[${this.constructor.name}] ${message}`)
+        this.logger = new Logger(this.constructor.name);
     }
 
     init() {
-        this.log(`Loading modules...`)
+        this.logger.log(`Loading modules...`)
         const modules = fs.readdirSync("./modules").filter(file => file.endsWith(".js"));
         modules.forEach(file => {
             this.load(file)
         });
-        this.log(`Successfully Loaded ${this.modules.size} modules`)
+        this.logger.log(`Successfully Loaded ${this.modules.size} modules`)
     }
 
     load(moduleName) {
@@ -33,27 +30,26 @@ module.exports = class ModuleManager {
             const module = require(`../modules/${moduleName}`);
             delete require.cache[require.resolve(`../modules/${moduleName}`)];
             const _module = new module(this.client);
-            if (_module.conf.enabled)
+            if (_module.options.enabled)
                 _module.loadCommands()
             this.add(_module)
         } catch (error) {
-            console.error(error.stack)
-            this.log("Unable to load " + moduleName + ": " + error)
+            this.logger.error("Unable to load " + moduleName + ": " + error)
             return { error }
         }
         return {}
     }
 
     add(module) {
-        this.modules.set(module.about.name, module);
-        this.log(`${module.about.name} loaded`)
+        this.modules.set(module.options.name, module);
+        this.logger.log(`${module.options.name} loaded`)
 
         const eventCallback = event => async (...args) => {
-            for (let [_name, module] of new Map([...this.modules.entries()].sort((a, b) => b[1].conf.priority - a[1].conf.priority))) {
-                if (module.conf.enabled && (module.conf.event == event || module.conf.event.includes(event))) {
+            for (let [_name, module] of new Map([...this.modules.entries()].sort((a, b) => b[1].options.priority - a[1].options.priority))) {
+                if (module.options.enabled && (module.options.event == event || module.options.event.includes(event))) {
                     let execution;
 
-                    if (Array.isArray(module.conf.event))
+                    if (Array.isArray(module.options.event))
                         execution = await module.run(this.client, event, ...args);
                     else
                         execution = await module.run(this.client, ...args);
@@ -64,14 +60,14 @@ module.exports = class ModuleManager {
             }
         }
 
-        if (typeof module.conf.event == "string") {
-            if (!this.events.has(module.conf.event)) {
-                const event = module.conf.event
+        if (typeof module.options.event == "string") {
+            if (!this.events.has(module.options.event)) {
+                const event = module.options.event
                 this.events.add(event);
                 this.client.on(event, eventCallback(event))
             }
-        } else if (Array.isArray(module.conf.event)) {
-            module.conf.event.forEach(evt => {
+        } else if (Array.isArray(module.options.event)) {
+            module.options.event.forEach(evt => {
                 if (!this.events.has(evt)) {
                     const event = evt
                     this.events.add(event);
@@ -86,39 +82,39 @@ module.exports = class ModuleManager {
     }
 
     unload(pluginName) {
-        let tru = (pluginName) => { this.log(`${pluginName} unloaded`); return true }
+        let tru = (pluginName) => { this.logger.log(`${pluginName} unloaded`); return true }
         return this.modules.delete(pluginName) ? tru(pluginName) : false;
     }
 
     enable(pluginName) {
         if (!this.modules.get(pluginName)) return false
-        let tru = (pluginName) => { this.log(`${pluginName} enabled`); return true }
-        return this.modules.get(pluginName).conf.enabled = true ? tru(pluginName) : false;
+        let tru = (pluginName) => { this.logger.log(`${pluginName} enabled`); return true }
+        return this.modules.get(pluginName).options.enabled = true ? tru(pluginName) : false;
     }
 
     disable(pluginName) {
         if (!this.modules.get(pluginName)) return false
-        let tru = (pluginName) => { this.log(`${pluginName} disabled`); return true }
-        return !(this.modules.get(pluginName).conf.enabled = false) ? tru(pluginName) : false;
+        let tru = (pluginName) => { this.logger.log(`${pluginName} disabled`); return true }
+        return !(this.modules.get(pluginName).options.enabled = false) ? tru(pluginName) : false;
     }
 
     isLoaded(pluginName) {
-        return this.modules.get(pluginName) ? this.modules.get(pluginName).conf.enabled : false
+        return this.modules.get(pluginName) ? this.modules.get(pluginName).options.enabled : false
     }
 
     info(pluginName) {
         if (!this.modules.get(pluginName)) return { error: "Invalid module name" }
         return {
-            description: this.modules.get(pluginName).about.info,
-            enabled: this.modules.get(pluginName).conf.enabled,
+            description: this.modules.get(pluginName).options.info,
+            enabled: this.modules.get(pluginName).options.enabled,
             loaded: true,
-            event: this.modules.get(pluginName).conf.event
+            event: this.modules.get(pluginName).options.event
         }
     }
 
     get list() {
         return {
-            loaded: [...this.modules.values()].map(module => `${this.isLoaded(module.about.name) ? emojis.greenTick : emojis.redTick} **${module.about.name}**`).join("\n"),
+            loaded: [...this.modules.values()].map(module => `${this.isLoaded(module.options.name) ? emojis.greenTick : emojis.redTick} **${module.options.name}**`).join("\n"),
             unloaded: fs.readdirSync("./modules").filter(file => file.endsWith(".js")).map(fl => fl.split(".")[0]).filter(plg => ![...this.modules.keys()].includes(plg)).map(module => `**${module}**`).join("\n")
         }
     }

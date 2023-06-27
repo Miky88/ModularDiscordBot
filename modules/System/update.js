@@ -1,7 +1,7 @@
 const BotClient = require("../..");
 const Command = require("../../structures/Command.js");
 
-module.exports = class ExecCommand extends Command {
+module.exports = class UpdateCommand extends Command {
     constructor() {
         super({
             name: "update",

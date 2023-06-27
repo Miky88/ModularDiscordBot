@@ -25,7 +25,7 @@ class Example extends Module {
     }
 
     async run(client, ...args) { // args are the arguments of Discord.js Events (es. for presenceUpdate you would have [oldPresence, newPresence]
-        this.log("Hi!")
+        this.logger.log("Hi!")
     }
 }
 

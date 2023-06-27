@@ -58,7 +58,7 @@ module.exports = class InteractionCommandHandler extends Module {
                 content: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers.",
                 ephemeral: true
             })
-            console.error(e)
+            this.logger.error(e)
         }
 
         return { cancelEvent: true };

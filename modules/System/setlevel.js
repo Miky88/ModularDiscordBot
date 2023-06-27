@@ -7,7 +7,7 @@ module.exports = class SetLevelCommand extends Command {
     constructor() {
         super({
             name: 'setlevel',
-            info: 'Sets a user\'s powerlevel',
+            description: 'Sets a user\'s powerlevel',
             minLevel: 9,
             options: [
                 {

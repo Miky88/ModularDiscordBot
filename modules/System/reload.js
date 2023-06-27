@@ -23,8 +23,8 @@ module.exports = class ReloadCommand extends Command {
         const commandName = args.command
         try {
             const [_, module] = client.moduleManager.getCommand(commandName);
-            client.moduleManager.reload(module.about.name);
-            await interaction.reply(`:white_check_mark: Command \`${commandName}\` and module \`${module.about.name}\` have been reloaded`)
+            client.moduleManager.reload(module.options.name);
+            await interaction.reply(`:white_check_mark: Command \`${commandName}\` and module \`${module.options.name}\` have been reloaded`)
         } catch (error) {
             if (error.code == "MODULE_NOT_FOUND")
                 return await interaction.reply(`:x: Command \`${commandName}\` does not exist or it's not in the same directory of this reload command, if you were trying to reload a module just reload it with the \`plugman\` command`)

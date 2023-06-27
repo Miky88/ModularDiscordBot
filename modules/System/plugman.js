@@ -3,7 +3,7 @@ const Command = require('../../structures/Command.js');
 let { EmbedBuilder, ApplicationCommandOptionType} = require('discord.js');
 let { emojis } = require('../../config.js');
 
-class PlugMan extends Command {
+module.exports = class PlugManCommand extends Command {
     constructor() {
         super ({
             name: "plugman",
@@ -123,5 +123,3 @@ class PlugMan extends Command {
         }
     }
 }
-
-module.exports = PlugMan;

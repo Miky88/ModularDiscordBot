@@ -10,9 +10,9 @@ module.exports = class Database {
         this.client = client;
         this.collections = ['users'];
 
-        for (let module of client.pluginManager.modules.values()) {
-            if (module.conf.usesDB)
-                this.collections.push(`plugin_${module.about.name}`)
+        for (let module of client.moduleManager.modules.values()) {
+            if (module.options.usesDB)
+                this.collections.push(`plugin_${module.options.name}`)
         }
 
         this.db = new loki('database.db', {

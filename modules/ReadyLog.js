@@ -16,12 +16,12 @@ module.exports = class ReadyLog extends Module {
      */
     async run(client, ..._args) {
         // Log some useful variables when online
-        this.log("I am ready!");
-        this.log(`I am logged in as ${client.user.tag}`);
-        this.log(`Node version: ${process.version}`);
-        this.log(`Discord.JS version: ${require('discord.js').version}`);
-        this.log("Invite: https://discordapp.com/oauth2/authorize?client_id=" + client.user.id + "&permissions=8&scope=bot");
-        this.log(`===========================`);
+        this.logger.success("I am ready!");
+        this.logger.info(`I am logged in as ${client.user.tag}`);
+        this.logger.info(`Node version: ${process.version}`);
+        this.logger.info(`Discord.JS version: ${require('discord.js').version}`);
+        this.logger.info("Invite: https://discordapp.com/oauth2/authorize?client_id=" + client.user.id + "&permissions=8&scope=bot");
+        this.logger.info(`===========================`);
         client.user.setActivity(client.config.activity);
 
         // If the bot got rebooted with reboot command, this will edit the message once ready

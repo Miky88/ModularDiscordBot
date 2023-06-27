@@ -1,5 +1,6 @@
 const { InteractionType, ApplicationCommandType, ApplicationCommandOptionType } = require('discord.js');
 const { Module } = require('./Module.js');
+const Logger = require('./Logger.js');
 
 module.exports = class Command {
     constructor({
@@ -21,14 +22,7 @@ module.exports = class Command {
         };
 
         this.config = { name, description, cooldown, minLevel, minGuildLevel, reqPerms, botPerms };
-    }
-
-    /**
-     * Logs something on the console
-     * @param {String} message 
-     */
-    log(message) {
-        console.log(`[${this.help.name}] ${message}`)
+        this.logger = new Logger(this.constructor.name);
     }
 
     /**
