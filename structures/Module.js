@@ -44,9 +44,9 @@ module.exports = class Module {
                 delete require.cache[require.resolve(`../modules/${this.options.name}/${file}`)];
 
                 this.commands.set(file.split(".")[0], command);
-                this.logger.log(`Loaded ${command.interaction ? "interaction " : ''}command ${command.interaction ? "/" : ''}${file.substr(0, file.length-3)} from ${this.options.name}`);
+                this.logger.verbose(`Loaded ${command.interaction ? "interaction " : ''}command ${command.interaction ? "/" : ''}${file.substr(0, file.length-3)} from ${this.options.name}`);
             } catch (e) {
-                this.logger.log(`Failed to load command ${file} from ${this.options.name}: ${e.stack || e}`);
+                this.logger.error(`Failed to load command ${file} from ${this.options.name}: ${e.stack || e}`);
             }
         }); 
     }

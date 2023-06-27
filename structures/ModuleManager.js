@@ -17,12 +17,12 @@ module.exports = class ModuleManager {
     }
 
     init() {
-        this.logger.log(`Loading modules...`)
+        this.logger.info(`Loading modules...`)
         const modules = fs.readdirSync("./modules").filter(file => file.endsWith(".js"));
         modules.forEach(file => {
             this.load(file)
         });
-        this.logger.log(`Successfully Loaded ${this.modules.size} modules`)
+        this.logger.success(`Successfully Loaded ${this.modules.size} modules`)
     }
 
     load(moduleName) {
@@ -42,7 +42,7 @@ module.exports = class ModuleManager {
 
     add(module) {
         this.modules.set(module.options.name, module);
-        this.logger.log(`${module.options.name} loaded`)
+        this.logger.verbose(`${module.options.name} loaded`)
 
         const eventCallback = event => async (...args) => {
             for (let [_name, module] of new Map([...this.modules.entries()].sort((a, b) => b[1].options.priority - a[1].options.priority))) {

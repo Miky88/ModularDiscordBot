@@ -28,7 +28,7 @@ module.exports = class PermsCommand extends Command {
         let level = client.config.powerlevels.find(pl => pl.level == data.powerlevel) || client.config.powerlevels.find(pl => pl.level == 0);
         let guildlevel = client.config.guildlevels.find(gl => gl.level == data.guildlevel) || client.config.guildlevels.find(gl => gl.level == 0);
         const embed = new EmbedBuilder()
-            .setTitle(`${user.username}`)
+            .setTitle(`${user.discriminator ? user.tag : user.username}`)
             .setThumbnail(user.displayAvatarURL())
             .addFields([
                 {
