@@ -12,56 +12,98 @@ module.exports = class Logger {
      * Logs something on the console
      * @param {String} message
      */
-    log(message) {
-        console.log(`[${this.name}] ${message}`)
+    log(...message) {
+        let final = "";
+
+        for (const msg of message) {
+            final += `${msg}\n`;
+        }
+
+        console.log(`[${this.name}] ${final}`);
     }
 
     /**
      * Error something on the console
      * @param {String} message
      */
-    error(message) {
-        console.error(`[${chalk.red(this.name)}] ${chalk.red(message)}`)
+    error(...message) {
+        let final = "";
+
+        for (const msg of message) {
+            final += `${msg}\n`;
+        }
+
+        console.log(`[${chalk.red(this.name)}] ${chalk.red(final)}`);
     }
 
     /**
      * Warn something on the console
      * @param {String} message
      */
-    warn(message) {
-        console.warn(`[${chalk.yellow(this.name)}] ${chalk.yellow(message)}`)
+    warn(...message) {
+        let final = "";
+
+        for (const msg of message) {
+            final += `${msg}\n`;
+        }
+
+        console.log(`[${chalk.yellow(this.name)}] ${chalk.yellow(final)}`);
     }
 
     /**
      * Success something on the console
      * @param {String} message
      */
-    success(message) {
-        console.log(`[${chalk.green(this.name)}] ${chalk.green(message)}`)
+    success(...message) {
+        let final = "";
+
+        for (const msg of message) {
+            final += `${msg}\n`;
+        }
+
+        console.log(`[${chalk.green(this.name)}] ${chalk.green(final)}`);
     }
 
     /**
      * Info something on the console
      * @param {String} message
      */
-    info(message) {
-        console.log(`[${chalk.blueBright(this.name)}] ${chalk.blueBright(message)}`)
+    info(...message) {
+        let final = "";
+
+        for (const msg of message) {
+            final += `${msg}\n`;
+        }
+
+        console.log(`[${chalk.blueBright(this.name)}] ${chalk.blueBright(final)}`);
     }
 
     /**
      * Debug something on the console
      * @param {String} message
      */
-    debug(message) {
-        console.log(`[${chalk.magenta(this.name)}] ${chalk.magenta(message)}`)
+    debug(...message) {
+        let final = "";
+
+        for (const msg of message) {
+            final += `${msg}\n`;
+        }
+
+        console.log(`[${chalk.magenta(this.name)}] ${chalk.magenta(final)}`);
     }
 
     /**
      * Verbose something on the console
      * @param {String} message
      */
-    verbose(message) {
-        console.log(`[${chalk.cyan(this.name)}] ${chalk.cyan(message)}`)
+    debug(...message) {
+        let final = "";
+
+        for (const msg of message) {
+            final += `${msg}\n`;
+        }
+
+        console.log(`[${chalk.cyan(this.name)}] ${chalk.cyan(final)}`);
     }
 
     /**
@@ -69,7 +111,13 @@ module.exports = class Logger {
      * @param {String} message
      * @param {String} color
      */
-    custom(message, color) {
-        console.log(`[${chalk[color](this.name)}] ${chalk[color](message)}`)
+    custom(color, ...message) {
+        let final = "";
+
+        for (const msg of message) {
+            final += `${msg}\n`;
+        }
+
+        console.log(`[${chalk[color](this.name)}] ${chalk[color](final)}`)
     }
 }
