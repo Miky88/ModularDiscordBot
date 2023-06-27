@@ -13,11 +13,12 @@ module.exports = class ConfigurationManager {
         this.module = module;
 
         // Create config file if it doesn't exist in /modules/<module>/config.yml
-        if (!fs.existsSync(`../modules/${this.module.constructor.name}/config.yml`)) {
-            fs.writeFileSync(`../modules/${this.module.constructor.name}/config.yml`, stringify(this.defaultConfig))
+        if (!fs.existsSync(`./modules/${this.module.constructor.name}/config.yml`)) {
+            module.logger.info(`Creating config file for ${this.module.constructor.name}`)
+            fs.writeFileSync(`./modules/${this.module.constructor.name}/config.yml`, stringify(this.defaultConfig))
         }
 
-        this.file = parse(fs.readFileSync(`../modules/${this.module.constructor.name}/config.yml`, 'utf8'))
+        this.file = parse(fs.readFileSync(`./modules/${this.module.constructor.name}/config.yml`, 'utf8'))
 
         // Check if config file has all the required fields
         for (const key in this.defaultConfig) {

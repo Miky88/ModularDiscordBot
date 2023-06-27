@@ -10,7 +10,7 @@ const chalk = require('chalk');
 module.exports = class Module {
     /**
      * @param {BotClient} client 
-     * @param {object} options
+     * @param {} options
      * @param {string | string[]} [options.event]
      */
     constructor(client, {
