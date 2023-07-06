@@ -17,7 +17,7 @@ Discord stuff
 Module Management
 - [ ] Improve plugin management
 - [ ] Support for dependencies
-- [>] Discuss the possibility to move actual /modules in /structures and /plugins in /modules
+- [x] Discuss the possibility to move actual /modules in /structures and /plugins in /modules
 - [x] Colorize console output
 
 Database Support
