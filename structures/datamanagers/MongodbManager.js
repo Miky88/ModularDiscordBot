@@ -68,7 +68,7 @@ module.exports = class MongodbManager extends DataManager {
         return true;
     }
 
-    async init(options) {
+    async init(options) { // TODO
         this.db.loadDatabase(options);
         return true;
     }
