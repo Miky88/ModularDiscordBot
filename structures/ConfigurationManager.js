@@ -9,7 +9,7 @@ module.exports = class ConfigurationManager {
      * @param {Object} defaultConfig The default configuration for the module
      * @param {String} customName The name of the configuration file without the extension (default: config)
      */
-    constructor(module, defaultConfig, name = 'config.yml') {
+    constructor(module, defaultConfig, name = 'config') {
         this.defaultConfig = defaultConfig
         this.module = module;
         this.name = name

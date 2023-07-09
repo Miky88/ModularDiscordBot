@@ -1,7 +1,7 @@
 # Rewrite Discord.js v14 TODO
 [ ] = Not started
 [x] = Done
-[>] = In progress
+[ ] >> = In progress
 
 Discord stuff
 - [x] Take to Discord.js v14
@@ -21,10 +21,10 @@ Module Management
 - [x] Colorize console output
 
 Database Support
-- [ ] LokiJS (Already implemented, but needs improvements)
+- [ ] >> LokiJS (Already implemented, but needs improvements)
 - [ ] Redis
 - [ ] SQL
-- [ ] Mongo
+- [ ] >> Mongo
 - [ ] Cassandra/Scylla
 
 Planning for the future
