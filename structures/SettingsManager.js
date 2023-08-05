@@ -49,8 +49,7 @@ module.export = class SettingsManager {
                 id: guildID,
                 settings: this.defaultSettings
             });
-            this.db.saveDatabase();
-            return this.defaultSettings;
+            data = this.settings.findOne({ id: guildID });
         }
 
         data.settings[key] = value;
