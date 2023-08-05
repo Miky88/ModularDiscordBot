@@ -4,7 +4,7 @@ const loki = require("lokijs");
 module.exports = class LokiManager extends DataManager {
     constructor(options) {
         super(options);
-        this.db = new loki('database.db', options);
+        this.db = new loki(options._name ? options._name : "database.db", options);
     }
     
     async add(collectionName, obj) {

@@ -4,8 +4,8 @@ const { Collection } = require('lokijs');
 const BotClient = require('..');
 const PluginPriorities = require('./ModulePriorities');
 const ConfigurationManager = require('./ConfigurationManager');
+const SettingsManager = require('./SettingsManager');
 const Logger = require('./Logger');
-const chalk = require('chalk');
 
 module.exports = class Module {
     /**
@@ -21,7 +21,8 @@ module.exports = class Module {
         system = false,
         usesDB = false,
         priority = PluginPriorities.NORMAL,
-        config = null
+        config = null,
+        settings = null
     }) {
         this.client = client;
         this.options = { name, info, enabled, event, system, priority, usesDB };
@@ -30,6 +31,8 @@ module.exports = class Module {
         this.logger = new Logger(this.options.name);
         if(config)
             this.config = new ConfigurationManager(this, config);
+        if(settings)
+            this.settings = new SettingsManager(this, settings);
     }
 
     async loadCommands() {

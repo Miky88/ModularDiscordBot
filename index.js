@@ -10,7 +10,6 @@ class BotClient extends Client {
     constructor(options) {
         super(options);
 
-        this.config = require('./config.js');
         this.commands = new Collection();
         this.moduleManager = new ModuleManager(this);
         this.database = new Database(this);
@@ -21,6 +20,6 @@ class BotClient extends Client {
 
 const client = new BotClient({ intents: Object.values(GatewayIntentBits).reduce((a, b) => a | b), partials: [Partials.Reaction, Partials.Message] });
 
-client.login(client.config.token);
+client.login(process.env.TOKEN);
 
 module.exports = BotClient;

@@ -22,7 +22,6 @@ module.exports = class ReadyLog extends Module {
         this.logger.info(`Discord.JS version: ${require('discord.js').version}`);
         this.logger.info("Invite: https://discordapp.com/oauth2/authorize?client_id=" + client.user.id + "&permissions=8&scope=bot");
         this.logger.info(`===========================`);
-        client.user.setActivity(client.config.activity);
 
         // If the bot got rebooted with reboot command, this will edit the message once ready
         try {

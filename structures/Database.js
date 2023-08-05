@@ -1,21 +1,22 @@
-const loki = require('lokijs');
+const Loki = require('lokijs');
 const BotClient = require('..');
 const cache = new Map();
 
 module.exports = class Database {
     /**
+     * The bot's main database
      * @param {BotClient} client 
      */
     constructor(client) {
         this.client = client;
-        this.collections = ['users'];
+        this.collections = ['users',  'settings'];
 
         for (let module of client.moduleManager.modules.values()) {
             if (module.options.usesDB)
                 this.collections.push(`plugin_${module.options.name}`)
         }
 
-        this.db = new loki('database.db', {
+        this.db = new Loki('database.db', {
             autoload: true,
             autosave: true,
             autoloadCallback: () => this.collections.forEach(x => this.db[x] = this.db.addCollection(x)),
