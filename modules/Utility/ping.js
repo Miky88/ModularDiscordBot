@@ -11,7 +11,7 @@ module.exports = class PingCommand extends Command {
 
     /**
      * 
-     * @param {import('../..')} client 
+     * @param {import('../../index.js')} client 
      * @param {import('discord.js').CommandInteraction} interaction 
      * @param {*} args
      */
