@@ -2,8 +2,8 @@ let { EmbedBuilder, ApplicationCommandOptionType, escapeMarkdown } = require('di
 const Command = require('../../structures/Command.js')
 
 module.exports = class PermsCommand extends Command {
-    constructor() {
-        super({
+    constructor(client) {
+        super(client, {
             name: 'perms',
             description: 'Shows yours or another user\'s permission levels',
             minLevel: -1,
@@ -19,28 +19,28 @@ module.exports = class PermsCommand extends Command {
     }
 
     async run(client, interaction, args) {
-        const { user } = args;
+        let { user } = args;
+        if (!user) user = interaction.user
 
         const data = await client.database.forceUser(user.id)
         if (!data) return interaction.reply(`${yellowtick} There's no user in database matching your query`)
         if (interaction.user.data.powerlevel < 0 && data.user.id !== interaction.user.id) return
 
-        let level = client.config.powerlevels.find(pl => pl.level == data.powerlevel) || client.config.powerlevels.find(pl => pl.level == 0);
-        let guildlevel = client.config.guildlevels.find(gl => gl.level == data.guildlevel) || client.config.guildlevels.find(gl => gl.level == 0);
+        console.log(client.database.getFlags(user.id).map(f => `\`${f}\``).join(", "))
         const embed = new EmbedBuilder()
             .setTitle(`${user.discriminator ? user.tag : user.username}`)
             .setThumbnail(user.displayAvatarURL())
             .addFields([
                 {
-                    name: "Powerlevel",
-                    value: `**${level.icon} ${level.level} - ${level.name}**\n${level.description}`
+                    name: "Flags",
+                    value: `todo`
                 },
                 {
                     name: "Guildlevel",
-                    value: `**${guildlevel.icon} ${guildlevel.level} - ${guildlevel.name}**\n${guildlevel.description}`
+                    value: `todo`
                 }
             ])
-            .setDescription(`**${level.icon} ${level.level} - ${level.name}**\n${level.description}`)
+            .setDescription(`todo`)
             .setColor("Random")
         if (data.blacklistReason && data.powerlevel < 0)
             embed.addField('Blacklist reason', `\`\`\`${escapeMarkdown(data.blacklistReason)}\`\`\``)

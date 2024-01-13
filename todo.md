@@ -9,7 +9,7 @@ Discord stuff
 - [x] Completely rewrite commands in slash commands
 - [x] Move commands into plugin folders
 - [x] Create a config loader and create a YAML config for each plugin
-- [ ] Use enums for permissions (system and guild)
+- [ ] New system for permissions (use flags for system)
 - [ ] Make it support multiple guilds
 - [ ] Ensure difference between Guild permission and System permission
 - [ ] New settings system per guild

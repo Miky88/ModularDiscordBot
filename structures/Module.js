@@ -2,7 +2,7 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const { Collection } = require('lokijs');
 const BotClient = require('..');
-const PluginPriorities = require('./ModulePriorities');
+const ModulePriorities = require('./ModulePriorities');
 const ConfigurationManager = require('./ConfigurationManager');
 const SettingsManager = require('./SettingsManager');
 const Logger = require('./Logger');
@@ -18,14 +18,13 @@ module.exports = class Module {
         info = "No description provided.",
         enabled = false,
         event = "ready",
-        system = false,
         usesDB = false,
-        priority = PluginPriorities.NORMAL,
+        priority = ModulePriorities.NORMAL,
         config = null,
         settings = null
     }) {
         this.client = client;
-        this.options = { name, info, enabled, event, system, priority, usesDB };
+        this.options = { name, info, enabled, event, priority, usesDB };
         
         this.commands = new Discord.Collection();
         this.logger = new Logger(this.options.name);
@@ -41,13 +40,13 @@ module.exports = class Module {
         commands.forEach(file => {
             try {
                 /**
-                 * @type {import('./InteractionCommand')}
+                 * @type {import('./Command.')}
                  */
                 const command = new (require(`../modules/${this.options.name}/${file}`));
                 delete require.cache[require.resolve(`../modules/${this.options.name}/${file}`)];
 
                 this.commands.set(file.split(".")[0], command);
-                this.logger.verbose(`Loaded ${command.interaction ? "interaction " : ''}command ${command.interaction ? "/" : ''}${file.substr(0, file.length-3)} from ${this.options.name}`);
+                this.logger.verbose(`Loaded command ${file.split(".")[0]} from ${this.options.name}`);
             } catch (e) {
                 this.logger.error(`Failed to load command ${file} from ${this.options.name}: ${e.stack || e}`);
             }

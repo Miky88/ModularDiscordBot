@@ -1,6 +1,7 @@
 const { parse, stringify } = require('yaml')
 const Module = require('./Module.js')
 const fs = require('fs')
+const { Client } = require('discord.js')
 
 module.exports = class ConfigurationManager {
     /**
@@ -13,14 +14,16 @@ module.exports = class ConfigurationManager {
         this.defaultConfig = defaultConfig
         this.module = module;
         this.name = name
+        this.path = (this.module instanceof Client) ? `config.yml` : `./modules/${this.module.constructor.name}/${this.name}.yml`
 
         // Create config file if it doesn't exist in /modules/<module>/config.yml
-        if (!fs.existsSync(`./modules/${this.module.constructor.name}/${this.name}.yml`)) {
-            module.logger.info(`Creating ${this.name}.yml file for ${this.module.constructor.name}`)
-            fs.writeFileSync(`./modules/${this.module.constructor.name}/${this.name}.yml`, stringify(this.defaultConfig))
+        if (!fs.existsSync(this.path)) {
+            if(module.logger)
+                module.logger.info(`Creating ${this.name}.yml file for ${this.module.constructor.name}`)
+            fs.writeFileSync(this.path, stringify(this.defaultConfig))
         }
 
-        this.file = parse(fs.readFileSync(`./modules/${this.module.constructor.name}/${this.name}.yml`, 'utf8'))
+        this.file = parse(fs.readFileSync(this.path, 'utf8'))
 
         // Check if config file has all the required fields
         for (const key in this.defaultConfig) {
@@ -31,7 +34,7 @@ module.exports = class ConfigurationManager {
 
         // Re-write config file if it doesn't have all the required fields
         if (Object.keys(this.file).length !== Object.keys(this.defaultConfig).length) {
-            fs.writeFileSync(`./modules/${this.module.constructor.name}/${this.name}.yml`, stringify(this.file))
+            fs.writeFileSync(this.path, stringify(this.file))
         }
     }
 
@@ -51,7 +54,7 @@ module.exports = class ConfigurationManager {
      */
     set(key, value) {
         this.file[key] = value
-        fs.writeFileSync(`../modules/${this.module.constructor.name}/${this.name}.yml`, stringify(this.file))
+        fs.writeFileSync(this.path, stringify(this.file))
     }
 
     /**
@@ -59,7 +62,7 @@ module.exports = class ConfigurationManager {
      * @returns {Object} The new configuration file
      */
     reload() {
-        this.file = parse(fs.readFileSync(`../modules/${this.module.constructor.name}/${this.name}.yml`, 'utf8'))
+        this.file = parse(fs.readFileSync(this.path, 'utf8'))
         return this.file
     }
 
@@ -69,6 +72,6 @@ module.exports = class ConfigurationManager {
      */
     reset() {
         this.file = this.defaultConfig
-        fs.writeFileSync(`../modules/${this.module.constructor.name}/${this.name}.yml`, stringify(this.file))
+        fs.writeFileSync(this.path, stringify(this.file))
     }
 }

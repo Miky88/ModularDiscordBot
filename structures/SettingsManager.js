@@ -78,4 +78,12 @@ module.export = class SettingsManager {
         this.db.saveDatabase();
         return data.settings;
     }
+
+    delete(guildID) {
+        const data = this.settings.findOne({ id: guildID });
+        if (!data) return false;
+        this.settings.remove(data);
+        this.db.saveDatabase();
+        return true;
+    }
 }

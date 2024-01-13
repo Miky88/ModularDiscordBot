@@ -2,8 +2,8 @@ const BotClient = require("../..");
 const Command = require("../../structures/Command.js");
 
 module.exports = class UpdateCommand extends Command {
-    constructor() {
-        super({
+    constructor(client) {
+        super(client, {
             name: "update",
             description: "Pulls commits from git and reboots the bot",
             cooldown: 3,

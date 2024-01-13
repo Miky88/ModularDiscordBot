@@ -1,8 +1,8 @@
 const Command = require('../../structures/Command.js');
 
 module.exports = class PingCommand extends Command {
-    constructor() {
-        super ({
+    constructor(client) {
+        super(client, {
             name: 'ping',
             description: 'Checks if the bot responds',
             cooldown: 3

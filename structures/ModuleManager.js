@@ -1,4 +1,3 @@
-const { emojis } = require('../config.js');
 const fs = require('fs');
 const Module = require('./Module.js');
 const Command = require('./Command.js');
@@ -114,7 +113,7 @@ module.exports = class ModuleManager {
 
     get list() {
         return {
-            loaded: [...this.modules.values()].map(module => `${this.isLoaded(module.options.name) ? emojis.greenTick : emojis.redTick} **${module.options.name}**`).join("\n"),
+            loaded: [...this.modules.values()].map(module => `${this.isLoaded(module.options.name) ? ":white_check_mark:" : ":x:"} **${module.options.name}**`).join("\n"),
             unloaded: fs.readdirSync("./modules").filter(file => file.endsWith(".js")).map(fl => fl.split(".")[0]).filter(plg => ![...this.modules.keys()].includes(plg)).map(module => `**${module}**`).join("\n")
         }
     }

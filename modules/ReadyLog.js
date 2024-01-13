@@ -5,8 +5,7 @@ module.exports = class ReadyLog extends Module {
         super(client, {
             info: "Logs informations once ready and sets the custom status",
             enabled: true,
-            event: "ready",
-            system: true
+            event: "ready"
         })
     }
 
@@ -21,6 +20,8 @@ module.exports = class ReadyLog extends Module {
         this.logger.info(`Node version: ${process.version}`);
         this.logger.info(`Discord.JS version: ${require('discord.js').version}`);
         this.logger.info("Invite: https://discordapp.com/oauth2/authorize?client_id=" + client.user.id + "&permissions=8&scope=bot");
+        this.logger.info(`System Server: ${client.config.get('systemServer')}`);
+        this.logger.info(`Owners: ${client.config.get('owners').join(", ")}`);
         this.logger.info(`===========================`);
 
         // If the bot got rebooted with reboot command, this will edit the message once ready

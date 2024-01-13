@@ -7,8 +7,7 @@ module.exports = class InteractionCommandHandler extends Module {
         super(client, {
             info: "Adds interaction commands support.",
             enabled: true,
-            event: ["ready", "interactionCreate"],
-            system: false
+            event: ["ready", "interactionCreate"]
         });
     }
     
@@ -16,7 +15,8 @@ module.exports = class InteractionCommandHandler extends Module {
      * @param {BotClient} client 
      */
     async ready(client) {
-        client.application.commands.set(client.moduleManager.commands.map(c => c.toJson()))
+        client.application.commands
+            .set(client.moduleManager.commands.map(c => c.toJson()))
     }
 
     /**
@@ -29,7 +29,7 @@ module.exports = class InteractionCommandHandler extends Module {
 
         try {
             let [cmd, plugin] = this.client.moduleManager.getCommand(interaction.commandName);
-            if (!cmd) return
+            if (!cmd) return interaction.reply({ content: ":no_entry: Command not found", ephemeral: true });
 
             // TODO: Could potentially unify system/guild check
 
@@ -58,7 +58,7 @@ module.exports = class InteractionCommandHandler extends Module {
                 content: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers.",
                 ephemeral: true
             })
-            this.logger.error(e)
+            this.logger.error(e.stack || e)
         }
 
         return { cancelEvent: true };
