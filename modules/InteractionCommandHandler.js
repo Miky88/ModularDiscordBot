@@ -24,7 +24,7 @@ module.exports = class InteractionCommandHandler extends Module {
      * @param {Discord.Interaction} interaction
      */
     async interactionCreate(client, interaction) {
-        if (!interaction.isCommand() && !interaction.isContextMenu()) return;
+        if (!interaction.isCommand() && !interaction.isContextMenuCommand()) return;
         interaction.user.data = await client.database.forceUser(interaction.user.id);
 
         try {

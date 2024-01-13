@@ -7,7 +7,7 @@ module.exports = class System extends Module {
         super(client, {
             info: "Loads the system utility commands",
             enabled: true,
-            event: ["ready"]
+            event: ["ready", "interactionCreate"]
         })
     }
 
@@ -27,6 +27,19 @@ module.exports = class System extends Module {
         systemGuild.commands.set(this.systemCommands.map(c => c.toJson()))
         
         this.commands = this.systemCommands;
+    }
+
+    async interactionCreate(client, interaction) {
+        if(!interaction.isAutocomplete()) return;
+
+        const command = this.systemCommands.get(interaction.commandName);
+        if(!command) return;
+
+        if(interaction.commandName == "plugman") {
+            let modules = [...this.client.moduleManager.modules.keys()];
+            let options = modules.map(m => ({ name: m, value: m }));
+            return interaction.respond(options);
+        }
     }
 
 

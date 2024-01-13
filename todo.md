@@ -15,17 +15,15 @@ Discord stuff
 - [ ] New settings system per guild
 
 Module Management
-- [ ] Improve plugin management
+- [x] Improve plugin management
 - [ ] Support for dependencies
 - [x] Discuss the possibility to move actual /modules in /structures and /plugins in /modules
 - [x] Colorize console output
 
 Database Support
-- [ ] >> LokiJS (Already implemented, but needs improvements)
+- [x] LokiJS (Already implemented, but needs improvements)
 - [ ] Redis
 - [ ] SQL
-- [ ] >> Mongo
-- [ ] Cassandra/Scylla
 
 Planning for the future
 - [ ] Support web dashboard

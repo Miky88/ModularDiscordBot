@@ -21,7 +21,8 @@ module.exports = class PlugManCommand extends Command {
                     name: "module",
                     description: "Module to perform action on",
                     type: ApplicationCommandOptionType.String,
-                    required: false
+                    required: false,
+                    autocomplete: true
                 }
             ]
         });
@@ -34,74 +35,74 @@ module.exports = class PlugManCommand extends Command {
      * @param {*} args 
      */
     async run(client, interaction, args) {
-        let { action, pluginName } = args
+        let { action, module } = args
         let Manager = client.moduleManager
         let response
         let embed = new EmbedBuilder()
         .setTitle("Module Manager")
-        .setFooter("PluginManager "+ process.env.PLUGMAN_VERSION)
+        .setFooter({ text: "PluginManager "+ process.env.PLUGMAN_VERSION })
         switch (action) {
             case "load":
-                response = await Manager.load(pluginName)
+                response = await Manager.load(module)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${pluginName}** succefully loaded`)
+                    .setDescription(`:white_check_mark: **${module}** succefully loaded`)
                 if(!response.error) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to load **${pluginName}**:\`\`\`${response.error}\`\`\``)
+                    .setDescription(`:x: There was an error trying to load **${module}**:\`\`\`${response.error}\`\`\``)
                 return await interaction.reply({ embeds: [embed] })
             case "unload":
-                response = await Manager.unload(pluginName)
+                response = await Manager.unload(module)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${pluginName}** succefully unloaded`)
+                    .setDescription(`:white_check_mark: **${module}** succefully unloaded`)
                 if(response) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to unload **${pluginName}**, is it even loaded?`)
+                    .setDescription(`:x: There was an error trying to unload **${module}**, is it even loaded?`)
                 return await interaction.reply({ embeds: [embed] })
             case "reload":
-                response = await Manager.reload(pluginName)
+                response = await Manager.reload(module)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${pluginName}** succefully reloaded`)
+                    .setDescription(`:white_check_mark: **${module}** succefully reloaded`)
                 if(response) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to reload **${pluginName}**, is it even loaded?`)
+                    .setDescription(`:x: There was an error trying to reload **${module}**, is it even loaded?`)
                 return await interaction.reply({ embeds: [embed] })
             case "enable":
-                response = await Manager.enable(pluginName)
+                response = await Manager.enable(module)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${pluginName}** succefully enabled and executed`)
+                    .setDescription(`:white_check_mark: **${module}** succefully enabled and executed`)
                 if(response) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to enable **${pluginName}**, is it even loaded?`)
+                    .setDescription(`:x: There was an error trying to enable **${module}**, is it even loaded?`)
                 return await interaction.reply({ embeds: [embed] })
             case "disable":
-                response = await Manager.disable(pluginName)
+                response = await Manager.disable(module)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${pluginName}** succefully disabled`)
+                    .setDescription(`:white_check_mark: **${module}** succefully disabled`)
                 if(response) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to disable **${pluginName}**, is it even loaded?`)
+                    .setDescription(`:x: There was an error trying to disable **${module}**, is it even loaded?`)
                 return await interaction.reply({ embeds: [embed] })
             case "info":
-                response = await Manager.info(pluginName)
+                response = await Manager.info(module)
                 
                 embed
                     .setTitle(`Module Manager`)
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to fetch informations from **${pluginName}**:\`\`\`${response.error}\`\`\``)
+                    .setDescription(`:x: There was an error trying to fetch informations from **${module}**:\`\`\`${response.error}\`\`\``)
                 if(response.error) return await interaction.reply({ embeds: [embed] })
     
                 embed
-                    .setTitle(`Module Manager - ${pluginName}`)
+                    .setTitle(`Module Manager - ${module}`)
                     .setColor(0x0000FF)
                     .setDescription(response.description)
                     .addField("Enabled", `${response.enabled}`, true)
@@ -111,7 +112,7 @@ module.exports = class PlugManCommand extends Command {
             case "list":
                 embed
                     .setTitle("Module Manager")
-                    .addField("Loaded", Manager.list.loaded || "_Valore vuoto_", true)
+                    .addFields({name : "Loaded", value: Manager.list.loaded || "_Valore vuoto_", inline: true })
                     .setColor(0x0000FF)
                 Manager.list.unloaded ? embed.addField("Unloaded", Manager.list.unloaded, true) : undefined
                 await interaction.reply({ embeds: [embed] })
