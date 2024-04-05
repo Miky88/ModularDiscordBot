@@ -3,10 +3,10 @@ const BotClient = require('..');
 const cache = new Map();
 
 const flags = {
-    OWNER: 1n << 0n,
-    STAFF: 1n << 1n,
-    PREMIUM: 1n << 2n,
-    BLACKLISTED: 1n << 3n,
+    OWNER: 1 << 0,
+    STAFF: 1 << 1,
+    PREMIUM: 1 << 2,
+    BLACKLISTED: 1 << 3,
 };
 
 module.exports = class Database {
@@ -34,8 +34,7 @@ module.exports = class Database {
     async addUser(userID) {
         const user = await this.db.users.insert({
             id: userID,
-            flags: 0n,
-            guildlevel: 0,
+            flags: 0,
             blacklistReason: null,
             guildBlacklistReason: null
         })
@@ -59,7 +58,7 @@ module.exports = class Database {
         if (!flagValue) throw new Error(`Invalid flag ${flagName}`);
         let user = this.getUser(userId);
         if (!user) throw new Error(`Invalid user ${userId}`);
-        user.flags = user.flags ? BigInt(user.flags) : 0n;
+        user.flags = user.flags ? parseInt(user.flags) : 0;
         if (value) {
             user.flags |= flagValue;
         } else {
@@ -72,7 +71,7 @@ module.exports = class Database {
         let flagValue = flags[flagName];
         if (!flagValue) throw new Error(`Invalid flag ${flagName}`);
         let user = this.getUser(userId);
-        user.flags = user.flags ? BigInt(user.flags) : 0n;
+        user.flags = user.flags ? parseInt(user.flags) : 0;
         if (!user) throw new Error(`Invalid user ${userId}`);
         return (user.flags & flagValue) == flagValue;
     }

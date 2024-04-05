@@ -8,7 +8,7 @@ module.exports = class EvalCommand extends Command {
             name: "eval",
             description: "Evaluates albitrary JavaScript",
             cooldown: 3,
-            minLevel: 10,
+            requiredFlag: ["OWNER"],
             options: [
                 {
                     name: "code",

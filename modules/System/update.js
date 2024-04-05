@@ -7,7 +7,7 @@ module.exports = class UpdateCommand extends Command {
             name: "update",
             description: "Pulls commits from git and reboots the bot",
             cooldown: 3,
-            minLevel: 10,
+            requiredFlag: ["OWNER"]
         })
     }
 

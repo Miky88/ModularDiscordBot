@@ -7,7 +7,7 @@ module.exports = class ReloadCommand extends Command {
             name: 'reload',
             description: 'Reloads a command',
             cooldown: 3,
-            minLevel: 9,
+            requiredFlag: ['OWNER'],
             options: [
                 {
                     name: "command",

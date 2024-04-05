@@ -9,14 +9,14 @@ module.exports = class Command {
         options = [],
         type = ApplicationCommandType.ChatInput,
         cooldown = 0,
-        minLevel = 0,
+        requiredFlag = [],
         minGuildLevel = 0,
         reqPerms = [],
         botPerms = [],
     }) {
         /** @type {import('..')} */
         this.client = client
-        this.config = { name, description, cooldown, minLevel, minGuildLevel, reqPerms, botPerms };
+        this.config = { name, description, cooldown, requiredFlag, minGuildLevel, reqPerms, botPerms };
 
         this.data = {
             name,

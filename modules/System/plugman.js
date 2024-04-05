@@ -7,7 +7,7 @@ module.exports = class PlugManCommand extends Command {
         super(client, {
             name: "plugman",
             description: "Manipulate Bot Plugins",
-            minLevel: 9,
+            requiredFlag: ["OWNER"],
             cooldown: 3,
             options: [
                 {
@@ -40,7 +40,6 @@ module.exports = class PlugManCommand extends Command {
         let response
         let embed = new EmbedBuilder()
         .setTitle("Module Manager")
-        .setFooter({ text: "PluginManager "+ process.env.PLUGMAN_VERSION })
         switch (action) {
             case "load":
                 response = await Manager.load(module)
