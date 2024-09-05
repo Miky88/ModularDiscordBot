@@ -20,7 +20,7 @@ class Example extends Module {
             name: "Example", // Name of the module
             info: "Description", // Description of the module
             enabled: true, // Defines if this module would be enabled on startup
-            event: "ready" // Event that triggeres the module
+            event: ["ready"] // Event that triggeres the module (can be more than one)
         })
     }
 
