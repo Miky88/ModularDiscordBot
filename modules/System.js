@@ -12,30 +12,38 @@ module.exports = class System extends Module {
     }
 
     async ready(client) {
-        let serverId = this.client.config.get('systemServer');
-        if(!serverId) {
-            this.logger.error(`System server not set in config.yml!`);
-            return;
-        }
-        
-        let systemGuild = await this.client.guilds.fetch(serverId);
-        if (!systemGuild) {
-            this.logger.error(`System server not found. Set it in config.yml!`);
+        let serverIds = this.client.config.get('systemServer');
+
+        if (!serverIds) {
+            this.logger.error(`System servers not found in config.yml!`);
             return;
         }
 
-        systemGuild.commands.set(this.systemCommands.map(c => c.toJson()))
-        
+        for (const serverId of serverIds) {
+            try {
+                let systemGuild = await this.client.guilds.fetch(serverId);
+
+                if (!systemGuild) {
+                    this.logger.error(`System server not found: ${serverId}. Set it on config.yml!`);
+                }
+
+                await systemGuild.commands.set(this.systemCommands.map(c => c.toJson()));
+            } catch (error) {
+                this.logger.error(`Failed to fetch server ${serverId}: ${error}`);
+            }
+        }
+
+
         this.commands = this.systemCommands;
     }
 
     async interactionCreate(client, interaction) {
-        if(!interaction.isAutocomplete()) return;
+        if (!interaction.isAutocomplete()) return;
 
         const command = this.systemCommands.get(interaction.commandName);
-        if(!command) return;
+        if (!command) return;
 
-        if(interaction.commandName == "plugman") {
+        if (interaction.commandName == "plugman") {
             let modules = [...this.client.moduleManager.modules.keys()];
             let options = modules.map(m => ({ name: m, value: m }));
             return interaction.respond(options);
