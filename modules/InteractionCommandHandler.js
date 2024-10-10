@@ -46,11 +46,20 @@ module.exports = class InteractionCommandHandler extends Module {
                 let usrLevel = client.config.guildlevels.find(pl => pl.level == interaction.user.data.guildlevel)
                 return interaction.reply({ content: `:no_entry: You don't have permission to perform this command. Minimum guild permission required is **${reqLevel.icon} ${reqLevel.level} - ${reqLevel.name}** and your guild permission is **${usrLevel.icon} ${usrLevel.level} - ${usrLevel.name}**`, ephemeral: true})
             }
-
-            let args = interaction.options.data.reduce((obj, option) => {
-                obj[option.name] = option.value
-                return obj
-            }, {});
+            
+            function extractOptions(options, obj = {}) {
+                options.forEach(option => {
+                    if (option.value !== undefined) {
+                        obj[option.name] = option.value;
+                    }
+                    if (option.options) {
+                        extractOptions(option.options, obj);  // Recursively flatten nested options
+                    }
+                });
+                return obj;
+            }
+            
+            let args = extractOptions(interaction.options.data);
     
             await cmd.run(client, interaction, args, module);  
         } catch (e) {
