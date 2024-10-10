@@ -1,3 +1,5 @@
+const { id } = require('common-tags');
+
 module.export = class SettingsManager {
     /**
      * Instantiates a settings manager for a specific module
@@ -53,6 +55,37 @@ module.export = class SettingsManager {
         }
 
         data.settings[key] = value;
+        this.settings.update(data);
+        this.db.saveDatabase();
+        return data.settings;
+    }
+
+    add(guildID, key, value){
+        const data = this.settings.findOne({id: guildID});
+        if(!data) {
+            this.settings.add({
+                id: guildID,
+                settings: this.defaultSettings
+            });
+            data = this.settings.findOne({id: guildID});
+        }
+
+        data.settings[key] = value;
+        this.settings.update(data);
+        this.db.saveDatabase();
+        return data.settings;
+    }
+
+    remove(guildID, key){
+        const data = this.settings.findOne({id: guildID});
+        if(data) {
+            this.settings.remove({
+                id: guildID,
+                key: key,
+                settings: this.defaultSettings
+            });
+            data = this.settings.findOne({id: guildID});
+        }
         this.settings.update(data);
         this.db.saveDatabase();
         return data.settings;
