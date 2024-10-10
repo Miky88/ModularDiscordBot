@@ -1,5 +1,3 @@
-const { id } = require('common-tags');
-
 module.export = class SettingsManager {
     /**
      * Instantiates a settings manager for a specific module
@@ -60,37 +58,6 @@ module.export = class SettingsManager {
         return data.settings;
     }
 
-    add(guildID, key, value){
-        const data = this.settings.findOne({id: guildID});
-        if(!data) {
-            this.settings.add({
-                id: guildID,
-                settings: this.defaultSettings
-            });
-            data = this.settings.findOne({id: guildID});
-        }
-
-        data.settings[key] = value;
-        this.settings.update(data);
-        this.db.saveDatabase();
-        return data.settings;
-    }
-
-    remove(guildID, key){
-        const data = this.settings.findOne({id: guildID});
-        if(data) {
-            this.settings.remove({
-                id: guildID,
-                key: key,
-                settings: this.defaultSettings
-            });
-            data = this.settings.findOne({id: guildID});
-        }
-        this.settings.update(data);
-        this.db.saveDatabase();
-        return data.settings;
-    }
-
     /**
      * @param {string} guildID
      * @param {string} key
@@ -107,6 +74,35 @@ module.export = class SettingsManager {
         }
 
         data.settings[key] = this.defaultSettings[key];
+        this.settings.update(data);
+        this.db.saveDatabase();
+        return data.settings;
+    }
+
+    add(guildID, key, value){
+        const data = this.settings.findOne({id: guildID});
+            if(!Array.isArray(data.settings[key])) throw new Error("Not an array.")
+            if(!data) {
+                this.settings.insert({
+                    id: guildID,
+                    settings: this.defaultSettings
+                });
+                data = this.settings.findOne({id: guildID});
+            }
+            
+            data.settings[key].push(value);
+            this.settings.update(data);
+            this.db.saveDatabase();
+            return data.settings;
+        
+    }
+
+    remove(guildID, key, value){
+        const data = this.settings.findOne({id: guildID});
+        if(!Array.isArray(data.settings[key])) throw new Error("Not an array.")
+        arr = data.settings[key].filter(function(item) {
+            return item !== value
+        })
         this.settings.update(data);
         this.db.saveDatabase();
         return data.settings;
