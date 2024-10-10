@@ -37,7 +37,7 @@ module.exports = class FlagsCommand extends Command {
                             description: "Flag to add",
                             type: ApplicationCommandOptionType.String,
                             required: true,
-                            choices: ["BLACKLISTED", "STAFF", "PREMIUM"].map(c => ({ name: c, value: c }))
+                            choices: ["OWNER", "BLACKLISTED", "STAFF", "PREMIUM"].map(c => ({ name: c, value: c }))
                         }
                     ]
                 },
@@ -57,22 +57,38 @@ module.exports = class FlagsCommand extends Command {
                             description: "Flag to remove",
                             type: ApplicationCommandOptionType.String,
                             required: true,
-                            choices: ["BLACKLISTED", "STAFF", "PREMIUM"].map(c => ({ name: c, value: c }))
+                            choices: ["OWNER", "BLACKLISTED", "STAFF", "PREMIUM"].map(c => ({ name: c, value: c }))
                         }
                     ]
                 }
             ]
         });
-        this.flagStrings = {
-            owner: "**Bot Owner**: This user is a owner of this bot.\n",
-            staff: "**Bot Staffer**: This user is a staffer of this bot. You can talk to him for support.\n",
-            premium: "**Premium**: This user is premium on this bot and supported the development.\n",
-            blacklisted: "**Blacklisted**: This user is blacklisted from this bot. You shouldn't talk to him.\n",
-            user: "**User**: A normal user of this bot.\n"
-        },
         this.embedSettings = {
             list: {
-                title: "**Flags of <user>**:"
+                title: "**Flags of <user>**:",
+                flags: {
+                    owner: "**Bot Owner**: This user is a owner of this bot.\n",
+                    staff: "**Bot Staffer**: This user is a staffer of this bot. You can talk to him for support.\n",
+                    premium: "**Premium**: This user is premium on this bot and supported the development.\n",
+                    blacklisted: "**Blacklisted**: This user is blacklisted from this bot. You shouldn't talk to him.\n",
+                    user: "**User**: A normal user of this bot.\n"
+                }
+            },
+            add: {
+                title: "**Added a flag to <user>:**",
+                description: "Added the flag <flag> to <user>."
+            },
+            remove: {
+                title: "**Removed a flag to <user>**",
+                description: "Remove the flag <flag> to <user>"
+            },
+            errors: {
+                alreadyHasFlag: {
+                    title: "This user already has this flag."
+                },
+                notHasFlag: {
+                    title: "This user doesn't have this flag."
+                }
             }
         }
     }
@@ -84,34 +100,76 @@ module.exports = class FlagsCommand extends Command {
      * @param {*} args 
      */
     async run(client, interaction, args) {
+        let flags = client.database.getFlags(args.user);
+        let flag = interaction.options.getString('flag');
+        let user = interaction.user;
+        console.log(flag)
+        let embed = new EmbedBuilder()
         switch (interaction.options.getSubcommand()) {
             case "list":
                 let flagStrings = "";
-                let flags = client.database.getFlags(args.user);
                 if (flags.includes("OWNER")) {
-                    flagStrings += this.flagStrings.owner.toString();
+                    flagStrings += this.embedSettings.list.flags.owner;
                 }
                 if (flags.includes("STAFF")) {
-                    flagStrings += this.flagStrings.staff.toString();
+                    flagStrings += this.embedSettings.list.flags.staff;
                 }
                 if (flags.includes("PREMIUM")) {
-                    flagStrings += this.flagStrings.premium.toString();
+                    flagStrings += this.embedSettings.list.flags;
                 }
                 if (flags.includes("BLACKLISTED")) {
-                    flagStrings += this.flagStrings.blacklisted.toString();
+                    flagStrings += this.embedSettings.list.flags.blacklisted;
                 }
                 if (flags.includes("USER")) {
-                    flagStrings += this.flagStrings.user.toString();
+                    flagStrings += this.embedSettings.list.flags.user;
                 }
-                const embed = new EmbedBuilder()
-                    .setTitle(this.embedSettings.list.title.replace('<user>', interaction.user.tag))
+                if( flagStrings == ""){
+                    flagStrings += "None";
+                }
+                embed
+                    .setTitle(this.embedSettings.list.title.replace('<user>', user.tag))
                     .setDescription(flagStrings)
                     .setColor('Random');
                 interaction.reply({embeds: [embed]});
                 break;
             case "add":
+                if(flags.includes(flag)){
+                    embed = new EmbedBuilder()
+                    .setTitle(this.embedSettings.errors.alreadyHasFlag)
+                    .setColor('Random');
+                    interaction.reply({embeds: [embed]});
+                    return;
+                }
+                client.database.setFlag(args.user, flag, 0)
+
+                .setTitle(this.embedSettings.add.title.replace('<user>', user.tag))
+                    .setDescription(this.embedSettings.add.description
+                        .replace('<flag>', flag)
+                        .replace('<user>', user.tag));
+
+
+                interaction.reply({embeds: [embed]});
+
                 break;
             case "remove":
+                if(!flags.includes(flag)){
+                    embed = new EmbedBuilder()
+                    .setTitle(this.embedSettings.errors.notHasFlag)
+                    .setColor('Random');
+                    interaction.reply({embeds: [embed]});
+                    return;
+                }
+                client.database.setFlag(args.user, flag, 1)
+
+                
+
+                embed = new EmbedBuilder()
+                    .setTitle(this.embedSettings.remove.title.replace('<user>', user.tag))
+                    .setDescription(this.embedSettings.remove.description
+                        .replace('<flag>', flag)
+                        .replace('<user>', user.tag));
+                
+                interaction.reply({embeds: [embed]});
                 break;
         }
         
