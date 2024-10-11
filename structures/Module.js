@@ -20,11 +20,12 @@ module.exports = class Module {
         event = "ready",
         usesDB = false,
         priority = ModulePriorities.NORMAL,
+        dependencies= [],
         config = null,
         settings = null
     }) {
         this.client = client;
-        this.options = { name, info, enabled, event, priority, usesDB };
+        this.options = { name, info, enabled, event, priority, usesDB, dependencies};
         
         this.commands = new Discord.Collection();
         this.logger = new Logger(this.options.name);

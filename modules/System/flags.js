@@ -65,15 +65,14 @@ module.exports = class FlagsCommand extends Command {
         });
         this.settings = {
             list: {
-                title: "🚩 <user>'s flags:\n\n",
+                title: "🚩 <user>'s flags:",
                 flags: {
-                    owner: "> - **Bot Owner**: This user is a owner of this bot.\n",
-                    staff: "> - **Bot Staffer**: This user is a staffer of this bot. You can talk to him for support.\n",
-                    premium: "> - **Premium**: This user is premium on this bot and supported the development.\n",
-                    blacklisted: "> - **Blacklisted**: This user is blacklisted from this bot. You shouldn't talk to him.\n",
-                    user: "> - **User**: A normal user of this bot.\n",
-                    none: "🚩 <user> has no flags"
-                }
+                    OWNER: "**Bot Owner**: This user is a developer of this bot",
+                    STAFF: "**Bot Staff**: This user has staff priviliges on this bot",
+                    PREMIUM: "**Premium**: This user supported the development of this bot",
+                    BLACKLISTED: "**Blacklisted**: This user is blacklisted from this bot",
+                },
+                none: "🚩 <user> has no flags"
             },
             add: "✅ Flag `<flag>` has been assigned to <user>",
             remove:"✅ Flag `<flag>` has been removed to <user>",
@@ -93,30 +92,15 @@ module.exports = class FlagsCommand extends Command {
     async run(client, interaction, args) {
         let flags = client.database.getFlags(args.user);
         let flag = interaction.options.getString('flag');
-        let user = interaction.user;
+        let user = interaction.options.getUser('user');
         switch (interaction.options.getSubcommand()) {
             case "list":
-                let flagStrings = "";
-                if (flags.includes("OWNER")) {
-                    flagStrings += this.settings.list.flags.owner;
-                }
-                if (flags.includes("STAFF")) {
-                    flagStrings += this.settings.list.flags.staff;
-                }
-                if (flags.includes("PREMIUM")) {
-                    flagStrings += this.settings.list.flags;
-                }
-                if (flags.includes("BLACKLISTED")) {
-                    flagStrings += this.settings.list.flags.blacklisted;
-                }
-                if (flags.includes("USER")) {
-                    flagStrings += this.settings.list.flags.user;
-                }
-                if(flagStrings == ""){
-                    flagStrings += this.settings.list.flags.none
-                        .replace('<user>', user.tag);
-                    interaction.reply(flagStrings);
-                    return;
+                if(flags.length > 0){
+                    return interaction.reply(`${this.settings.list.title.replace('<user>', user.tag)} \n>>> ${flags.map(fl => "- " + this.settings.list.flags[fl]).join("\n")}`);
+                } else {
+                    return interaction.reply(this.settings.list.none
+                        .replace('<user>', user.tag)
+                    );
                 }
                 
                 let message = "";

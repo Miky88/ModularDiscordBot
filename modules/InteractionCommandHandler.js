@@ -31,13 +31,10 @@ module.exports = class InteractionCommandHandler extends Module {
             let [cmd, plugin] = this.client.moduleManager.getCommand(interaction.commandName);
             if (!cmd) return interaction.reply({ content: ":no_entry: Command not found", ephemeral: true });
 
-            // TODO: Could potentially unify system/guild check
-
-            // System Permission check
-            if (interaction.user.data.powerlevel < cmd.config.minLevel) {
-                let reqLevel = client.config.powerlevels.find(pl => pl.level == cmd.config.minLevel)
-                let usrLevel = client.config.powerlevels.find(pl => pl.level == interaction.user.data.powerlevel)
-                return interaction.reply({ content: `:no_entry: You don't have permission to perform this command. Minimum system permission required is **${reqLevel.icon} ${reqLevel.level} - ${reqLevel.name}** and your system permission is **${usrLevel.icon} ${usrLevel.level} - ${usrLevel.name}**`, ephemeral: true})
+            // Required Flag check
+            if (cmd.config.requiredFlag.length > 0) {
+                let flag = cmd.config.requiredFlag.find(f => !interaction.user.data.flags.includes(f))
+                if (flag) return interaction.reply({ content: `:no_entry: You don't have required flag **${flag}** to perform this command.`, ephemeral: true})
             }
 
             // Guild Permission check

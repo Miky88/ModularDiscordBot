@@ -7,7 +7,8 @@ module.exports = class System extends Module {
         super(client, {
             info: "Loads the system utility commands",
             enabled: true,
-            event: ["ready", "interactionCreate"]
+            event: ["ready", "interactionCreate"],
+            dependencies: ["Utility"]
         })
     }
 

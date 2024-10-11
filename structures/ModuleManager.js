@@ -4,6 +4,9 @@ const Command = require('./Command.js');
 const Logger = require('./Logger.js');
 
 module.exports = class ModuleManager {
+    loadedDependencies = [];
+
+
     /**
      * @param {import('..')} client 
      */
@@ -19,6 +22,9 @@ module.exports = class ModuleManager {
         this.logger.info(`Loading modules...`)
         const modules = fs.readdirSync("./modules").filter(file => file.endsWith(".js"));
         modules.forEach(file => {
+            if(this.loadedDependencies.includes(file)){
+                return;
+            }
             this.load(file)
         });
         this.logger.success(`Successfully Loaded ${this.modules.size} modules`)
@@ -29,6 +35,18 @@ module.exports = class ModuleManager {
             const module = require(`../modules/${moduleName}`);
             delete require.cache[require.resolve(`../modules/${moduleName}`)];
             const _module = new module(this.client);
+            if(_module.options.dependencies.length > 0){
+                let dependencies = _module.options.dependencies;
+                for(let dependence of dependencies){
+                    if(this.isLoaded(dependence)){
+
+                    } else {
+                        this.load(dependence);
+                        this.loadedDependencies.push(dependence + ".js");
+                        return this.logger.success(`Successfully loaded dependence ${dependence} of ${moduleName}`);
+                    }
+                }
+            }
             if (_module.options.enabled)
                 _module.loadCommands()
             this.add(_module)
@@ -81,19 +99,19 @@ module.exports = class ModuleManager {
     }
 
     unload(pluginName) {
-        let tru = (pluginName) => { this.logger.log(`${pluginName} unloaded`); return true }
+        this.logger.log(`${pluginName} unloaded`);
         return this.modules.delete(pluginName) ? tru(pluginName) : false;
     }
 
     enable(pluginName) {
         if (!this.modules.get(pluginName)) return false
-        let tru = (pluginName) => { this.logger.log(`${pluginName} enabled`); return true }
+        this.logger.log(`${pluginName} enabled`);
         return this.modules.get(pluginName).options.enabled = true ? tru(pluginName) : false;
     }
 
     disable(pluginName) {
         if (!this.modules.get(pluginName)) return false
-        let tru = (pluginName) => { this.logger.log(`${pluginName} disabled`); return true }
+        this.logger.log(`${pluginName} disabled`);
         return !(this.modules.get(pluginName).options.enabled = false) ? tru(pluginName) : false;
     }
 
@@ -106,7 +124,7 @@ module.exports = class ModuleManager {
         return {
             description: this.modules.get(pluginName).options.info,
             enabled: this.modules.get(pluginName).options.enabled,
-            loaded: true,
+            loaded: this.isLoaded(pluginName),
             event: this.modules.get(pluginName).options.event
         }
     }
