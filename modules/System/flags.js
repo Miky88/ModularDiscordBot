@@ -63,32 +63,23 @@ module.exports = class FlagsCommand extends Command {
                 }
             ]
         });
-        this.embedSettings = {
+        this.settings = {
             list: {
-                title: "**Flags of <user>**:",
+                title: "🚩 <user>'s flags:\n\n",
                 flags: {
-                    owner: "**Bot Owner**: This user is a owner of this bot.\n",
-                    staff: "**Bot Staffer**: This user is a staffer of this bot. You can talk to him for support.\n",
-                    premium: "**Premium**: This user is premium on this bot and supported the development.\n",
-                    blacklisted: "**Blacklisted**: This user is blacklisted from this bot. You shouldn't talk to him.\n",
-                    user: "**User**: A normal user of this bot.\n"
+                    owner: "> - **Bot Owner**: This user is a owner of this bot.\n",
+                    staff: "> - **Bot Staffer**: This user is a staffer of this bot. You can talk to him for support.\n",
+                    premium: "> - **Premium**: This user is premium on this bot and supported the development.\n",
+                    blacklisted: "> - **Blacklisted**: This user is blacklisted from this bot. You shouldn't talk to him.\n",
+                    user: "> - **User**: A normal user of this bot.\n",
+                    none: "🚩 <user> has no flags"
                 }
             },
-            add: {
-                title: "**Added a flag to <user>:**",
-                description: "Added the flag **<flag>** to <user>."
-            },
-            remove: {
-                title: "**Removed a flag to <user>**",
-                description: "Removed the flag **<flag>** to <user>"
-            },
+            add: "✅ Flag `<flag>` has been assigned to <user>",
+            remove:"✅ Flag `<flag>` has been removed to <user>",
             errors: {
-                alreadyHasFlag: {
-                    title: "This user already has this flag."
-                },
-                notHasFlag: {
-                    title: "This user doesn't have this flag."
-                }
+                alreadyHasFlag: "⚠️ Flag already assigned",
+                notHasFlag: "⚠️ Nothing to remove"
             }
         }
     }
@@ -103,77 +94,68 @@ module.exports = class FlagsCommand extends Command {
         let flags = client.database.getFlags(args.user);
         let flag = interaction.options.getString('flag');
         let user = interaction.user;
-        let embed = new EmbedBuilder()
         switch (interaction.options.getSubcommand()) {
             case "list":
                 let flagStrings = "";
                 if (flags.includes("OWNER")) {
-                    flagStrings += this.embedSettings.list.flags.owner;
+                    flagStrings += this.settings.list.flags.owner;
                 }
                 if (flags.includes("STAFF")) {
-                    flagStrings += this.embedSettings.list.flags.staff;
+                    flagStrings += this.settings.list.flags.staff;
                 }
                 if (flags.includes("PREMIUM")) {
-                    flagStrings += this.embedSettings.list.flags;
+                    flagStrings += this.settings.list.flags;
                 }
                 if (flags.includes("BLACKLISTED")) {
-                    flagStrings += this.embedSettings.list.flags.blacklisted;
+                    flagStrings += this.settings.list.flags.blacklisted;
                 }
                 if (flags.includes("USER")) {
-                    flagStrings += this.embedSettings.list.flags.user;
+                    flagStrings += this.settings.list.flags.user;
                 }
-                if( flagStrings == ""){
-                    flagStrings += "None";
+                if(flagStrings == ""){
+                    flagStrings += this.settings.list.flags.none
+                        .replace('<user>', user.tag);
+                    interaction.reply(flagStrings);
+                    return;
                 }
-                embed
-                    .setTitle(this.embedSettings.list.title.replace('<user>', user.tag))
-                    .setDescription(flagStrings)
-                    .setColor('Random');
-                interaction.reply({embeds: [embed]});
+                
+                let message = "";
+                message += this.settings.list.title
+                    .replace('<user>', user.tag);
+                message += flagStrings;
+
+                interaction.reply(message);
                 break;
+            
             case "add":
-                console.log(flag)
                 if(flags.includes(flag)){
-                    embed
-                        .setTitle(this.embedSettings.errors.alreadyHasFlag.title)
-                        .setColor('Random');
-                    interaction.reply({embeds: [embed]});
+                    const alreadyHasFlag = this.settings.errors.alreadyHasFlag;
+                    interaction.reply(alreadyHasFlag);
                     return;
                 }
                 client.database.setFlag(args.user, flag, true)
 
-                embed
-                    .setTitle(this.embedSettings.add.title.replace('<user>', user.tag))
-                    .setDescription(this.embedSettings.add.description
-                        .replace('<flag>', flag)
-                        .replace('<user>', user.tag))
-                    .setColor('Random');
-
-
-                interaction.reply({embeds: [embed]});
+                const flagadded = this.settings.add
+                    .replace('<flag>', flag)
+                    .replace('<user>', user.tag);
+                
+                interaction.reply(flagadded);
 
                 break;
+            
             case "remove":
-                console.log(flag)
                 if(!(flags.includes(flag))){
-                    embed
-                        .setTitle(this.embedSettings.errors.notHasFlag.title)
-                        .setColor('Random');
-                    interaction.reply({embeds: [embed]});
+                    const notHasFlag = this.settings.errors.notHasFlag;
+                    interaction.reply(notHasFlag);
                     return;
                 }
                 client.database.setFlag(args.user, flag, false);
 
+                const flagremoved = this.settings.remove
+                    .replace('<flag>', flag)
+                    .replace('<user>', user.tag);
                 
-
-                embed = new EmbedBuilder()
-                    .setTitle(this.embedSettings.remove.title.replace('<user>', user.tag))
-                    .setDescription(this.embedSettings.remove.description
-                        .replace('<flag>', flag)
-                        .replace('<user>', user.tag))
-                    .setColor('Random');
-                
-                interaction.reply({embeds: [embed]});
+                interaction.reply(flagremoved);
                 break;
         }
         
