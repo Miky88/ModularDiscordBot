@@ -37,7 +37,7 @@ module.exports = class FlagsCommand extends Command {
                             description: "Flag to add",
                             type: ApplicationCommandOptionType.String,
                             required: true,
-                            choices: ["OWNER", "BLACKLISTED", "STAFF", "PREMIUM"].map(c => ({ name: c, value: c }))
+                            choices: ["BLACKLISTED", "STAFF", "PREMIUM"].map(c => ({ name: c, value: c }))
                         }
                     ]
                 },
@@ -57,7 +57,7 @@ module.exports = class FlagsCommand extends Command {
                             description: "Flag to remove",
                             type: ApplicationCommandOptionType.String,
                             required: true,
-                            choices: ["OWNER", "BLACKLISTED", "STAFF", "PREMIUM"].map(c => ({ name: c, value: c }))
+                            choices: ["BLACKLISTED", "STAFF", "PREMIUM"].map(c => ({ name: c, value: c }))
                         }
                     ]
                 }
@@ -76,11 +76,11 @@ module.exports = class FlagsCommand extends Command {
             },
             add: {
                 title: "**Added a flag to <user>:**",
-                description: "Added the flag <flag> to <user>."
+                description: "Added the flag **<flag>** to <user>."
             },
             remove: {
                 title: "**Removed a flag to <user>**",
-                description: "Remove the flag <flag> to <user>"
+                description: "Removed the flag **<flag>** to <user>"
             },
             errors: {
                 alreadyHasFlag: {
@@ -103,7 +103,6 @@ module.exports = class FlagsCommand extends Command {
         let flags = client.database.getFlags(args.user);
         let flag = interaction.options.getString('flag');
         let user = interaction.user;
-        console.log(flag)
         let embed = new EmbedBuilder()
         switch (interaction.options.getSubcommand()) {
             case "list":
@@ -133,33 +132,37 @@ module.exports = class FlagsCommand extends Command {
                 interaction.reply({embeds: [embed]});
                 break;
             case "add":
+                console.log(flag)
                 if(flags.includes(flag)){
-                    embed = new EmbedBuilder()
-                    .setTitle(this.embedSettings.errors.alreadyHasFlag)
-                    .setColor('Random');
+                    embed
+                        .setTitle(this.embedSettings.errors.alreadyHasFlag.title)
+                        .setColor('Random');
                     interaction.reply({embeds: [embed]});
                     return;
                 }
-                client.database.setFlag(args.user, flag, 0)
+                client.database.setFlag(args.user, flag, true)
 
-                .setTitle(this.embedSettings.add.title.replace('<user>', user.tag))
+                embed
+                    .setTitle(this.embedSettings.add.title.replace('<user>', user.tag))
                     .setDescription(this.embedSettings.add.description
                         .replace('<flag>', flag)
-                        .replace('<user>', user.tag));
+                        .replace('<user>', user.tag))
+                    .setColor('Random');
 
 
                 interaction.reply({embeds: [embed]});
 
                 break;
             case "remove":
-                if(!flags.includes(flag)){
-                    embed = new EmbedBuilder()
-                    .setTitle(this.embedSettings.errors.notHasFlag)
-                    .setColor('Random');
+                console.log(flag)
+                if(!(flags.includes(flag))){
+                    embed
+                        .setTitle(this.embedSettings.errors.notHasFlag.title)
+                        .setColor('Random');
                     interaction.reply({embeds: [embed]});
                     return;
                 }
-                client.database.setFlag(args.user, flag, 1)
+                client.database.setFlag(args.user, flag, false);
 
                 
 
@@ -167,7 +170,8 @@ module.exports = class FlagsCommand extends Command {
                     .setTitle(this.embedSettings.remove.title.replace('<user>', user.tag))
                     .setDescription(this.embedSettings.remove.description
                         .replace('<flag>', flag)
-                        .replace('<user>', user.tag));
+                        .replace('<user>', user.tag))
+                    .setColor('Random');
                 
                 interaction.reply({embeds: [embed]});
                 break;
