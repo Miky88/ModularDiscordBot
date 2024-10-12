@@ -13,14 +13,13 @@ module.exports = class ModuleManager {
         this.modules = new Map();
         this.events = new Set();
         this.logger = new Logger(this.constructor.name);
-        this.loadedDependencies = [];
     }
 
     init() {
         this.logger.info(`Loading modules...`)
         const modules = fs.readdirSync("./modules").filter(file => file.endsWith(".js"));
         modules.forEach(file => {
-            if (!this.loadedDependencies.includes(file)) {
+            if (!this.isLoaded(file.split(".")[0])) {
                 this.load(file)
             }
         });
@@ -37,7 +36,6 @@ module.exports = class ModuleManager {
                 for (let dependence of dependencies) {
                     if (!this.isLoaded(dependence)) {
                         this.load(dependence);
-                        this.loadedDependencies.push(dependence + ".js");
                         this.logger.verbose(`Successfully loaded dependence ${dependence} of ${moduleName}`);
                     }
                 }
@@ -79,28 +77,28 @@ module.exports = class ModuleManager {
     }
 
     reload(pluginName) {
-        return this.unload(pluginName) ? (this.load(pluginName)?.error ? false : true) : false
+        return this.unload(pluginName) ? (!this.load(pluginName)?.error) : false
     }
 
     unload(pluginName) {
         this.logger.log(`${pluginName} unloaded`);
-        return this.modules.delete(pluginName) ? tru(pluginName) : false;
+        return this.modules.delete(pluginName);
     }
 
     enable(pluginName) {
         if (!this.modules.get(pluginName)) return false
         this.logger.log(`${pluginName} enabled`);
-        return this.modules.get(pluginName).options.enabled = true ? tru(pluginName) : false;
+        return this.modules.get(pluginName).options.enabled = true;
     }
 
     disable(pluginName) {
         if (!this.modules.get(pluginName)) return false
         this.logger.log(`${pluginName} disabled`);
-        return !(this.modules.get(pluginName).options.enabled = false) ? tru(pluginName) : false;
+        return !(this.modules.get(pluginName).options.enabled = false);
     }
 
     isLoaded(pluginName) {
-        return this.modules.get(pluginName) ? this.modules.get(pluginName).options.enabled : false
+        return !!this.modules.get(pluginName);
     }
 
     info(pluginName) {
