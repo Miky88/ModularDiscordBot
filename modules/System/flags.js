@@ -2,8 +2,8 @@ const Command = require('../../structures/Command.js');
 const { ApplicationCommandOptionType, EmbedBuilder, userMention, User, UserContextMenuCommandInteraction } = require('discord.js');
 
 module.exports = class FlagsCommand extends Command {
-    constructor(client) {
-        super(client, {
+    constructor(client, module) {
+        super(client, module, {
             name: 'flags',
             description: 'Edit user flags',
             requiredFlag: ['OWNER'],
@@ -63,24 +63,7 @@ module.exports = class FlagsCommand extends Command {
                 }
             ]
         });
-        this.settings = {
-            list: {
-                title: "🚩 <user>'s flags:",
-                flags: {
-                    OWNER: "**Bot Owner**: This user is a developer of this bot",
-                    STAFF: "**Bot Staff**: This user has staff priviliges on this bot",
-                    PREMIUM: "**Premium**: This user supported the development of this bot",
-                    BLACKLISTED: "**Blacklisted**: This user is blacklisted from this bot",
-                },
-                none: "🚩 <user> has no flags"
-            },
-            add: "✅ Flag `<flag>` has been assigned to <user>",
-            remove:"✅ Flag `<flag>` has been removed to <user>",
-            errors: {
-                alreadyHasFlag: "⚠️ Flag already assigned",
-                notHasFlag: "⚠️ Nothing to remove"
-            }
-        }
+        console.log(client)
     }
 
     /**
@@ -90,21 +73,22 @@ module.exports = class FlagsCommand extends Command {
      * @param {*} args 
      */
     async run(client, interaction, args) {
-        let flags = client.database.getFlags(args.user);
+        console.log(this.module)
         let flag = interaction.options.getString('flag');
         let user = interaction.options.getUser('user');
+        let flags = client.database.getFlags(args.user);
         switch (interaction.options.getSubcommand()) {
             case "list":
                 if(flags.length > 0){
-                    return interaction.reply(`${this.settings.list.title.replace('<user>', user.tag)} \n>>> ${flags.map(fl => "- " + this.settings.list.flags[fl]).join("\n")}`);
+                    return interaction.reply(`${this.module.config.get("list.title").replace('<user>', user.tag)} \n>>> ${flags.map(fl => "- " + this.config.get("list.flags." + fl).join("\n"))}`);
                 } else {
-                    return interaction.reply(this.settings.list.none
+                    return interaction.reply(this.config.get("list.none")
                         .replace('<user>', user.tag)
                     );
                 }
                 
                 let message = "";
-                message += this.settings.list.title
+                message += this.config.get("list.title")
                     .replace('<user>', user.tag);
                 message += flagStrings;
 
@@ -113,13 +97,13 @@ module.exports = class FlagsCommand extends Command {
             
             case "add":
                 if(flags.includes(flag)){
-                    const alreadyHasFlag = this.settings.errors.alreadyHasFlag;
+                    const alreadyHasFlag = this.config.get("errors.alreadyHasFlag");
                     interaction.reply(alreadyHasFlag);
                     return;
                 }
                 client.database.setFlag(args.user, flag, true)
 
-                const flagadded = this.settings.add
+                const flagadded = this.config.get("add")
                     .replace('<flag>', flag)
                     .replace('<user>', user.tag);
                 
@@ -129,13 +113,13 @@ module.exports = class FlagsCommand extends Command {
             
             case "remove":
                 if(!(flags.includes(flag))){
-                    const notHasFlag = this.settings.errors.notHasFlag;
+                    const notHasFlag = this.config.get("errors.notHasFlag");
                     interaction.reply(notHasFlag);
                     return;
                 }
                 client.database.setFlag(args.user, flag, false);
 
-                const flagremoved = this.settings.remove
+                const flagremoved = this.config.get("remove")
                     .replace('<flag>', flag)
                     .replace('<user>', user.tag);
                 

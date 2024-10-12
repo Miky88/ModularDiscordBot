@@ -59,7 +59,7 @@ module.exports = class InteractionCommandHandler extends Module {
             
             let args = extractOptions(interaction.options.data);
     
-            await cmd.run(client, interaction, args, module);  
+            await cmd.run(client, interaction, args);
         } catch (e) {
             interaction.reply({
                 content: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers.",

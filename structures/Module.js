@@ -43,9 +43,9 @@ module.exports = class Module {
                 /**
                  * @type {import('./Command.')}
                  */
-                const command = new (require(`../modules/${this.options.name}/${file}`));
+                const CommandClass = require(`../modules/${this.options.name}/${file}`);
+                const command = new CommandClass(this.client, this);
                 delete require.cache[require.resolve(`../modules/${this.options.name}/${file}`)];
-
                 this.commands.set(file.split(".")[0], command);
                 this.logger.verbose(`Loaded command ${file.split(".")[0]} from ${this.options.name}`);
             } catch (e) {

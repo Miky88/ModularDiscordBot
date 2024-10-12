@@ -3,7 +3,7 @@ const { Module } = require('./Module.js');
 const Logger = require('./Logger.js');
 
 module.exports = class Command {
-    constructor(client, {
+    constructor(client, module, {
         name = 'Unspecified',
         description = 'Unspecified.',
         options = [],
@@ -16,6 +16,7 @@ module.exports = class Command {
     }) {
         /** @type {import('..')} */
         this.client = client
+        this.module = module
         this.config = { name, description, cooldown, requiredFlag, minGuildLevel, reqPerms, botPerms };
 
         this.data = {

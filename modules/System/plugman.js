@@ -3,8 +3,8 @@ const Command = require('../../structures/Command.js');
 let { EmbedBuilder, ApplicationCommandOptionType} = require('discord.js');
 
 module.exports = class PlugManCommand extends Command {
-    constructor(client) {
-        super(client, {
+    constructor(client, module) {
+        super(client, module, {
             name: "plugman",
             description: "Manipulate Bot Plugins",
             requiredFlag: ["OWNER"],
