@@ -4,9 +4,6 @@ const Command = require('./Command.js');
 const Logger = require('./Logger.js');
 
 module.exports = class ModuleManager {
-    loadedDependencies = [];
-
-
     /**
      * @param {import('..')} client 
      */
@@ -16,16 +13,16 @@ module.exports = class ModuleManager {
         this.modules = new Map();
         this.events = new Set();
         this.logger = new Logger(this.constructor.name);
+        this.loadedDependencies = [];
     }
 
     init() {
         this.logger.info(`Loading modules...`)
         const modules = fs.readdirSync("./modules").filter(file => file.endsWith(".js"));
         modules.forEach(file => {
-            if(this.loadedDependencies.includes(file)){
-                return;
+            if (!this.loadedDependencies.includes(file)) {
+                this.load(file)
             }
-            this.load(file)
         });
         this.logger.success(`Successfully Loaded ${this.modules.size} modules`)
     }
@@ -35,15 +32,13 @@ module.exports = class ModuleManager {
             const module = require(`../modules/${moduleName}`);
             delete require.cache[require.resolve(`../modules/${moduleName}`)];
             const _module = new module(this.client);
-            if(_module.options.dependencies.length > 0){
+            if (_module.options.dependencies.length > 0) {
                 let dependencies = _module.options.dependencies;
-                for(let dependence of dependencies){
-                    if(this.isLoaded(dependence)){
-
-                    } else {
+                for (let dependence of dependencies) {
+                    if (!this.isLoaded(dependence)) {
                         this.load(dependence);
                         this.loadedDependencies.push(dependence + ".js");
-                        return this.logger.success(`Successfully loaded dependence ${dependence} of ${moduleName}`);
+                        this.logger.verbose(`Successfully loaded dependence ${dependence} of ${moduleName}`);
                     }
                 }
             }
@@ -63,35 +58,24 @@ module.exports = class ModuleManager {
 
         const eventCallback = event => async (...args) => {
             for (let [_name, module] of new Map([...this.modules.entries()].sort((a, b) => b[1].options.priority - a[1].options.priority))) {
-                if (module.options.enabled && (module.options.event == event || module.options.event.includes(event))) {
+                if (module.options.enabled && module.options.events.includes(event)) {
                     let execution;
 
-                    if (Array.isArray(module.options.event))
-                        execution = await module.run(this.client, event, ...args);
-                    else
-                        execution = await module.run(this.client, ...args);
+                    execution = await module.run(this.client, event, ...args);
 
                     if (execution?.cancelEvent)
                         break;
                 }
             }
         }
-
-        if (typeof module.options.event == "string") {
-            if (!this.events.has(module.options.event)) {
-                const event = module.options.event
+        module.options.events.forEach(evt => {
+            if (!this.events.has(evt)) {
+                const event = evt
                 this.events.add(event);
                 this.client.on(event, eventCallback(event))
             }
-        } else if (Array.isArray(module.options.event)) {
-            module.options.event.forEach(evt => {
-                if (!this.events.has(evt)) {
-                    const event = evt
-                    this.events.add(event);
-                    this.client.on(event, eventCallback(event))
-                }
-            })
-        }
+        })
+        
     }
 
     reload(pluginName) {
@@ -125,7 +109,7 @@ module.exports = class ModuleManager {
             description: this.modules.get(pluginName).options.info,
             enabled: this.modules.get(pluginName).options.enabled,
             loaded: this.isLoaded(pluginName),
-            event: this.modules.get(pluginName).options.event
+            events: this.modules.get(pluginName).options.events
         }
     }
 

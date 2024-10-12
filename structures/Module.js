@@ -11,21 +11,21 @@ module.exports = class Module {
     /**
      * @param {BotClient} client 
      * @param {} options
-     * @param {string | string[]} [options.event]
+     * @param {string[]} [options.events]
      */
     constructor(client, {
         name = this.constructor.name,
         info = "No description provided.",
         enabled = false,
-        event = "ready",
+        events = [],
         usesDB = false,
         priority = ModulePriorities.NORMAL,
-        dependencies= [],
+        dependencies = [],
         config = null,
         settings = null
     }) {
         this.client = client;
-        this.options = { name, info, enabled, event, priority, usesDB, dependencies};
+        this.options = { name, info, enabled, events, priority, usesDB, dependencies };
         
         this.commands = new Discord.Collection();
         this.logger = new Logger(this.options.name);
@@ -56,12 +56,10 @@ module.exports = class Module {
 
     run(client, event, ...args) {
         // Register automatic event method caller
-        if (Array.isArray(this.options.event)) {
-            const method = this[event];
-            if (!method)
-                return this.logger.error(`[${this.options.name}] There was no configured method for the ${event} event.`);
-            return method.call(this, client, ...args);
-        }
+        const method = this[event];
+        if (!method)
+            return this.logger.error(`[${this.options.name}] There was no configured method for the ${event} event.`);
+        return method.call(this, client, ...args);
     }
 
     /**

@@ -20,11 +20,11 @@ class Example extends Module {
             name: "Example", // Name of the module
             info: "Description", // Description of the module
             enabled: true, // Defines if this module would be enabled on startup
-            event: ["ready"] // Event that triggeres the module (can be more than one)
+            events: ["ready"] // Event that triggeres the module (can be more than one)
         })
     }
 
-    async run(client, ...args) { // args are the arguments of Discord.js Events (es. for presenceUpdate you would have [oldPresence, newPresence]
+    async ready(client, ...args) { // args are the arguments of Discord.js Events (es. for presenceUpdate you would have [oldPresence, newPresence]
         this.logger.log("Hi!")
     }
 }
