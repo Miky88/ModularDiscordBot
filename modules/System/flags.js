@@ -75,14 +75,13 @@ module.exports = class FlagsCommand extends Command {
         let flag = interaction.options.getString('flag');
         let user = interaction.options.getUser('user');
         let flags;
-        try{
-            flags = client.database.getFlags(args.user);
-        } catch(e){
-            client.database.addUser(args.user);
-            flags = client.database.getFlags(args.user);
-        }
         switch (interaction.options.getSubcommand()) {
             case "list":
+                try{
+                    flags = client.database.getFlags(args.user);
+                } catch(e){
+                    return interaction.reply(this.module.config.get("flags.list.none").replace('<user>', user.tag));
+                }
                 if(flags.length > 0){
                     return interaction.reply(`${this.module.config.get("flags.list.title").replace('<user>', user.tag)} \n>>> ${flags.map(fl => "- " + this.module.config.get("flags.list.flags." + fl)).join("\n")}`);
                 } else {
@@ -91,6 +90,12 @@ module.exports = class FlagsCommand extends Command {
                     );
                 }
             case "add":
+                try{
+                    flags = client.database.getFlags(args.user);
+                } catch(e){
+                    client.database.addUser(args.user);
+                    flags = client.database.getFlags(args.user);
+                }
                 if(flags.includes(flag)){
                     const alreadyHasFlag = this.module.config.get("flags.errors.alreadyHasFlag");
                     interaction.reply(alreadyHasFlag);
@@ -107,6 +112,11 @@ module.exports = class FlagsCommand extends Command {
                 break;
             
             case "remove":
+                try{
+                    flags = client.database.getFlags(args.user);
+                } catch(e){
+                    return interaction.reply(this.module.config.get("flags.errors.notHasFlag").replace('<user>', user.tag));
+                }
                 if(!(flags.includes(flag))){
                     const notHasFlag = this.module.config.get("flags.errors.notHasFlag");
                     interaction.reply(notHasFlag);
