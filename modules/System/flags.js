@@ -63,7 +63,6 @@ module.exports = class FlagsCommand extends Command {
                 }
             ]
         });
-        console.log(client)
     }
 
     /**
@@ -73,7 +72,6 @@ module.exports = class FlagsCommand extends Command {
      * @param {*} args 
      */
     async run(client, interaction, args) {
-        console.log(this.module)
         let flag = interaction.options.getString('flag');
         let user = interaction.options.getUser('user');
         let flags = client.database.getFlags(args.user);
@@ -86,15 +84,6 @@ module.exports = class FlagsCommand extends Command {
                         .replace('<user>', user.tag)
                     );
                 }
-                
-                let message = "";
-                message += this.config.get("list.title")
-                    .replace('<user>', user.tag);
-                message += flagStrings;
-
-                interaction.reply(message);
-                break;
-            
             case "add":
                 if(flags.includes(flag)){
                     const alreadyHasFlag = this.config.get("errors.alreadyHasFlag");
