@@ -8,9 +8,9 @@ module.exports = class System extends Module {
         super(client, {
             info: "Loads the system utility commands",
             enabled: true,
-            events: ["ready", "interactionCreate"]
-            
+            events: ["ready", "interactionCreate"] 
         }),
+
         this.config = new ConfigurationManager(this, {
             flags: {
                 list: {
@@ -83,10 +83,11 @@ module.exports = class System extends Module {
                 /**
                  * @type {import('./InteractionCommand')}
                  */
-                const command = new (require(`../modules/${this.options.name}/${file}`));
+                const command = require(`../modules/${this.options.name}/${file}`);
                 delete require.cache[require.resolve(`../modules/${this.options.name}/${file}`)];
+                const _command = new command(this.client, this);
 
-                this.systemCommands.set(file.split(".")[0], command);
+                this.systemCommands.set(file.split(".")[0], _command);
                 this.logger.verbose(`Loaded system command ${file.split(".")[0]} from ${this.options.name}`);
             } catch (e) {
                 this.logger.error(`Failed to load system command ${file} from ${this.options.name}: ${e.stack || e}`);

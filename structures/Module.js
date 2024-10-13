@@ -41,12 +41,13 @@ module.exports = class Module {
         commands.forEach(file => {
             try {
                 /**
-                 * @type {import('./Command.')}
+                 * @type {import('./Command')}
                  */
-                const CommandClass = require(`../modules/${this.options.name}/${file}`);
-                const command = new CommandClass(this.client, this);
+                const command = require(`../modules/${this.options.name}/${file}`);
                 delete require.cache[require.resolve(`../modules/${this.options.name}/${file}`)];
-                this.commands.set(file.split(".")[0], command);
+                const _command = new command(this.client, this);
+                
+                this.commands.set(file.split(".")[0], _command);
                 this.logger.verbose(`Loaded command ${file.split(".")[0]} from ${this.options.name}`);
             } catch (e) {
                 this.logger.error(`Failed to load command ${file} from ${this.options.name}: ${e.stack || e}`);

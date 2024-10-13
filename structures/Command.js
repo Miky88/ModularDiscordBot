@@ -1,5 +1,4 @@
-const { InteractionType, ApplicationCommandType, ApplicationCommandOptionType } = require('discord.js');
-const { Module } = require('./Module.js');
+const { ApplicationCommandType } = require('discord.js');
 const Logger = require('./Logger.js');
 
 module.exports = class Command {
@@ -17,6 +16,7 @@ module.exports = class Command {
         /** @type {import('..')} */
         this.client = client
         this.module = module
+        // console.log(this.module.constructor.name)
         this.config = { name, description, cooldown, requiredFlag, minGuildLevel, reqPerms, botPerms };
 
         this.data = {
@@ -33,10 +33,9 @@ module.exports = class Command {
      * @param {BotClient} client 
      * @param {Interaction} interaction 
      * @param {object} args
-     * @param {Module} module
      * @returns {Promise<any>}
      */
-    run(client, interaction, args, module) {}
+    run(client, interaction, args) {}
 
     toJson() {
         return (!this.data.type || this.data.type == ApplicationCommandType.ChatInput) ? {
