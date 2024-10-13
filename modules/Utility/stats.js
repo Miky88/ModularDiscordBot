@@ -6,8 +6,8 @@ require("moment-duration-format");
 const { EmbedBuilder } = require('discord.js');
 
 module.exports = class StatsCommand extends Command {
-    constructor(client) {
-        super(client, {
+    constructor(client, module) {
+        super(client, module, {
             name: 'stats',
             description: 'See some fancy bot statistics',
             cooldown: 3

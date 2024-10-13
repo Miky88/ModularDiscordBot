@@ -1,8 +1,8 @@
 const Command = require('../../structures/Command.js');
 
 module.exports = class RebootCommand extends Command {
-    constructor(client) {
-        super(client, {
+    constructor(client, module) {
+        super(client, module, {
             name: 'reboot',
             description: 'Reboots the bot if running under PM2',
             requiredFlag: ['OWNER']

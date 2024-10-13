@@ -11,20 +11,21 @@ module.exports = class Module {
     /**
      * @param {BotClient} client 
      * @param {} options
-     * @param {string | string[]} [options.event]
+     * @param {string[]} [options.events]
      */
     constructor(client, {
         name = this.constructor.name,
         info = "No description provided.",
         enabled = false,
-        event = "ready",
+        events = [],
         usesDB = false,
         priority = ModulePriorities.NORMAL,
+        dependencies = [],
         config = null,
         settings = null
     }) {
         this.client = client;
-        this.options = { name, info, enabled, event, priority, usesDB };
+        this.options = { name, info, enabled, events, priority, usesDB, dependencies };
         
         this.commands = new Discord.Collection();
         this.logger = new Logger(this.options.name);
@@ -42,9 +43,9 @@ module.exports = class Module {
                 /**
                  * @type {import('./Command.')}
                  */
-                const command = new (require(`../modules/${this.options.name}/${file}`));
+                const CommandClass = require(`../modules/${this.options.name}/${file}`);
+                const command = new CommandClass(this.client, this);
                 delete require.cache[require.resolve(`../modules/${this.options.name}/${file}`)];
-
                 this.commands.set(file.split(".")[0], command);
                 this.logger.verbose(`Loaded command ${file.split(".")[0]} from ${this.options.name}`);
             } catch (e) {
@@ -55,12 +56,10 @@ module.exports = class Module {
 
     run(client, event, ...args) {
         // Register automatic event method caller
-        if (Array.isArray(this.options.event)) {
-            const method = this[event];
-            if (!method)
-                return this.logger.error(`[${this.options.name}] There was no configured method for the ${event} event.`);
-            return method.call(this, client, ...args);
-        }
+        const method = this[event];
+        if (!method)
+            return this.logger.error(`[${this.options.name}] There was no configured method for the ${event} event.`);
+        return method.call(this, client, ...args);
     }
 
     /**

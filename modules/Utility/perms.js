@@ -2,8 +2,8 @@ let { EmbedBuilder, ApplicationCommandOptionType, escapeMarkdown } = require('di
 const Command = require('../../structures/Command.js')
 
 module.exports = class PermsCommand extends Command {
-    constructor(client) {
-        super(client, {
+    constructor(client, module) {
+        super(client, module, {
             name: 'perms',
             description: 'Shows yours or another user\'s permission levels',
             minLevel: -1,
@@ -26,7 +26,6 @@ module.exports = class PermsCommand extends Command {
         if (!data) return interaction.reply(`${yellowtick} There's no user in database matching your query`)
         if (interaction.user.data.powerlevel < 0 && data.user.id !== interaction.user.id) return
 
-        console.log(client.database.getFlags(user.id).map(f => `\`${f}\``).join(", "))
         const embed = new EmbedBuilder()
             .setTitle(`${user.discriminator ? user.tag : user.username}`)
             .setThumbnail(user.displayAvatarURL())

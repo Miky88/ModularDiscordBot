@@ -3,8 +3,8 @@ const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
 const Command = require("../../structures/Command.js");
 
 module.exports = class EvalCommand extends Command {
-    constructor(client) {
-        super(client, {
+    constructor(client, module) {
+        super(client, module, {
             name: "eval",
             description: "Evaluates albitrary JavaScript",
             cooldown: 3,

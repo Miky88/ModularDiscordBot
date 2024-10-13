@@ -2,8 +2,8 @@ const Command = require('../../structures/Command');
 const { ApplicationCommandOptionType } = require('discord.js');
 
 module.exports = class ReloadCommand extends Command {
-    constructor(client) {
-        super(client, {
+    constructor(client, module) {
+        super(client, module, {
             name: 'reload',
             description: 'Reloads a command',
             cooldown: 3,

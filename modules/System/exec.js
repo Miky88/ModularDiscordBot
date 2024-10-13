@@ -3,8 +3,8 @@ const exec = require("util").promisify(require("child_process").exec);
 const Command = require("../../structures/Command.js");
 
 module.exports = class ExecCommand extends Command {
-    constructor(client) {
-        super(client, {
+    constructor(client, module) {
+        super(client, module, {
             name: "exec",
             description: "Runs shell commands on the host machine",
             cooldown: 3,
