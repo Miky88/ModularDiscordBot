@@ -40,20 +40,23 @@ module.exports = class ConfigurationManager {
 
     /**
      * Gets a value from the configuration file
-     * @param {String} key 
+     * @param {String} key Key can be a path to a nested object
      * @returns {*} The value from the configuration file 
      */
     get(key) {
-        return this.file[key]
+        return key.split('.').reduce((o, i) => o[i], this.file)
     }
 
     /**
      * Sets a value in the configuration file
-     * @param {String} key
+     * @param {String} key Key can be a path to a nested object
      * @param {*} value
      */
     set(key, value) {
-        this.file[key] = value
+        key = key.split('.')
+        let lastKey = key.pop()
+        let obj = key.reduce((o, i) => o[i], this.file)
+        obj[lastKey] = value
         fs.writeFileSync(this.path, stringify(this.file))
     }
 
