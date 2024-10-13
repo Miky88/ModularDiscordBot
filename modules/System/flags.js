@@ -74,12 +74,12 @@ module.exports = class FlagsCommand extends Command {
     async run(client, interaction, args) {
         let flag = interaction.options.getString('flag');
         let user = interaction.options.getUser('user');
+        let flags;
         try{
-        let flags = client.database.getFlags(args.user);
+            flags = client.database.getFlags(args.user);
         } catch(e){
-            return interaction.reply(this.module.config.get("flags.list.none")
-                        .replace('<user>', user.tag)
-                    );
+            client.database.addUser(args.user);
+            flags = client.database.getFlags(args.user);
         }
         switch (interaction.options.getSubcommand()) {
             case "list":
