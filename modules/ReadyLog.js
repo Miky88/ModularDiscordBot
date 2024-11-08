@@ -3,9 +3,11 @@ const Module = require("../structures/Module.js");
 module.exports = class ReadyLog extends Module {
     constructor(client) {
         super(client, {
+            name: "ReadyLog",
             info: "Logs informations once ready and sets the custom status",
             enabled: true,
-            events: ["ready"]
+            events: ["ready"],
+
         })
     }
 

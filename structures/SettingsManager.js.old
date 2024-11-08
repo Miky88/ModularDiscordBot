@@ -1,0 +1,122 @@
+module.exports = class SettingsManager {
+    /**
+     * Instantiates a settings manager for a specific module
+     * @param {import('./Module')} module The module to instantiate the settings manager for
+     * @param {object} defaultSettings The default settings for the module
+     */
+    constructor(module, defaultSettings = {}) {
+        this.client = module.client;
+        /** @type {import('lokijs')} */
+        this.db = this.client.database.db;
+        this.defaultSettings = defaultSettings;
+
+        this.settings = module.client.database.db.getCollection(`settings_${module.options.name}`);
+        console.log(this.settings)
+        if (!this.settings) {
+            this.settings = this.db.addCollection(`settings_${module.options.name}`);
+            if(this.settings.data.length > 0) {
+                this.client.guilds.cache.forEach(guild => {
+                    this.settings.insert({
+                        id: guild.id,
+                        settings: defaultSettings
+                    });
+                });
+            }
+            this.db.saveDatabase();
+            console.log(this.settings)
+        }
+        
+        this.client.settings.set(module.options.name, this);
+    }
+
+    /**
+     * @param {string} guildID
+     * @returns {object}
+     */
+    get(guildID) {
+        const data = this.settings.data.find(s => s.id == guildID)
+
+        if (!data) {
+            this.settings.insert({
+                id: guildID,
+                settings: this.defaultSettings
+            });
+            return this.defaultSettings;
+        }
+
+        return data.settings;
+    }
+
+    async set(guildID, key, value) {
+        let data = await this.settings.data.find(s => s.id == guildID)
+        if (!data) {
+            await this.settings.insert({
+                id: guildID,
+                settings: this.defaultSettings
+            });
+            data = await this.settings.data.find(s => s.id == guildID)
+        }
+
+        data.settings[key] = value;
+        await this.settings.update(data);
+        this.db.saveDatabase();
+        return data.settings;
+    }
+
+    /**
+     * @param {string} guildID
+     * @param {string} key
+     */
+    async reset(guildID, key) {
+        let data = await this.settings.data.find(s => s.id == guildID)
+        if (!data) {
+            await this.settings.insert({
+                id: guildID,
+                settings: this.defaultSettings
+            });
+            return this.defaultSettings;
+        }
+        console.log(data.settings[key])
+        console.log(this.defaultSettings[key])
+        data.settings[key] = this.defaultSettings[key];
+        await this.settings.update(data);
+        this.db.saveDatabase();
+        return data.settings;
+    }
+
+    async add(guildID, key, value){
+        let data = await this.settings.findOne({id: guildID});
+            if(!Array.isArray(data.settings[key])) throw new Error("Not an array.")
+            if(!data) {
+                console.log("data")
+                await this.settings.insert({
+                    id: guildID,
+                    settings: this.defaultSettings
+                });
+                data = await this.settings.findOne({id: guildID});
+            }
+            data.settings[key].push(value);
+            await this.settings.update(data);
+            this.db.saveDatabase();
+            return data.settings;
+        
+    }
+
+    async remove(guildID, key, value){
+        let data = await this.settings.findOne({id: guildID});
+        if(!Array.isArray(data.settings[key])) throw new Error("Not an array.")
+        arr = data.settings[key].filter(function(item) {
+            return item !== value
+        })
+        await this.settings.update(data);
+        this.db.saveDatabase();
+        return data.settings;
+    }
+
+    async delete(guildID) {
+        let data = await this.settings.data.find(s => s.id == guildID)
+        if (!data) return false;
+        await this.settings.remove(data);
+        return true;
+    }
+}

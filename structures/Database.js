@@ -16,18 +16,33 @@ module.exports = class Database {
      */
     constructor(client) {
         this.client = client;
-        this.collections = ['users', 'settings'];
+        this.collections = ['users'];
 
         for (let module of client.moduleManager.modules.values()) {
-           if (module.options.usesDB)
-                this.collections.push(`plugin_${module.options.name}`)
+            if (module.options.usesDB)
+                this.collections.push(`module_${module.options.name}`)
+            if (module.options.settings)
+                this.collections.push(`settings_${module.options.name}`)
+
         }
 
         this.db = new Loki('database.db', {
             autoload: true,
             autosave: true,
-            autoloadCallback: () => this.collections.forEach(x => this.db[x] = this.db.addCollection(x)),
-            autosaveInterval: 1000
+            autoloadCallback: () => {
+                this.collections.forEach(name => {
+                    if (!this.db.getCollection(name)) {
+                        console.log(name)
+                        this.db[name] = this.db.addCollection(name)
+                    } else{
+                        console.log("woowowow" + name)
+                        this.db[name] = this.db.getCollection(name)
+                        console.log(this.db[name].data)
+                    }
+                });
+            },
+            autosaveInterval: 1000,
+            persistenceMethod: 'fs'
         });
     }
 

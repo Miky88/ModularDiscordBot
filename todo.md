@@ -11,7 +11,7 @@ Discord stuff
 - [x] Create a config loader and create a YAML config for each plugin
 - [x] New system for permissions (use flags for system)
 - [x] Make it support multiple guilds
-- [x] Ensure difference between Guild permission and System permission
+- [>>] Ensure difference between Guild permission and System permission
 - [x] New settings system per guild
 
 Module Management
