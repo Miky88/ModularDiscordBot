@@ -1,6 +1,7 @@
 const Command = require('../../structures/Command.js');
 const { ApplicationCommandOptionType, EmbedBuilder, userMention, User, UserContextMenuCommandInteraction } = require('discord.js');
 const { Pagination } = require('pagination.djs');
+const Module = require('../../structures/Module.js');
 
 module.exports = class Settings extends Command {
     constructor(client, module) {
@@ -150,22 +151,32 @@ module.exports = class Settings extends Command {
                     .setTitle('Value removed')
                     .setDescription(`Value \`${interaction.options.getString("value")}\` removed from key \`${interaction.options.getString("key")}\``)
                 interaction.reply({ embeds: [embed] })
-                this.client.database.db.saveDatabase();
                 break;
             } case "view": {
                 const pagination = new Pagination(interaction);
                 const embeds = [];
-                const settings = this.client.settings.map((v, k) => { return { module: k, settings: v.get(guild.id) }});
+
+
+                /**
+                 * @type {[{}]}
+                 */
+                let settings = [];
+                for (const [_module, moduleSettings] of client.settings) {
+                    const guildSettings = await this.client.settings.get(_module).get(guild.id);
+                    if (guildSettings) {
+                        settings.push({ module: _module, settings: guildSettings });
+                    }
+                }
                 settings.forEach(s => {
                     const embed = new EmbedBuilder()
                        .setTitle(`Settings for ${s.module}`)
-                       .setDescription(Object.entries(s.settings).map(([key, value]) => `\`${key}\`: ${Array.isArray(value)? value.join(', ') : value}`).join('\n'))
+                       .setDescription(Object.entries(s.settings.settings).map(([key, value]) => `\`${key}\`: ${Array.isArray(value)? value.join(', ') : value}`).join('\n'))
                     embeds.push(embed);
                 });
                 pagination.setAuthorizedUsers([interaction.user.id])
                 pagination.setTitle(`Settings for ${guild.name}`) 
                 pagination.setEmbeds(embeds, (embed, index, array) => {
-                    return embed.setFooter({ text: `Page: ${index + 1}/${array.length}` });
+                    return embed.setFooter({ text: `Page: ${index}/${array.length}` });
                 });
                 await pagination.render();
                 break;
@@ -175,7 +186,6 @@ module.exports = class Settings extends Command {
                     .setTitle('Key restored to its default value')
                     .setDescription(`Key \`${interaction.options.getString("key")}\` has been restored to default.`)
                 interaction.reply({ embeds: [embed] })
-                this.client.database.db.saveDatabase();
                 break;
             }
         }

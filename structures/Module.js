@@ -31,20 +31,13 @@ module.exports = class Module {
         this.commands = new Discord.Collection();
         this.logger = new Logger(this.options.name);
 
-        if (this.options.usesDB) {
-            if(this.options.name == "System"){
-                this.client.database = new Database(this.client)
-            }
-            this.client.database.db[`module_${this.options.name}`] = this.client.database.db.addCollection(`module_${this.options.name}`) 
-        }
-        if(this.options.settings) {
-            this.client.database.db[`settings_${this.options.name}`] = this.client.database.db.addCollection(`settings_${this.options.name}`) 
-        }
+        // if(usesDB)
+        //     client.database.db[`module_${this.options.name}`] = client.database.db.addCollection(`module_${this.options.name}`);
 
         if(config)
             this.config = new ConfigurationManager(this, config);
         if(settings)
-            this.settings = new SettingsManager(this, settings);
+            this.settings = new SettingsManager(client, this, settings);
     }
 
     async loadCommands() {

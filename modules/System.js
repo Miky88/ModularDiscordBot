@@ -38,8 +38,7 @@ module.exports = class System extends Module {
                 thisIsAString: "myPlainText",
                 thisIsAnInt: 10,
                 thisIsAdouble: 2.4
-            },
-            usesDB: true
+            }
         })
     }
 
