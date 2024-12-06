@@ -75,7 +75,6 @@ module.exports = class FlagsCommand extends Command {
         let flag = interaction.options.getString('flag');
         let user = interaction.options.getUser('user');
         let flags;
-        let flags;
         switch (interaction.options.getSubcommand()) {
             case "list":
                 try{
@@ -86,7 +85,6 @@ module.exports = class FlagsCommand extends Command {
                 if(flags.length > 0){
                     return interaction.reply(`${this.module.config.get("flags.list.title").replace('<user>', user.tag)} \n>>> ${flags.map(fl => "- " + this.module.config.get("flags.list.flags." + fl)).join("\n")}`);
                 } else {
-                    return interaction.reply(this.module.config.get("flags.list.none")
                     return interaction.reply(this.module.config.get("flags.list.none")
                         .replace('<user>', user.tag)
                     );
@@ -106,7 +104,6 @@ module.exports = class FlagsCommand extends Command {
                 client.database.setFlag(args.user, flag, true)
 
                 const flagadded = this.module.config.get("flags.add")
-                const flagadded = this.module.config.get("flags.add")
                     .replace('<flag>', flag)
                     .replace('<user>', user.tag);
                 
@@ -122,13 +119,11 @@ module.exports = class FlagsCommand extends Command {
                 }
                 if(!(flags.includes(flag))){
                     const notHasFlag = this.module.config.get("flags.errors.notHasFlag");
-                    const notHasFlag = this.module.config.get("flags.errors.notHasFlag");
                     interaction.reply(notHasFlag);
                     return;
                 }
                 client.database.setFlag(args.user, flag, false);
 
-                const flagremoved = this.module.config.get("flags.remove")
                 const flagremoved = this.module.config.get("flags.remove")
                     .replace('<flag>', flag)
                     .replace('<user>', user.tag);
