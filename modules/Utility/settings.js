@@ -8,7 +8,6 @@ module.exports = class Settings extends Command {
         super(client, module, {
             name: 'settings',
             description: 'View, add or remove settings from this guild.',
-            // minGuildLevel: ['OWNER'], TODO
             options: [
                 {
                     name: "view",

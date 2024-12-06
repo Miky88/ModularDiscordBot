@@ -65,9 +65,7 @@ module.exports = class System extends Module {
     }
 
     async interactionCreate(client, interaction) {
-
         if (!interaction.isAutocomplete()) return;
-
         const command = this.systemCommands.get(interaction.commandName);
         if (!command) return;
 
@@ -75,23 +73,6 @@ module.exports = class System extends Module {
             let modules = [...this.client.moduleManager.modules.keys()];
             let options = modules.map(m => ({ name: m, value: m }));
             return interaction.respond(options);
-        } else if (interaction.commandName == "settings") {
-            const module = interaction.options.getString("module");
-            const moduleSettings = this.client.moduleManager.modules.get(module).settings
-            switch (interaction.options.getSubcommand()) {
-                case "add":
-                case "remove":
-                    return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => moduleSettings.defaultSettings[key] instanceof Array).map(key => ({ name: key, value: key })))
-                    break;
-                case "set":
-                    return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => !(moduleSettings.defaultSettings[key] instanceof Array)).map(key => ({ name: key, value: key })))
-                    break;
-                case "reset":
-                    return interaction.respond(Object.keys(moduleSettings.defaultSettings).map(key => ({ name: key, value: key })))
-                    break;
-            }
-
-            console.log(interaction);
         }
     }
 

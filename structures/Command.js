@@ -9,23 +9,20 @@ module.exports = class Command {
         type = ApplicationCommandType.ChatInput,
         cooldown = 0,
         requiredFlag = [],
-        minGuildLevel = 0, // TODO
-        reqPerms = [],
-        botPerms = [],
+        defaultMemberPermissions = [],
         guildOnly = false,
     }) {
         /** @type {import('..')} */
         this.client = client
         this.module = module
-        // console.log(this.module.constructor.name)
-        this.config = { name, description, cooldown, requiredFlag, reqPerms, botPerms, guildOnly, minGuildLevel };
+        this.config = { name, description, cooldown, requiredFlag, defaultMemberPermissions, guildOnly };
 
         this.data = {
             name,
             description,
             options,
             type,
-            defaultMemberPermissions: reqPerms
+            defaultMemberPermissions
         };
 
         this.logger = new Logger(this.constructor.name);
