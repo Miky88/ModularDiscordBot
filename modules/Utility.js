@@ -32,5 +32,4 @@ module.exports = class Utility extends Module {
             console.log(interaction);
         }
     }
-
 }

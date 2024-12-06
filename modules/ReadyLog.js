@@ -6,8 +6,7 @@ module.exports = class ReadyLog extends Module {
             name: "ReadyLog",
             info: "Logs informations once ready and sets the custom status",
             enabled: true,
-            events: ["ready"],
-
+            events: ["ready"]
         })
     }
 

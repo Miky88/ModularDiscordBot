@@ -76,7 +76,6 @@ module.exports = class System extends Module {
         }
     }
 
-
     // Override
     async loadCommands() {
         this.systemCommands = new Discord.Collection();

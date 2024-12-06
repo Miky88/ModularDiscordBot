@@ -20,10 +20,6 @@ module.exports = class InteractionCommandHandler extends Module {
             .set(client.moduleManager.commands.map(c => c.toJson()))
     }
 
-    checkGuildPermissions(member) {
-        
-    }
-
     /**
      * @param {BotClient} client
      * @param {Discord.Interaction} interaction
@@ -41,12 +37,6 @@ module.exports = class InteractionCommandHandler extends Module {
                 let flags = await client.database.getFlags(interaction.user.id)
                 let flag = cmd.config.requiredFlag.find(f => !flags.includes(f))
                 if (flag) return interaction.reply({ content: `:no_entry: You don't have required flag **${flag}** to perform this command.`, ephemeral: true})
-            }
-
-            // Guild Permission check TODO
-            if(interaction){
-                // if command on server and server only
-                // 
             }
             
             function extractOptions(options, obj = {}) {

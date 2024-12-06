@@ -5,7 +5,7 @@ module.exports = class RebootCommand extends Command {
         super(client, module, {
             name: 'reboot',
             description: 'Reboots the bot if running under PM2',
-            requiredFlag: ['OWNER']
+            requiredFlag: ['STAFF']
         });
     }
 
