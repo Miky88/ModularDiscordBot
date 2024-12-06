@@ -3,7 +3,7 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const ConfigurationManager = require("../structures/ConfigurationManager.js");
 const SettingsManager = require("../structures/SettingsManager.js");
-const Settings = require("./System/Settings.js");
+const Settings = require("./System/settings.js");
 const { set } = require("mongoose");
 
 module.exports = class System extends Module {
