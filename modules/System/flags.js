@@ -75,30 +75,37 @@ module.exports = class FlagsCommand extends Command {
         let flag = interaction.options.getString('flag');
         let user = interaction.options.getUser('user');
         let flags;
+        let flags;
         switch (interaction.options.getSubcommand()) {
             case "list":
                 try{
-                    flags = await client.database.getFlags(user.id);
+                    flags = client.database.getFlags(args.user);
                 } catch(e){
                     return interaction.reply(this.module.config.get("flags.list.none").replace('<user>', user.tag));
                 }
                 if(flags.length > 0){
-                    return interaction.reply(`${this.module.config.get("flags.list.title").replace('<user>', user.tag)} \n>>> ${flags.map(fl => "- " + this.module.config.get("flags.list.flags." + fl)).join('\n')}`);
+                    return interaction.reply(`${this.module.config.get("flags.list.title").replace('<user>', user.tag)} \n>>> ${flags.map(fl => "- " + this.module.config.get("flags.list.flags." + fl)).join("\n")}`);
                 } else {
+                    return interaction.reply(this.module.config.get("flags.list.none")
                     return interaction.reply(this.module.config.get("flags.list.none")
                         .replace('<user>', user.tag)
                     );
                 }
             case "add":
                 try{
-                    flags = await client.database.getFlags(args.user);
+                    flags = client.database.getFlags(args.user);
                 } catch(e){
                     client.database.addUser(args.user);
-                    flags = await client.database.getFlags(args.user);
+                    flags = client.database.getFlags(args.user);
                 }
-                
-                client.database.setFlag(args.user, args.flag, true)
+                if(flags.includes(flag)){
+                    const alreadyHasFlag = this.module.config.get("flags.errors.alreadyHasFlag");
+                    interaction.reply(alreadyHasFlag);
+                    return;
+                }
+                client.database.setFlag(args.user, flag, true)
 
+                const flagadded = this.module.config.get("flags.add")
                 const flagadded = this.module.config.get("flags.add")
                     .replace('<flag>', flag)
                     .replace('<user>', user.tag);
@@ -109,17 +116,19 @@ module.exports = class FlagsCommand extends Command {
             
             case "remove":
                 try{
-                    flags = await client.database.getFlags(args.user);
+                    flags = client.database.getFlags(args.user);
                 } catch(e){
                     return interaction.reply(this.module.config.get("flags.errors.notHasFlag").replace('<user>', user.tag));
                 }
                 if(!(flags.includes(flag))){
+                    const notHasFlag = this.module.config.get("flags.errors.notHasFlag");
                     const notHasFlag = this.module.config.get("flags.errors.notHasFlag");
                     interaction.reply(notHasFlag);
                     return;
                 }
                 client.database.setFlag(args.user, flag, false);
 
+                const flagremoved = this.module.config.get("flags.remove")
                 const flagremoved = this.module.config.get("flags.remove")
                     .replace('<flag>', flag)
                     .replace('<user>', user.tag);
