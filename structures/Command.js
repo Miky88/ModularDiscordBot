@@ -1,4 +1,4 @@
-const { ApplicationCommandType } = require('discord.js');
+const { ApplicationCommandType, PermissionFlagsBits } = require('discord.js');
 const Logger = require('./Logger.js');
 
 module.exports = class Command {
@@ -9,21 +9,23 @@ module.exports = class Command {
         type = ApplicationCommandType.ChatInput,
         cooldown = 0,
         requiredFlag = [],
-        minGuildLevel = 0,
+        minGuildLevel = 0, // TODO
         reqPerms = [],
         botPerms = [],
+        guildOnly = false,
     }) {
         /** @type {import('..')} */
         this.client = client
         this.module = module
         // console.log(this.module.constructor.name)
-        this.config = { name, description, cooldown, requiredFlag, minGuildLevel, reqPerms, botPerms };
+        this.config = { name, description, cooldown, requiredFlag, reqPerms, botPerms, guildOnly, minGuildLevel };
 
         this.data = {
             name,
             description,
             options,
-            type
+            type,
+            defaultMemberPermissions: reqPerms
         };
 
         this.logger = new Logger(this.constructor.name);
@@ -38,14 +40,14 @@ module.exports = class Command {
     run(client, interaction, args) {}
 
     toJson() {
-        return (!this.data.type || this.data.type == ApplicationCommandType.ChatInput) ? {
-            name: this.data.name,
-            description: this.data.description,
-            options: this.data.options,
-            type: this.data.type
-        } : {
-            name: this.data.name,
-            type: this.data.type
-        }
+        const { name, description, options, type, defaultMemberPermissions } = this.data;
+        const isChatInput = !type || type === ApplicationCommandType.ChatInput;
+    
+        return {
+            name,
+            type,
+            ...(isChatInput && { description, options }),
+            defaultMemberPermissions
+        };
     }
 }

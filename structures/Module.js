@@ -36,8 +36,6 @@ module.exports = class Module {
 
         if(config)
             this.config = new ConfigurationManager(this, config);
-        if(settings)
-            this.settings = new SettingsManager(client, this, settings);
     }
 
     async loadCommands() {

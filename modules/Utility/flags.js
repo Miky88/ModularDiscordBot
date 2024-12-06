@@ -67,7 +67,7 @@ module.exports = class FlagsCommand extends Command {
 
     /**
      * 
-     * @param {import('../..')} client 
+     * @param {import('../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      * @param {*} args 
      */

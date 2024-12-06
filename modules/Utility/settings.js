@@ -8,12 +8,21 @@ module.exports = class Settings extends Command {
         super(client, module, {
             name: 'settings',
             description: 'View, add or remove settings from this guild.',
-            minGuildLevel: ['OWNER'],
+            // minGuildLevel: ['OWNER'], TODO
             options: [
                 {
                     name: "view",
                     description: "View the current settings for this server.",
-                    type: ApplicationCommandOptionType.Subcommand
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: "module",
+                            description: "Module to view settings for",
+                            type: ApplicationCommandOptionType.String,
+                            required: false,
+                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
+                        }
+                    ],
                 },
                 {
                     name: "set",
@@ -25,7 +34,7 @@ module.exports = class Settings extends Command {
                             description: "Module to set key of",
                             type: ApplicationCommandOptionType.String,
                             required: true,
-                            choices: client.settings.map((v, k) => {return {name: k, value: k}})
+                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
                         },
                         {
                             name: "key",
@@ -52,7 +61,7 @@ module.exports = class Settings extends Command {
                             description: "Module to add key of",
                             type: ApplicationCommandOptionType.String,
                             required: true,
-                            choices: client.settings.map((v, k) => {return {name: k, value: k}})
+                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
                         },
                         {
                             name: "key",
@@ -79,7 +88,7 @@ module.exports = class Settings extends Command {
                             description: "Module to remove value of",
                             type: ApplicationCommandOptionType.String,
                             required: true,
-                            choices: client.settings.map((v, k) => {return {name: k, value: k}})
+                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
                         },
                         {
                             name: "key",
@@ -106,7 +115,7 @@ module.exports = class Settings extends Command {
                             description: "Module to set key of",
                             type: ApplicationCommandOptionType.String,
                             required: true,
-                            choices: client.settings.map((v, k) => {return {name: k, value: k}})
+                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
                         },
                         {
                             name: "key",
@@ -123,7 +132,7 @@ module.exports = class Settings extends Command {
 
     /**
      * 
-     * @param {import('../..')} client 
+     * @param {import('../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      * @param {*} args 
      */
@@ -156,27 +165,23 @@ module.exports = class Settings extends Command {
                 const pagination = new Pagination(interaction);
                 const embeds = [];
 
-
-                /**
-                 * @type {[{}]}
-                 */
-                let settings = [];
-                for (const [_module, moduleSettings] of client.settings) {
-                    const guildSettings = await this.client.settings.get(_module).get(guild.id);
-                    if (guildSettings) {
-                        settings.push({ module: _module, settings: guildSettings });
-                    }
-                }
+                let settings = client.settings.map((v, k) => {return {module: k, settings: v.get(guild.id).settings}});
                 settings.forEach(s => {
                     const embed = new EmbedBuilder()
                        .setTitle(`Settings for ${s.module}`)
-                       .setDescription(Object.entries(s.settings.settings).map(([key, value]) => `\`${key}\`: ${Array.isArray(value)? value.join(', ') : value}`).join('\n'))
+                       .setDescription(Object.entries(s.settings).map(([key, value]) => `\`${key}\`: ${Array.isArray(value)? value.join(', ') : value}`).join('\n'))
                     embeds.push(embed);
                 });
+                if (embeds.length == 0) {
+                    const embed = new EmbedBuilder()
+                       .setTitle('No settings found')
+                       .setDescription('This guild has no settings set.')
+                       .setColor('Random')
+                    embeds.push(embed);
+                }
                 pagination.setAuthorizedUsers([interaction.user.id])
-                pagination.setTitle(`Settings for ${guild.name}`) 
                 pagination.setEmbeds(embeds, (embed, index, array) => {
-                    return embed.setFooter({ text: `Page: ${index}/${array.length}` });
+                    return embed.setFooter({ text: `Page: ${index + 1}/${array.length}` });
                 });
                 await pagination.render();
                 break;

@@ -3,8 +3,9 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const ConfigurationManager = require("../structures/ConfigurationManager.js");
 const SettingsManager = require("../structures/SettingsManager.js");
-const Settings = require("./System/Settings.js");
+const Settings = require("./Utility/settings.js");
 const { set } = require("mongoose");
+const ModulePriorities = require("../structures/ModulePriorities.js");
 
 module.exports = class System extends Module {
     constructor(client) {
@@ -33,12 +34,12 @@ module.exports = class System extends Module {
                     }
                 } 
             },
-            settings: {
-                thisIsAList: ["test1", "test2"],
-                thisIsAString: "myPlainText",
-                thisIsAnInt: 10,
-                thisIsAdouble: 2.4
-            }
+            // settings: {
+            //     thisIsAList: ["test1", "test2"],
+            //     thisIsAString: "myPlainText",
+            //     thisIsAnInt: 10,
+            //     thisIsAdouble: 2.4
+            // }
         })
     }
 
@@ -81,7 +82,10 @@ module.exports = class System extends Module {
             return interaction.respond(options);
         } else if (interaction.commandName == "settings") {
             const module = interaction.options.getString("module");
-            const moduleSettings = this.client.moduleManager.modules.get(module).settings
+            const _module = this.client.moduleManager.modules.get(module)
+            if(!_module)
+                return;
+            const moduleSettings = _module.settings;
             switch (interaction.options.getSubcommand()) {
                 case "add":
                 case "remove":
@@ -94,7 +98,7 @@ module.exports = class System extends Module {
                     return interaction.respond(Object.keys(moduleSettings.defaultSettings).map(key => ({ name: key, value: key })))
                     break;
             }
-
+            /** eh fai tu */
             console.log(interaction);
         }
     }
