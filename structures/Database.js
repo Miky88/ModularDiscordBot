@@ -1,5 +1,6 @@
 const Loki = require('lokijs');
 const BotClient = require('..');
+const Logger = require('./Logger.js');
 const cache = new Map();
 
 const flags = {
@@ -16,27 +17,33 @@ module.exports = class Database {
      */
     constructor(client) {
         this.client = client;
-        this.collections = ['users', 'settings'];
-
-        for (let module of client.moduleManager.modules.values()) {
-           if (module.options.usesDB)
-                this.collections.push(`plugin_${module.options.name}`)
-        }
+        this.collections = ['users']
 
         this.db = new Loki('database.db', {
             autoload: true,
             autosave: true,
-            autoloadCallback: () => this.collections.forEach(x => this.db[x] = this.db.addCollection(x)),
-            autosaveInterval: 1000
+            autoloadCallback: () => this.collections.forEach((collection) => this.db[collection] = this.db.addCollection(collection)),
+            autosaveInterval: 1000,
         });
+        this.logger = new Logger('DB');
+
+        // console.log(this.db.listCollections())
+        this.logger.verbose('Database loaded')
+    }
+    
+    reconfigure() {
+        this.db.configureOptions({
+            autoload: true,
+            autosave: true,
+            autoloadCallback: () => this.collections.forEach((collection) => this.db[collection] = this.db.addCollection(collection)),
+            autosaveInterval: 1000, 
+        })
     }
 
     async addUser(userID) {
         const user = await this.db.users.insert({
             id: userID,
-            flags: 0,
-            blacklistReason: null,
-            guildBlacklistReason: null
+            flags: 0
         })
         this.cacheUser(user)
         return user;
@@ -44,7 +51,6 @@ module.exports = class Database {
 
     cacheUser(user) {
         cache.set(user.id, user)
-        return true;
     }
 
     getUser(userID) {
@@ -91,10 +97,8 @@ module.exports = class Database {
         if (user) {
             if (this.client.config.get('owners').includes(user.id) && !this.hasFlag(user.id, 'OWNER')) {
                 this.setFlag(user.id, 'OWNER', true);
-                await this.updateUser(user);
             } else if (!this.client.config.get('owners').includes(user.id) && this.hasFlag(user.id, 'OWNER')) {
                 this.setFlag(user.id, 'OWNER', false);
-                await this.updateUser(user);
             }
             return user;
         }
@@ -108,5 +112,39 @@ module.exports = class Database {
         const update = await this.db.users.findOne({ id: data.id })
         this.cacheUser(update)
         return update
+    }
+
+    fixCollection (collection) {
+        this.logger.debug('Fixing collection', collection.name);
+        const deduplicateSet = new Set();
+        const data = collection.data
+            .sort((a, b) => a.meta.created - b.meta.created)
+            .filter((x) => {
+                const duplicated = deduplicateSet.has(x.$loki);
+                deduplicateSet.add(x.$loki);
+
+                if (duplicated) {
+                    this.logger.warn('Detected duplicated key, will remove it');
+                }
+                return !duplicated;
+            })
+            .sort((a, b) => a.$loki - b.$loki);
+
+        const index = new Array(data.length);
+        for (let i = 0; i < data.length; i += 1) {
+            index[i] = data[i].$loki;
+        }
+
+        collection.data = data;
+        collection.idIndex = index;
+        collection.maxId = collection.data?.length
+            ? Math.max(...collection.data.map((x) => x.$loki))
+            : 0;
+        collection.dirty = true;
+        collection.checkAllIndexes({
+            randomSampling: true,
+            repair: true,
+        });
+        this.logger.success('Done!');
     }
 }

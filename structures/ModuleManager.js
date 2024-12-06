@@ -2,6 +2,7 @@ const fs = require('fs');
 const Module = require('./Module.js');
 const Command = require('./Command.js');
 const Logger = require('./Logger.js');
+const SettingsManager = require('./SettingsManager.js');
 
 module.exports = class ModuleManager {
     /**
@@ -11,6 +12,7 @@ module.exports = class ModuleManager {
         this.client = client;
         /** @type {Map<string, import("./Module.js")>} */
         this.modules = new Map();
+
         this.events = new Set();
         this.logger = new Logger(this.constructor.name);
     }
@@ -23,6 +25,7 @@ module.exports = class ModuleManager {
                 this.load(file)
             }
         });
+        this.client.database.reconfigure(); 
         this.logger.success(`Successfully Loaded ${this.modules.size} modules`)
     }
 
@@ -42,6 +45,15 @@ module.exports = class ModuleManager {
             }
             if (_module.options.enabled)
                 _module.loadCommands()
+            if (_module.options.usesDB) {
+                this.client.database.db[`module_${_module.options.name}`] = this.client.database.db.addCollection(`module_${_module.options.name}`);
+                this.client.database.collections.push(`module_${_module.options.name}`);
+            }
+            if (_module.options.settings) {
+                _module.settings = new SettingsManager(this.client, _module, _module.options.settings);
+                this.client.database.collections.push(`settings_${_module.options.name}`);
+            }
+
             this.add(_module)
         } catch (error) {
             this.logger.error("Unable to load " + moduleName + ": " + error)
@@ -73,11 +85,10 @@ module.exports = class ModuleManager {
                 this.client.on(event, eventCallback(event))
             }
         })
-        
     }
 
     reload(pluginName) {
-        return this.unload(pluginName) ? (!this.load(pluginName)?.error) : false
+        return this.unload(pluginName) && this.load(pluginName)
     }
 
     unload(pluginName) {

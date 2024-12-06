@@ -2,34 +2,43 @@ const Module = require("../structures/Module.js");
 const Discord = require('discord.js');
 const fs = require('fs');
 const ConfigurationManager = require("../structures/ConfigurationManager.js");
+const SettingsManager = require("../structures/SettingsManager.js");
+const Settings = require("./System/Settings.js");
+const { set } = require("mongoose");
 
 module.exports = class System extends Module {
     constructor(client) {
         super(client, {
+            name: "System",
             info: "Loads the system utility commands",
             enabled: true,
-            events: ["ready", "interactionCreate"] 
-        }),
-
-        this.config = new ConfigurationManager(this, {
-            flags: {
-                list: {
-                    title: "🚩 <user>'s flags:",
-                    flags: {
-                        OWNER: "**Bot Owner**: This user is a developer of this bot",
-                        STAFF: "**Bot Staff**: This user has staff priviliges on this bot",
-                        PREMIUM: "**Premium**: This user supported the development of this bot",
-                        BLACKLISTED: "**Blacklisted**: This user is blacklisted from this bot",
+            events: ["ready", "interactionCreate"],
+            config: {
+                flags: {
+                    list: {
+                        title: "🚩 <user>'s flags:",
+                        flags: {
+                            OWNER: "**Bot Owner**: This user is a developer of this bot",
+                            STAFF: "**Bot Staff**: This user has staff priviliges on this bot",
+                            PREMIUM: "**Premium**: This user supported the development of this bot",
+                            BLACKLISTED: "**Blacklisted**: This user is blacklisted from this bot",
+                        },
+                        none: "🚩 <user> has no flags"
                     },
-                    none: "🚩 <user> has no flags"
-                },
-                add: "✅ Flag `<flag>` has been assigned to <user>",
-                remove:"✅ Flag `<flag>` has been removed to <user>",
-                errors: {
-                    alreadyHasFlag: "⚠️ Flag already assigned",
-                    notHasFlag: "⚠️ Nothing to remove"
-                }
-            } 
+                    add: "✅ Flag `<flag>` has been assigned to <user>",
+                    remove:"✅ Flag `<flag>` has been removed to <user>",
+                    errors: {
+                        alreadyHasFlag: "⚠️ Flag already assigned",
+                        notHasFlag: "⚠️ Nothing to remove"
+                    }
+                } 
+            },
+            settings: {
+                thisIsAList: ["test1", "test2"],
+                thisIsAString: "myPlainText",
+                thisIsAnInt: 10,
+                thisIsAdouble: 2.4
+            }
         })
     }
 
@@ -60,6 +69,7 @@ module.exports = class System extends Module {
     }
 
     async interactionCreate(client, interaction) {
+
         if (!interaction.isAutocomplete()) return;
 
         const command = this.systemCommands.get(interaction.commandName);
@@ -69,6 +79,23 @@ module.exports = class System extends Module {
             let modules = [...this.client.moduleManager.modules.keys()];
             let options = modules.map(m => ({ name: m, value: m }));
             return interaction.respond(options);
+        } else if (interaction.commandName == "settings") {
+            const module = interaction.options.getString("module");
+            const moduleSettings = this.client.moduleManager.modules.get(module).settings
+            switch (interaction.options.getSubcommand()) {
+                case "add":
+                case "remove":
+                    return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => moduleSettings.defaultSettings[key] instanceof Array).map(key => ({ name: key, value: key })))
+                    break;
+                case "set":
+                    return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => !(moduleSettings.defaultSettings[key] instanceof Array)).map(key => ({ name: key, value: key })))
+                    break;
+                case "reset":
+                    return interaction.respond(Object.keys(moduleSettings.defaultSettings).map(key => ({ name: key, value: key })))
+                    break;
+            }
+
+            console.log(interaction);
         }
     }
 

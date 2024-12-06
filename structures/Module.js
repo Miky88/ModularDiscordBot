@@ -6,6 +6,7 @@ const ModulePriorities = require('./ModulePriorities');
 const ConfigurationManager = require('./ConfigurationManager');
 const SettingsManager = require('./SettingsManager');
 const Logger = require('./Logger');
+const Database = require('./Database')
 
 module.exports = class Module {
     /**
@@ -25,14 +26,18 @@ module.exports = class Module {
         settings = null
     }) {
         this.client = client;
-        this.options = { name, info, enabled, events, priority, usesDB, dependencies };
+        this.options = { name, info, enabled, events, priority, usesDB, dependencies, settings};
         
         this.commands = new Discord.Collection();
         this.logger = new Logger(this.options.name);
+
+        // if(usesDB)
+        //     client.database.db[`module_${this.options.name}`] = client.database.db.addCollection(`module_${this.options.name}`);
+
         if(config)
             this.config = new ConfigurationManager(this, config);
         if(settings)
-            this.settings = new SettingsManager(this, settings);
+            this.settings = new SettingsManager(client, this, settings);
     }
 
     async loadCommands() {

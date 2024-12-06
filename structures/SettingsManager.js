@@ -1,118 +1,53 @@
-module.export = class SettingsManager {
+
+const _cache = new Map();
+
+module.exports = class SettingsManager {
     /**
      * Instantiates a settings manager for a specific module
+     * @param {import('../')} client The client to use for the settings manager
      * @param {import('./Module')} module The module to instantiate the settings manager for
      * @param {object} defaultSettings The default settings for the module
      */
-    constructor(module, defaultSettings = {}) {
-        this.client = module.client;
-        /** @type {import('lokijs')} */
-        this.db = client.database.db;
+    constructor(client, module, defaultSettings = {}) {
+        this.client = client;
+        this.dbName = `settings_${module.options.name}`;
+        this.module = module;
         this.defaultSettings = defaultSettings;
-
-        this.settings = this.db.getCollection(`settings_${module.options.name}`);
-        if (!this.settings) {
-            this.settings = this.db.addCollection(`settings_${module.options.name}`);
-            client.guilds.cache.forEach(guild => {
-                this.settings.insert({
-                    id: guild.id,
-                    settings: defaultSettings
-                });
-            });
-            this.db.saveDatabase();
-        }
+        
+        client.settings.set(module.options.name, this);
     }
 
-    /**
-     * @param {string} guildID
-     * @returns {object}
-     */
-    get(guildID) {
-        const data = this.settings.findOne({ id: guildID });
-
-        if (!data) {
-            this.settings.insert({
-                id: guildID,
-                settings: this.defaultSettings
-            });
-            this.db.saveDatabase();
-            return this.defaultSettings;
+    /*
+    this.db.data [
+        { // "guildData"
+            "id": guildID,
+            "settings": Object (settings: defaultSettings)
         }
+    ]
+    this.cache = Map<guildID, guildData>
+     */
 
-        return data.settings;
+    cache(guildID, settings) {
+        _cache.set(guildID, settings);
+    }
+
+    get(guildID) {
+        
+        const cached = _cache.get(guildID);
+        if (cached) return cached;
+
+        let guildData = this.client.database.db[this.dbName].findOne({ id: guildID });
+        if (!guildData) 
+            guildData = this.client.database.db[this.dbName].insert({ id: guildID, settings: this.defaultSettings });
+
+        _cache.set(guildID, guildData);
+        return guildData;
     }
 
     set(guildID, key, value) {
-        const data = this.settings.findOne({ id: guildID });
-        if (!data) {
-            this.settings.insert({
-                id: guildID,
-                settings: this.defaultSettings
-            });
-            data = this.settings.findOne({ id: guildID });
-        }
-
-        data.settings[key] = value;
-        this.settings.update(data);
-        this.db.saveDatabase();
-        return data.settings;
-    }
-
-    /**
-     * @param {string} guildID
-     * @param {string} key
-     */
-    reset(guildID, key) {
-        const data = this.settings.findOne({ id: guildID });
-        if (!data) {
-            this.settings.insert({
-                id: guildID,
-                settings: this.defaultSettings
-            });
-            this.db.saveDatabase();
-            return this.defaultSettings;
-        }
-
-        data.settings[key] = this.defaultSettings[key];
-        this.settings.update(data);
-        this.db.saveDatabase();
-        return data.settings;
-    }
-
-    add(guildID, key, value){
-        const data = this.settings.findOne({id: guildID});
-            if(!Array.isArray(data.settings[key])) throw new Error("Not an array.")
-            if(!data) {
-                this.settings.insert({
-                    id: guildID,
-                    settings: this.defaultSettings
-                });
-                data = this.settings.findOne({id: guildID});
-            }
-            
-            data.settings[key].push(value);
-            this.settings.update(data);
-            this.db.saveDatabase();
-            return data.settings;
-        
-    }
-
-    remove(guildID, key, value){
-        const data = this.settings.findOne({id: guildID});
-        if(!Array.isArray(data.settings[key])) throw new Error("Not an array.")
-        arr = data.settings[key].filter(function(item) {
-            return item !== value
-        })
-        this.settings.update(data);
-        this.db.saveDatabase();
-        return data.settings;
-    }
-
-    delete(guildID) {
-        const data = this.settings.findOne({ id: guildID });
-        if (!data) return false;
-        this.settings.remove(data);
-        this.db.saveDatabase();
-        return true;
+        const guildData = this.get(guildID);
+        guildData.settings[key] = value;
+        this.client.database.db[this.dbName].update(guildData);
+        _cache.set(guildID, guildData);
     }
 }
