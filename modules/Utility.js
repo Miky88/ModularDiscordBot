@@ -1,4 +1,5 @@
 const Module = require("../structures/Module.js");
+const ModulePriorities = require("../structures/ModulePriorities.js");
 
 module.exports = class Utility extends Module {
     constructor(client) {

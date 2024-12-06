@@ -3,8 +3,9 @@ const Discord = require('discord.js');
 const fs = require('fs');
 const ConfigurationManager = require("../structures/ConfigurationManager.js");
 const SettingsManager = require("../structures/SettingsManager.js");
-const Settings = require("./System/settings.js");
+const Settings = require("./Utility/settings.js");
 const { set } = require("mongoose");
+const ModulePriorities = require("../structures/ModulePriorities.js");
 
 module.exports = class System extends Module {
     constructor(client) {

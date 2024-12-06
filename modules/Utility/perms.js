@@ -32,19 +32,15 @@ module.exports = class PermsCommand extends Command {
             .addFields([
                 {
                     name: "Flags",
-                    value: `todo`
+                    value: `todo` // TODO
                 },
                 {
                     name: "Guildlevel",
-                    value: `todo`
+                    value: `todo` // TODO
                 }
             ])
             .setDescription(`todo`)
             .setColor("Random")
-        if (data.blacklistReason && data.powerlevel < 0)
-            embed.addField('Blacklist reason', `\`\`\`${escapeMarkdown(data.blacklistReason)}\`\`\``)
-        else if (data.guildBlacklistReason && data.guildlevel < 0)
-            embed.addField('Guild Blacklist reason', `\`\`\`${escapeMarkdown(data.guildBlacklistReason)}\`\`\``)
 
         interaction.reply({ embeds: [embed] })
     }
