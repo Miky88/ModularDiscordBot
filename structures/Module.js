@@ -7,7 +7,6 @@ const ConfigurationManager = require('./ConfigurationManager');
 const SettingsManager = require('./SettingsManager');
 const Logger = require('./Logger');
 const Database = require('./Database')
-const Database = require('./Database')
 
 module.exports = class Module {
     /**

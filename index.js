@@ -26,8 +26,6 @@ class BotClient extends Client {
 
         this.database = new Database(this);
         this.moduleManager.init();
-
-        console.log(this.database.db.listCollections())
     }
 };
 
