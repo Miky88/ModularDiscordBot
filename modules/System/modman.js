@@ -2,27 +2,102 @@ const Command = require('../../structures/Command.js');
 
 let { EmbedBuilder, ApplicationCommandOptionType} = require('discord.js');
 
-module.exports = class PlugManCommand extends Command {
+module.exports = class ModManCommand extends Command {
     constructor(client, module) {
         super(client, module, {
-            name: "plugman",
-            description: "Manipulate Bot Plugins",
+            name: "modman",
+            description: "Manipulate Bot Modules",
             requiredFlag: ["OWNER"],
             cooldown: 3,
             options: [
                 {
-                    name: "action",
-                    description: "Action to perform",
-                    type: ApplicationCommandOptionType.String,
-                    required: true,
-                    choices: ["load", "unload", "reload", "enable", "disable", "info", "list"].map(c => ({ name: c, value: c }))
+                    name: "load",
+                    description: "Load a module",
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: "module",
+                            description: "Module to perform action on",
+                            type: ApplicationCommandOptionType.String,
+                            required: true,
+                            autocomplete: true
+                        }
+                    ]
                 },
                 {
-                    name: "module",
-                    description: "Module to perform action on",
-                    type: ApplicationCommandOptionType.String,
-                    required: false,
-                    autocomplete: true
+                    name: "unload",
+                    description: "Unload a module",
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: "module",
+                            description: "Module to perform action on",
+                            type: ApplicationCommandOptionType.String,
+                            required: true,
+                            autocomplete: true
+                        }
+                    ]
+                },
+                {
+                    name: "reload",
+                    description: "Reload a module",
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: "module",
+                            description: "Module to perform action on",
+                            type: ApplicationCommandOptionType.String,
+                            required: true,
+                            autocomplete: true
+                        }
+                    ]
+                },
+                {
+                    name: "enable",
+                    description: "Enable a module",
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: "module",
+                            description: "Module to perform action on",
+                            type: ApplicationCommandOptionType.String,
+                            required: true,
+                            autocomplete: true
+                        }
+                    ]
+                },
+                {
+                    name: "disable",
+                    description: "Disable a module",
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: "module",
+                            description: "Module to perform action on",
+                            type: ApplicationCommandOptionType.String,
+                            required: true,
+                            autocomplete: true
+                        }
+                    ]
+                },
+                {
+                    name: "info",
+                    description: "Get information about a module",
+                    type: ApplicationCommandOptionType.Subcommand,
+                    options: [
+                        {
+                            name: "module",
+                            description: "Module to perform action on",
+                            type: ApplicationCommandOptionType.String,
+                            required: true,
+                            autocomplete: true
+                        }
+                    ]
+                },
+                {
+                    name: "list",
+                    description: "Get a list of loaded modules",
+                    type: ApplicationCommandOptionType.Subcommand,
                 }
             ]
         });
@@ -35,12 +110,12 @@ module.exports = class PlugManCommand extends Command {
      * @param {*} args 
      */
     async run(client, interaction, args) {
-        let { action, module } = args
+        let { module } = args
         let Manager = client.moduleManager
         let response
         let embed = new EmbedBuilder()
         .setTitle("Module Manager")
-        switch (action) {
+        switch (interaction.options.getSubcommand()) {
             case "load":
                 response = await Manager.load(module)
                 embed

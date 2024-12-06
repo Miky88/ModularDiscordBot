@@ -69,7 +69,7 @@ module.exports = class System extends Module {
         const command = this.systemCommands.get(interaction.commandName);
         if (!command) return;
 
-        if (interaction.commandName == "plugman") {
+        if (interaction.commandName == "modman") {
             let modules = [...this.client.moduleManager.modules.keys()];
             let options = modules.map(m => ({ name: m, value: m }));
             return interaction.respond(options);
