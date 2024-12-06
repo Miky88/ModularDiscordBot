@@ -186,7 +186,7 @@ module.exports = class ModManCommand extends Command {
             case "list":
                 embed
                     .setTitle("Module Manager")
-                    .addFields({name : "Loaded", value: Manager.list.loaded || "_Valore vuoto_", inline: true })
+                    .addFields({name : "Loaded", value: Manager.list.loaded || "_Nothing_", inline: true })
                     .setColor(0x0000FF)
                 Manager.list.unloaded ? embed.addField("Unloaded", Manager.list.unloaded, true) : undefined
                 await interaction.reply({ embeds: [embed] })
