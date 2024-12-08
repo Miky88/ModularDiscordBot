@@ -1,5 +1,5 @@
 const Command = require('../../structures/Command.js');
-const { ApplicationCommandOptionType, EmbedBuilder, userMention, User, UserContextMenuCommandInteraction } = require('discord.js');
+const { ApplicationCommandOptionType, EmbedBuilder, userMention, User, UserContextMenuCommandInteraction, PermissionsBitField } = require('discord.js');
 const { Pagination } = require('pagination.djs');
 const Module = require('../../structures/Module.js');
 
@@ -7,6 +7,7 @@ module.exports = class Settings extends Command {
     constructor(client, module) {
         super(client, module, {
             name: 'settings',
+            defaultMemberPermissions: [PermissionsBitField.Flags.ManageGuild],
             description: 'View, add or remove settings from this guild.',
             options: [
                 {

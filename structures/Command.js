@@ -1,4 +1,4 @@
-const { ApplicationCommandType, PermissionFlagsBits } = require('discord.js');
+const { ApplicationCommandType, PermissionFlagsBits, PermissionsBitField } = require('discord.js');
 const Logger = require('./Logger.js');
 
 module.exports = class Command {
@@ -9,7 +9,7 @@ module.exports = class Command {
         type = ApplicationCommandType.ChatInput,
         cooldown = 0,
         requiredFlag = [],
-        defaultMemberPermissions = [],
+        defaultMemberPermissions = null, // Array 
         guildOnly = false,
     }) {
         /** @type {import('..')} */
