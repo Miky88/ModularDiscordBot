@@ -80,10 +80,10 @@ module.exports = class FlagsCommand extends Command {
                 try{
                     flags = await client.database.getFlags(user.id);
                 } catch(e){
-                    return interaction.reply(this.module.config.get("flags.list.none").replace('<user>', user.tag));
+                    return interaction.reply(this.module.config.get("flags.list.none").replace('<user>', user.displayName));
                 }
                 if(flags.length > 0){
-                    return interaction.reply(`${this.module.config.get("flags.list.title").replace('<user>', user.tag)} \n>>> ${flags.map(fl => "- " + this.module.config.get("flags.list.flags." + fl)).join('\n')}`);
+                    return interaction.reply(`${this.module.config.get("flags.list.title").replace('<user>', user.displayName)} \n>>> ${flags.map(fl => "- " + this.module.config.get("flags.list.flags." + fl)).join('\n')}`);
                 } else {
                     return interaction.reply(this.module.config.get("flags.list.none")
                         .replace('<user>', user.tag)
