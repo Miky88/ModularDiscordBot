@@ -38,22 +38,8 @@ module.exports = class InteractionCommandHandler extends Module {
                 let flag = cmd.config.requiredFlag.find(f => !flags.includes(f))
                 if (flag) return interaction.reply({ content: `:no_entry: You don't have required flag **${flag}** to perform this command.`, ephemeral: true})
             }
-            
-            function extractOptions(options, obj = {}) {
-                options.forEach(option => {
-                    if (option.value !== undefined) {
-                        obj[option.name] = option.value;
-                    }
-                    if (option.options) {
-                        extractOptions(option.options, obj);  // Recursively flatten nested options
-                    }
-                });
-                return obj;
-            }
-            
-            let args = extractOptions(interaction.options.data);
-    
-            await cmd.run(client, interaction, args);
+                        
+            await cmd.run(client, interaction);
         } catch (e) {
             interaction.reply({
                 content: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers.",

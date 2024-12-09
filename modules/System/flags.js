@@ -71,7 +71,7 @@ module.exports = class FlagsCommand extends Command {
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      * @param {*} args 
      */
-    async run(client, interaction, args) {
+    async run(client, interaction) {
         let flag = interaction.options.getString('flag');
         let user = interaction.options.getUser('user');
         let flags;
@@ -91,13 +91,13 @@ module.exports = class FlagsCommand extends Command {
                 }
             case "add":
                 try{
-                    flags = await client.database.getFlags(args.user);
+                    flags = await client.database.getFlags(user);
                 } catch(e){
-                    client.database.addUser(args.user);
-                    flags = await client.database.getFlags(args.user);
+                    client.database.addUser(user);
+                    flags = await client.database.getFlags(user);
                 }
                 
-                client.database.setFlag(args.user, args.flag, true)
+                client.database.setFlag(user, flag, true)
 
                 const flagadded = this.module.config.get("flags.add")
                     .replace('<flag>', flag)
@@ -109,7 +109,7 @@ module.exports = class FlagsCommand extends Command {
             
             case "remove":
                 try{
-                    flags = await client.database.getFlags(args.user);
+                    flags = await client.database.getFlags(user);
                 } catch(e){
                     return interaction.reply(this.module.config.get("flags.errors.notHasFlag").replace('<user>', user.tag));
                 }
@@ -118,7 +118,7 @@ module.exports = class FlagsCommand extends Command {
                     interaction.reply(notHasFlag);
                     return;
                 }
-                client.database.setFlag(args.user, flag, false);
+                client.database.setFlag(user, flag, false);
 
                 const flagremoved = this.module.config.get("flags.remove")
                     .replace('<flag>', flag)

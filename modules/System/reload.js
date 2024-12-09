@@ -19,8 +19,8 @@ module.exports = class ReloadCommand extends Command {
         })
     }
 
-    async run(client, interaction, args) {
-        const commandName = args.command
+    async run(client, interaction) {
+        const commandName = interaction.options.getString("command");
         try {
             const [_, module] = client.moduleManager.getCommand(commandName);
             client.moduleManager.reload(module.options.name);

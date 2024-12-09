@@ -109,8 +109,8 @@ module.exports = class ModManCommand extends Command {
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      * @param {*} args 
      */
-    async run(client, interaction, args) {
-        let { module } = args
+    async run(client, interaction) {
+        let module = interaction.options.getString("module");
         let Manager = client.moduleManager
         let response
         let embed = new EmbedBuilder()

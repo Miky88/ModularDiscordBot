@@ -20,7 +20,7 @@ module.exports = class StatsCommand extends Command {
      * @param {import('discord.js').CommandInteraction} interaction 
      * @param {*} args 
      */
-    async run(client, interaction, args) {
+    async run(client, interaction) {
         const duration = moment
         .duration(client.uptime)
         .format(" D [days], H [hrs], m [mins], s [secs]");

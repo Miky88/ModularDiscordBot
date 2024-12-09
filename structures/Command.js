@@ -31,10 +31,9 @@ module.exports = class Command {
     /**
      * @param {BotClient} client 
      * @param {Interaction} interaction 
-     * @param {object} args
      * @returns {Promise<any>}
      */
-    run(client, interaction, args) {}
+    run(client, interaction) {}
 
     toJson() {
         const { name, description, options, type, defaultMemberPermissions } = this.data;

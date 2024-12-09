@@ -136,7 +136,7 @@ module.exports = class Settings extends Command {
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      * @param {*} args 
      */
-    async run(client, interaction, args) {
+    async run(client, interaction) {
         const guild = interaction.guild;
         switch (interaction.options.getSubcommand()) {
             case "set": {

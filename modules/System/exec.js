@@ -20,8 +20,8 @@ module.exports = class ExecCommand extends Command {
         })
     }
 
-    async run(client, interaction, args, module) {
-        let script = args.code
+    async run(client, interaction) {
+        let script = interaction.options.getString("code");
 
         try {
             let result = await exec(script).catch(err => {

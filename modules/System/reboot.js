@@ -15,7 +15,7 @@ module.exports = class RebootCommand extends Command {
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      * @param {*} args 
      */
-    async run(client, interaction, args) {
+    async run(client, interaction) {
         const { promisify } = require("util");
         const write = promisify(require("fs").writeFile);
         if (!interaction.replied) await interaction.reply({ ephemeral: true, content: "OK" });

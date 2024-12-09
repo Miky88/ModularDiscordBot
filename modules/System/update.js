@@ -14,7 +14,7 @@ module.exports = class UpdateCommand extends Command {
     /**
      * @param {BotClient} client
      */
-    async run(client, interaction, args) {
+    async run(client, interaction) {
         const [exec] = client.moduleManager.getCommand("exec");
         if (!exec)
             return interaction.reply("Unknown command `exec`, aborting.");
