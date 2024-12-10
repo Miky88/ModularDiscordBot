@@ -1,6 +1,6 @@
 const Command = require('../../structures/Command.js');
-
 let { EmbedBuilder, ApplicationCommandOptionType} = require('discord.js');
+const PowerLevels = require("../../structures/PowerLevels.js");
 
 module.exports = class ModManCommand extends Command {
     constructor(client, module) {
@@ -8,6 +8,7 @@ module.exports = class ModManCommand extends Command {
             name: "modman",
             description: "Manipulate Bot Modules",
             cooldown: 3,
+            minLevel: PowerLevels.OWNER,
             options: [
                 {
                     name: "load",

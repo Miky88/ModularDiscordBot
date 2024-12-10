@@ -1,6 +1,7 @@
 const Loki = require('lokijs');
 const BotClient = require('..');
 const Logger = require('./Logger.js');
+const PowerLevels = require('./PowerLevels.js');
 const cache = new Map();
 
 module.exports = class Database {
@@ -39,6 +40,7 @@ module.exports = class Database {
     async addUser(userID) {
         const user = await this.db.users.insert({
             id: userID,
+            powerlevel: PowerLevels.USER,
         })
         this.cacheUser(user)
         return user;

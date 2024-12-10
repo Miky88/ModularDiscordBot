@@ -1,5 +1,6 @@
 const { ApplicationCommandType } = require('discord.js');
 const Logger = require('./Logger.js');
+const PowerLevels = require('./PowerLevels.js');
 
 module.exports = class Command {
     constructor(client, module, {
@@ -8,13 +9,14 @@ module.exports = class Command {
         options = [],
         type = ApplicationCommandType.ChatInput,
         cooldown = 0,
+        minLevel = PowerLevels.USER,
         defaultMemberPermissions = null, // Array 
         guildOnly = false,
     }) {
         /** @type {import('..')} */
         this.client = client
         this.module = module
-        this.config = { name, description, cooldown, requiredFlag, defaultMemberPermissions, guildOnly };
+        this.config = { name, description, cooldown, minLevel, defaultMemberPermissions, guildOnly };
 
         this.data = {
             name,

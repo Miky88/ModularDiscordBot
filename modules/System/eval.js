@@ -1,6 +1,7 @@
+const Command = require("../../structures/Command.js");
 const { inspect } = require("util");
 const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
-const Command = require("../../structures/Command.js");
+const PowerLevels = require("../../structures/PowerLevels.js");
 
 module.exports = class EvalCommand extends Command {
     constructor(client, module) {
@@ -8,6 +9,7 @@ module.exports = class EvalCommand extends Command {
             name: "eval",
             description: "Evaluates arbitrary JavaScript",
             cooldown: 3,
+            minLevel: PowerLevels.OWNER,
             options: [
                 {
                     name: "code",

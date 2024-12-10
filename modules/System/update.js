@@ -1,5 +1,5 @@
-const BotClient = require("../..");
 const Command = require("../../structures/Command.js");
+const PowerLevels = require("../../structures/PowerLevels.js");
 
 module.exports = class UpdateCommand extends Command {
     constructor(client, module) {
@@ -7,6 +7,7 @@ module.exports = class UpdateCommand extends Command {
             name: "update",
             description: "Pulls commits from git and reboots the bot",
             cooldown: 3,
+            minLevel: PowerLevels.OWNER,
         })
     }
 

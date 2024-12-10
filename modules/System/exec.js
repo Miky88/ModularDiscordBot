@@ -1,6 +1,7 @@
+const Command = require("../../structures/Command.js");
 const { AttachmentBuilder, ApplicationCommandOptionType } = require("discord.js");
 const exec = require("util").promisify(require("child_process").exec);
-const Command = require("../../structures/Command.js");
+const PowerLevels = require("../../structures/PowerLevels.js");
 
 module.exports = class ExecCommand extends Command {
     constructor(client, module) {
@@ -8,6 +9,7 @@ module.exports = class ExecCommand extends Command {
             name: "exec",
             description: "Runs shell commands on the host machine",
             cooldown: 3,
+            minLevel: PowerLevels.OWNER,
             options: [
                 {
                     name: "code",

@@ -1,12 +1,13 @@
 let { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js')
 const Command = require('../../structures/Command.js');
+const PowerLevels = require('../../structures/PowerLevels.js');
 
 module.exports = class PermsCommand extends Command {
     constructor(client, module) {
         super(client, module, {
             name: 'perms',
             description: 'Shows yours or another user\'s perms',
-            minLevel: -1,
+            minLevel: PowerLevels.BLACKLISTED,
             options: [
                 {
                     name: "user",

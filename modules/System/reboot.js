@@ -1,10 +1,12 @@
 const Command = require('../../structures/Command.js');
+const PowerLevels = require("../../structures/PowerLevels.js");
 
 module.exports = class RebootCommand extends Command {
     constructor(client, module) {
         super(client, module, {
             name: 'reboot',
             description: 'Reboots the bot if running under PM2',
+            minLevel: PowerLevels.ADMIN,
         });
     }
 
