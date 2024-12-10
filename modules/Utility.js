@@ -11,6 +11,11 @@ module.exports = class Utility extends Module {
         })
     }
 
+    /**
+     * 
+     * @param {import('../index.js')} client 
+     * @param {import('discord.js').Interaction} interaction 
+     */
     async interactionCreate(client, interaction) {
         if (!interaction.isAutocomplete()) return;
         const command = this.commands.get(interaction.commandName);

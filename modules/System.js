@@ -38,6 +38,9 @@ module.exports = class System extends Module {
         })
     }
 
+    /**
+     * @param {import('../index.js')} client 
+     */
     async ready(client) {
         let serverIds = this.client.config.get('systemServer');
 

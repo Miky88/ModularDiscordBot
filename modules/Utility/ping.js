@@ -13,7 +13,6 @@ module.exports = class PingCommand extends Command {
      * 
      * @param {import('../../index.js')} client 
      * @param {import('discord.js').CommandInteraction} interaction 
-     * @param {*} args
      */
     async run(client, interaction) {
         let m = await interaction.reply({ content: 'Pinging...', fetchReply: true });

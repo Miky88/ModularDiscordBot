@@ -19,6 +19,11 @@ module.exports = class ReloadCommand extends Command {
         })
     }
 
+    /**
+     * 
+     * @param {import('../../index.js')} client 
+     * @param {import('discord.js').ChatInputCommandInteraction} interaction 
+     */
     async run(client, interaction) {
         const commandName = interaction.options.getString("command");
         try {

@@ -11,7 +11,7 @@ module.exports = class ReadyLog extends Module {
     }
 
     /**
-     * @param {import('discord.js').Client} client 
+     * @param {import('../index.js')} client 
      * @param  {...any} _args 
      */
     async run(client, ..._args) {

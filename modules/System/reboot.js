@@ -11,9 +11,8 @@ module.exports = class RebootCommand extends Command {
 
     /**
      * 
-     * @param {import('..')} client 
+     * @param {import('../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
-     * @param {*} args 
      */
     async run(client, interaction) {
         const { promisify } = require("util");

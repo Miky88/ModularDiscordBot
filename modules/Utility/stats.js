@@ -18,7 +18,6 @@ module.exports = class StatsCommand extends Command {
      * 
      * @param {import('../../index.js')} client 
      * @param {import('discord.js').CommandInteraction} interaction 
-     * @param {*} args 
      */
     async run(client, interaction) {
         const duration = moment

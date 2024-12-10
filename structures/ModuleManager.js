@@ -29,6 +29,9 @@ module.exports = class ModuleManager {
         this.logger.success(`Successfully Loaded ${this.modules.size} modules`)
     }
 
+    /**
+     * @param {String} moduleName 
+     */
     load(moduleName) {
         try {
             const module = require(`../modules/${moduleName}`);
@@ -62,6 +65,9 @@ module.exports = class ModuleManager {
         return {}
     }
 
+    /**
+     * @param {Module} module 
+     */
     add(module) {
         this.modules.set(module.options.name, module);
         this.logger.verbose(`${module.options.name} loaded`)
@@ -87,31 +93,49 @@ module.exports = class ModuleManager {
         })
     }
 
+    /**
+     * @param {String} pluginName 
+     */
     reload(pluginName) {
         return this.unload(pluginName) && this.load(pluginName)
     }
 
+    /**
+     * @param {String} pluginName 
+     */
     unload(pluginName) {
         this.logger.log(`${pluginName} unloaded`);
         return this.modules.delete(pluginName);
     }
 
+    /**
+     * @param {String} pluginName 
+     */
     enable(pluginName) {
         if (!this.modules.get(pluginName)) return false
         this.logger.log(`${pluginName} enabled`);
         return this.modules.get(pluginName).options.enabled = true;
     }
 
+    /**
+     * @param {String} pluginName 
+     */
     disable(pluginName) {
         if (!this.modules.get(pluginName)) return false
         this.logger.log(`${pluginName} disabled`);
         return !(this.modules.get(pluginName).options.enabled = false);
     }
 
+    /**
+     * @param {String} pluginName 
+     */
     isLoaded(pluginName) {
         return !!this.modules.get(pluginName);
     }
 
+    /**
+     * @param {String} pluginName 
+     */
     info(pluginName) {
         if (!this.modules.get(pluginName)) return { error: "Invalid module name" }
         return {
@@ -130,7 +154,7 @@ module.exports = class ModuleManager {
     }
 
     /**
-     * @param {string} cmd 
+     * @param {String} cmd 
      * @returns {[Command, Module] | [null, null]}
      */
     getCommand(cmd) {

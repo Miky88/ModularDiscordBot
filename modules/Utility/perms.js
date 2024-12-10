@@ -18,6 +18,11 @@ module.exports = class PermsCommand extends Command {
         })
     }
 
+    /**
+     * 
+     * @param {import('../../index.js')} client 
+     * @param {import('discord.js').ChatInputCommandInteraction} interaction 
+     */
     async run(client, interaction) {
         let user = interaction.options.getUser("user");
         if (!user) user = interaction.user;

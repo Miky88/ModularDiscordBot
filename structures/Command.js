@@ -29,7 +29,7 @@ module.exports = class Command {
     }
 
     /**
-     * @param {BotClient} client 
+     * @param {import('../index.js')} client 
      * @param {Interaction} interaction 
      * @returns {Promise<any>}
      */

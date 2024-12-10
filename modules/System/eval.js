@@ -6,7 +6,7 @@ module.exports = class EvalCommand extends Command {
     constructor(client, module) {
         super(client, module, {
             name: "eval",
-            description: "Evaluates albitrary JavaScript",
+            description: "Evaluates arbitrary JavaScript",
             cooldown: 3,
             requiredFlag: ["OWNER"],
             options: [
@@ -20,6 +20,11 @@ module.exports = class EvalCommand extends Command {
         })
     }
 
+    /**
+     * 
+     * @param {import('../../index.js')} client 
+     * @param {import('discord.js').ChatInputCommandInteraction} interaction 
+     */
     async run(client, interaction) {
         const content = interaction.options.getString("code").replace(/client\.token/gmi, '\'mfa.VkO_2G4Qv3T--NO--lWetW_tjND--TOKEN--QFTm6YGtzq9PH--4U--tG0\'');
 

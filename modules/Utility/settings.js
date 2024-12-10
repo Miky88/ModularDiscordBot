@@ -134,7 +134,6 @@ module.exports = class Settings extends Command {
      * 
      * @param {import('../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
-     * @param {*} args 
      */
     async run(client, interaction) {
         const guild = interaction.guild;

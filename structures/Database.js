@@ -39,7 +39,10 @@ module.exports = class Database {
             autosaveInterval: 1000, 
         })
     }
-
+    
+    /**
+     * @param {String} userID 
+     */
     async addUser(userID) {
         const user = await this.db.users.insert({
             id: userID,
@@ -49,21 +52,32 @@ module.exports = class Database {
         return user;
     }
 
+    /**
+     * @param {import('discord.js').User} user 
+     */
     cacheUser(user) {
         cache.set(user.id, user)
     }
 
+    /**
+     * @param {String} userID 
+     */
     getUser(userID) {
         const data = cache.get(userID) || this.db.users.findOne({ id: userID })
         if (data) this.cacheUser(data)
         return data
     }
     
-    setFlag(userId, flagName, value) {
+    /**
+     * @param {String} userID 
+     * @param {String} flagName 
+     * @param {*} value 
+     */
+    setFlag(userID, flagName, value) {
         let flagValue = flags[flagName];
         if (!flagValue) throw new Error(`Invalid flag ${flagName}`);
-        let user = this.getUser(userId);
-        if (!user) throw new Error(`Invalid user ${userId}`);
+        let user = this.getUser(userID);
+        if (!user) throw new Error(`Invalid user ${userID}`);
         user.flags = user.flags ? parseInt(user.flags) : 0;
         if (value) {
             user.flags |= flagValue;
@@ -73,25 +87,35 @@ module.exports = class Database {
         return this.updateUser(user);
     }
 
-    hasFlag(userId, flagName) {
+    /**
+     * @param {String} userID 
+     * @param {String} flagName 
+     */
+    hasFlag(userID, flagName) {
         let flagValue = flags[flagName];
         if (!flagValue) throw new Error(`Invalid flag ${flagName}`);
-        let user = this.getUser(userId);
+        let user = this.getUser(userID);
         user.flags = user.flags ? parseInt(user.flags) : 0;
-        if (!user) throw new Error(`Invalid user ${userId}`);
+        if (!user) throw new Error(`Invalid user ${userID}`);
         return (user.flags & flagValue) == flagValue;
     }
 
-    getFlags(userId) {
-        let user = this.getUser(userId);
-        if (!user) throw new Error(`Invalid user ${userId}`);
+    /**
+     * @param {String} userID 
+     */
+    getFlags(userID) {
+        let user = this.getUser(userID);
+        if (!user) throw new Error(`Invalid user ${userID}`);
         let userFlags = [];
         for (let flagName in flags) {
-            if (this.hasFlag(userId, flagName)) userFlags.push(flagName);
+            if (this.hasFlag(userID, flagName)) userFlags.push(flagName);
         };
         return userFlags;
     }
 
+    /**
+     * @param {String} userID 
+     */
     async forceUser(userID) {
         let user = await this.getUser(userID)
         if (user) {
@@ -105,6 +129,9 @@ module.exports = class Database {
         return await this.addUser(userID)
     }
 
+    /**
+     * @param {*} data 
+     */
     async updateUser(data) {
         delete data.user
         this.db.users.update(data)
@@ -114,6 +141,9 @@ module.exports = class Database {
         return update
     }
 
+    /**
+     * @param {import('lokijs').Collection} collection 
+     */
     fixCollection (collection) {
         this.logger.debug('Fixing collection', collection.name);
         const deduplicateSet = new Set();

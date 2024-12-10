@@ -12,7 +12,9 @@ module.exports = class UpdateCommand extends Command {
     }
 
     /**
-     * @param {BotClient} client
+     * 
+     * @param {import('../../index.js')} client 
+     * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      */
     async run(client, interaction) {
         const [exec] = client.moduleManager.getCommand("exec");

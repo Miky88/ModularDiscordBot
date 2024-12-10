@@ -10,7 +10,7 @@ module.exports = class FlagsCommand extends Command {
             options: [
                 {
                     name: "list",
-                    description: "List the flags of an user",
+                    description: "List the flags of a user",
                     type: ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
@@ -23,7 +23,7 @@ module.exports = class FlagsCommand extends Command {
                 },
                 {
                     name: "add",
-                    description: "Add a flag to an user",
+                    description: "Add a flag to a user",
                     type: ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
@@ -43,7 +43,7 @@ module.exports = class FlagsCommand extends Command {
                 },
                 {
                     name: "remove",
-                    description: "Remove a flag to an user",
+                    description: "Remove a flag to a user",
                     type: ApplicationCommandOptionType.Subcommand,
                     options: [
                         {
@@ -69,7 +69,6 @@ module.exports = class FlagsCommand extends Command {
      * 
      * @param {import('../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
-     * @param {*} args 
      */
     async run(client, interaction) {
         let flag = interaction.options.getString('flag');
