@@ -71,7 +71,7 @@ module.exports = class System extends Module {
         if (!command) return;
 
         if (interaction.commandName == "modman") {
-            let modules = [...this.client.moduleManager.modules.keys()];
+            let modules = [...this.client.moduleManager.modules.keys()].filter(m => m != this.options.name);
             let options = modules.map(m => ({ name: m, value: m }));
             return interaction.respond(options);
         }
