@@ -28,12 +28,6 @@ module.exports = class System extends Module {
                         notHasFlag: "⚠️ Nothing to remove"
                     }
                 } 
-            },
-            settings: {
-                thisIsAList: ["test1", "test2"],
-                thisIsAString: "myPlainText",
-                thisIsAnInt: 10,
-                thisIsAdouble: 2.4
             }
         })
     }

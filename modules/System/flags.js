@@ -6,7 +6,7 @@ module.exports = class FlagsCommand extends Command {
         super(client, module, {
             name: 'flags',
             description: 'Edit user flags',
-            requiredFlag: ['OWNER'],
+            requiredFlag: ['STAFF'],
             options: [
                 {
                     name: "list",

@@ -174,7 +174,7 @@ module.exports = class Settings extends Command {
                 if (embeds.length == 0) {
                     const embed = new EmbedBuilder()
                        .setTitle('No settings found')
-                       .setDescription('This guild has no settings set.')
+                       .setDescription('There are no settings to show.')
                        .setColor('Random')
                     embeds.push(embed);
                 }
