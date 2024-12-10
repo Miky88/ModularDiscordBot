@@ -7,7 +7,6 @@ module.exports = class ModManCommand extends Command {
         super(client, module, {
             name: "modman",
             description: "Manipulate Bot Modules",
-            requiredFlag: ["OWNER"],
             cooldown: 3,
             options: [
                 {

@@ -8,7 +8,6 @@ module.exports = class ExecCommand extends Command {
             name: "exec",
             description: "Runs shell commands on the host machine",
             cooldown: 3,
-            requiredFlag: ["OWNER"],
             options: [
                 {
                     name: "code",

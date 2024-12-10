@@ -3,13 +3,6 @@ const BotClient = require('..');
 const Logger = require('./Logger.js');
 const cache = new Map();
 
-const flags = {
-    OWNER: 1 << 0,
-    STAFF: 1 << 1,
-    PREMIUM: 1 << 2,
-    BLACKLISTED: 1 << 3,
-};
-
 module.exports = class Database {
     /**
      * The bot's main database
@@ -46,7 +39,6 @@ module.exports = class Database {
     async addUser(userID) {
         const user = await this.db.users.insert({
             id: userID,
-            flags: 0
         })
         this.cacheUser(user)
         return user;
@@ -70,60 +62,11 @@ module.exports = class Database {
     
     /**
      * @param {String} userID 
-     * @param {String} flagName 
-     * @param {*} value 
-     */
-    setFlag(userID, flagName, value) {
-        let flagValue = flags[flagName];
-        if (!flagValue) throw new Error(`Invalid flag ${flagName}`);
-        let user = this.getUser(userID);
-        if (!user) throw new Error(`Invalid user ${userID}`);
-        user.flags = user.flags ? parseInt(user.flags) : 0;
-        if (value) {
-            user.flags |= flagValue;
-        } else {
-            user.flags &= ~flagValue;
-        }
-        return this.updateUser(user);
-    }
-
-    /**
-     * @param {String} userID 
-     * @param {String} flagName 
-     */
-    hasFlag(userID, flagName) {
-        let flagValue = flags[flagName];
-        if (!flagValue) throw new Error(`Invalid flag ${flagName}`);
-        let user = this.getUser(userID);
-        user.flags = user.flags ? parseInt(user.flags) : 0;
-        if (!user) throw new Error(`Invalid user ${userID}`);
-        return (user.flags & flagValue) == flagValue;
-    }
-
-    /**
-     * @param {String} userID 
-     */
-    getFlags(userID) {
-        let user = this.getUser(userID);
-        if (!user) throw new Error(`Invalid user ${userID}`);
-        let userFlags = [];
-        for (let flagName in flags) {
-            if (this.hasFlag(userID, flagName)) userFlags.push(flagName);
-        };
-        return userFlags;
-    }
-
-    /**
-     * @param {String} userID 
      */
     async forceUser(userID) {
         let user = await this.getUser(userID)
         if (user) {
-            if (this.client.config.get('owners').includes(user.id) && !this.hasFlag(user.id, 'OWNER')) {
-                this.setFlag(user.id, 'OWNER', true);
-            } else if (!this.client.config.get('owners').includes(user.id) && this.hasFlag(user.id, 'OWNER')) {
-                this.setFlag(user.id, 'OWNER', false);
-            }
+            // TODO check Owner/Staff
             return user;
         }
         return await this.addUser(userID)

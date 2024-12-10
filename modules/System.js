@@ -8,27 +8,7 @@ module.exports = class System extends Module {
             name: "System",
             info: "Loads the system commands",
             enabled: true,
-            events: ["ready", "interactionCreate"],
-            config: {
-                flags: {
-                    list: {
-                        title: "🚩 <user>'s flags:",
-                        flags: {
-                            OWNER: "**Bot Owner**: This user is a developer of this bot",
-                            STAFF: "**Bot Staff**: This user has staff priviliges on this bot",
-                            PREMIUM: "**Premium**: This user supported the development of this bot",
-                            BLACKLISTED: "**Blacklisted**: This user is blacklisted from this bot",
-                        },
-                        none: "🚩 <user> has no flags"
-                    },
-                    add: "✅ Flag `<flag>` has been assigned to <user>",
-                    remove:"✅ Flag `<flag>` has been removed to <user>",
-                    errors: {
-                        alreadyHasFlag: "⚠️ Flag already assigned",
-                        notHasFlag: "⚠️ Nothing to remove"
-                    }
-                } 
-            }
+            events: ["ready", "interactionCreate"]
         })
     }
 
