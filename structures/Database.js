@@ -68,10 +68,10 @@ module.exports = class Database {
     async forceUser(userID) {
         let user = await this.getUser(userID)
         if (user) {
-            if(user.powerlevel !== PowerLevels.OWNER && this.client.config.owners.includes(userID)) {
+            if(user.powerlevel !== PowerLevels.OWNER && this.client.config.get('owners').includes(userID)) {
                 user.powerlevel = PowerLevels.OWNER
                 this.updateUser(user)
-            } else if (user.powerlevel === PowerLevels.OWNER && !this.client.config.owners.includes(userID)) {
+            } else if (user.powerlevel === PowerLevels.OWNER && !this.client.config.get('owners').includes(userID)) {
                 user.powerlevel = PowerLevels.USER
                 this.updateUser(user)
             }
