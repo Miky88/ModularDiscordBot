@@ -107,75 +107,85 @@ module.exports = class ModManCommand extends Command {
      * 
      * @param {import('../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
+     * @param {import('../../structures/Module.js')} module 
      */
-    async run(client, interaction) {
-        let module = interaction.options.getString("module");
-        let Manager = client.moduleManager
-        let response
+    async run(client, interaction, module) {
         let embed = new EmbedBuilder()
-        .setTitle("Module Manager")
+        .setTitle("Module Manager");
+
+        let moduleName = interaction.options.getString("module");
+        if (moduleName == module.options.name) {
+            embed
+                .setColor(0xFF0000)
+                .setDescription(`:x: Cannot perform actions on module **${moduleName}**`);
+
+            return await interaction.reply({ embeds: [embed] });
+        }
+
+        let Manager = client.moduleManager;
+        let response;
         switch (interaction.options.getSubcommand()) {
             case "load":
-                response = await Manager.load(module)
+                response = await Manager.load(moduleName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${module}** succefully loaded`)
+                    .setDescription(`:white_check_mark: **${moduleName}** successfully loaded`)
                 if(!response.error) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to load **${module}**:\`\`\`${response.error}\`\`\``)
+                    .setDescription(`:x: There was an error trying to load **${moduleName}**:\`\`\`${response.error}\`\`\``)
                 return await interaction.reply({ embeds: [embed] })
             case "unload":
-                response = await Manager.unload(module)
+                response = await Manager.unload(moduleName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${module}** succefully unloaded`)
+                    .setDescription(`:white_check_mark: **${moduleName}** successfully unloaded`)
                 if(response) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to unload **${module}**, is it even loaded?`)
+                    .setDescription(`:x: There was an error trying to unload **${moduleName}**, is it even loaded?`)
                 return await interaction.reply({ embeds: [embed] })
             case "reload":
-                response = await Manager.reload(module)
+                response = await Manager.reload(moduleName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${module}** succefully reloaded`)
+                    .setDescription(`:white_check_mark: **${moduleName}** successfully reloaded`)
                 if(response) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to reload **${module}**, is it even loaded?`)
+                    .setDescription(`:x: There was an error trying to reload **${moduleName}**, is it even loaded?`)
                 return await interaction.reply({ embeds: [embed] })
             case "enable":
-                response = await Manager.enable(module)
+                response = await Manager.enable(moduleName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${module}** succefully enabled and executed`)
+                    .setDescription(`:white_check_mark: **${moduleName}** successfully enabled and executed`)
                 if(response) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to enable **${module}**, is it even loaded?`)
+                    .setDescription(`:x: There was an error trying to enable **${moduleName}**, is it even loaded?`)
                 return await interaction.reply({ embeds: [embed] })
             case "disable":
-                response = await Manager.disable(module)
+                response = await Manager.disable(moduleName)
                 embed
                     .setColor(0x00FF00)
-                    .setDescription(`:white_check_mark: **${module}** succefully disabled`)
+                    .setDescription(`:white_check_mark: **${moduleName}** successfully disabled`)
                 if(response) return await interaction.reply({ embeds: [embed] })
                 embed
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to disable **${module}**, is it even loaded?`)
+                    .setDescription(`:x: There was an error trying to disable **${moduleName}**, is it even loaded?`)
                 return await interaction.reply({ embeds: [embed] })
             case "info":
-                response = await Manager.info(module)
+                response = await Manager.info(moduleName)
                 
                 embed
                     .setTitle(`Module Manager`)
                     .setColor(0xFF0000)
-                    .setDescription(`:x: There was an error trying to fetch informations from **${module}**:\`\`\`${response.error}\`\`\``)
+                    .setDescription(`:x: There was an error trying to fetch informations from **${moduleName}**:\`\`\`${response.error}\`\`\``)
                 if(response.error) return await interaction.reply({ embeds: [embed] })
     
                 embed
-                    .setTitle(`Module Manager - ${module}`)
+                    .setTitle(`Module Manager - ${moduleName}`)
                     .setColor(0x0000FF)
                     .setDescription(response.description)
                     .addField("Enabled", `${response.enabled}`, true)

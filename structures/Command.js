@@ -31,9 +31,10 @@ module.exports = class Command {
     /**
      * @param {import('../index.js')} client 
      * @param {Interaction} interaction 
+     * @param {import('./Module.js')} module 
      * @returns {Promise<any>}
      */
-    run(client, interaction) {}
+    run(client, interaction, module) {}
 
     toJson() {
         const { name, description, options, type, defaultMemberPermissions } = this.data;

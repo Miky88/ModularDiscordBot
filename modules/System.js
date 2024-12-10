@@ -6,7 +6,7 @@ module.exports = class System extends Module {
     constructor(client) {
         super(client, {
             name: "System",
-            info: "Loads the system utility commands",
+            info: "Loads the system commands",
             enabled: true,
             events: ["ready", "interactionCreate"],
             config: {
@@ -67,6 +67,10 @@ module.exports = class System extends Module {
         this.commands = this.systemCommands;
     }
 
+    /**
+     * @param {import('../index.js')} client
+     * @param {Discord.Interaction} interaction
+     */
     async interactionCreate(client, interaction) {
         if (!interaction.isAutocomplete()) return;
         const command = this.systemCommands.get(interaction.commandName);
