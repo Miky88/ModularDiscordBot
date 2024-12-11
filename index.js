@@ -1,28 +1,35 @@
 // Imports
 require('dotenv').config();
 
-const { Client, Collection, Intents, TextChannel } = require('discord.js');
-require('./modules/Functions.js');
-const { PluginManager } = require('./modules/PluginManager.js');
-const Database = require('./modules/Database.js');
+const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
+const ModuleManager = require('./structures/ModuleManager.js');
+const Database = require('./structures/Database.js');
+const ConfigurationManager = require('./structures/ConfigurationManager.js');
+const Utils = require('./structures/Utils.js');
+BigInt.prototype.toJSON = function() { return this.toString() } // MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
 
 // Discord
 class BotClient extends Client {
     constructor(options) {
-        super (options);
+        super(options);
 
-        this.config = require('./config.js');
         this.commands = new Collection();
-        this.interactionCommands = new Collection();
-        this.PluginManager = new PluginManager(this);
-        this.PluginManager.init();
+        this.settings = new Collection();
+        this.utils = new Utils();
+        this.moduleManager = new ModuleManager(this);
+        this.config = new ConfigurationManager(this, {
+            activity: `/help`,
+            owners: ["311929179186790400", "422418878459674624"],
+            systemServer: ["1313550337474429001"]
+        });
 
         this.database = new Database(this);
+        this.moduleManager.init();
     }
 };
 
-const client = new BotClient({ intents: Object.values(Intents.FLAGS).reduce((a, b) => a | b), partials: ['REACTION', 'MESSAGE'] });
+const client = new BotClient({ intents: Object.values(GatewayIntentBits).reduce((a, b) => a | b), partials: [Partials.Reaction, Partials.Message] });
 
-client.login(client.config.token);
+client.login(process.env.TOKEN);
 
 module.exports = BotClient;
