@@ -28,8 +28,8 @@ module.exports = class PermsCommand extends Command {
         let user = interaction.options.getUser("user");
         if (!user) user = interaction.user;
 
-        const data = await client.database.forceUser(user.id)
-        if (!data) return await interaction.reply(`${yellowtick} There's no user in database matching your query`)
+        const data = await client.database.forceUser(user.id);
+        if (!data) return await interaction.reply(":warning: There's no user in database matching your query");
         if (interaction.user.data.powerlevel < 0 && data.user.id !== interaction.user.id) return;
 
         // const flags = await client.database.getFlags(user.id);
@@ -37,12 +37,12 @@ module.exports = class PermsCommand extends Command {
         const embed = new EmbedBuilder()
             .setTitle(`${user.discriminator ? user.tag : user.username}`)
             .setThumbnail(user.displayAvatarURL())
-            // .addFields([
-            //     {
-            //         name: "Flags",
-            //         value: flags.length ? flags.map(fl => `- ${client.moduleManager.modules.get("System").config.get("flags.list.flags." + fl)}`).join("\n") : "This user has no flags"
-            //     },
-            // ])
+            .addFields([
+                {
+                    name: "Power Level",
+                    value: `${Object.entries(PowerLevels).find(l => l[1] == data.powerlevel)[0]}`
+                },
+            ])
             // .setDescription(`todo`)
             .setColor("Random")
 
