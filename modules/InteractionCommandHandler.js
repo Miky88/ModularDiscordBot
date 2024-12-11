@@ -3,6 +3,7 @@ const Module = require("../structures/Module.js");
 const Command = require("../structures/Command.js");
 const BotClient = require('../index.js');
 const PowerLevels = require('../structures/PowerLevels.js');
+const ModulePriorities = require('../structures/ModulePriorities.js');
 
 module.exports = class InteractionCommandHandler extends Module {
     constructor(client) {
@@ -10,7 +11,8 @@ module.exports = class InteractionCommandHandler extends Module {
             name: "InteractionCommandHandler",
             info: "Adds interaction commands support.",
             enabled: true,
-            events: ["ready", "interactionCreate"]
+            events: ["ready", "interactionCreate"],
+            priority: ModulePriorities.HIGH
         });
     }
     

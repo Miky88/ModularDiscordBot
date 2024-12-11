@@ -1,6 +1,7 @@
 const Module = require("../structures/Module.js");
 const Discord = require('discord.js');
 const fs = require('fs');
+const ModulePriorities = require("../structures/ModulePriorities.js");
 
 module.exports = class System extends Module {
     constructor(client) {
@@ -8,7 +9,8 @@ module.exports = class System extends Module {
             name: "System",
             info: "Loads the system commands",
             enabled: true,
-            events: ["ready", "interactionCreate"]
+            events: ["ready", "interactionCreate"],
+            priority: ModulePriorities.HIGHEST
         })
     }
 
