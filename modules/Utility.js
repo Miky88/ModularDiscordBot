@@ -7,7 +7,7 @@ module.exports = class Utility extends Module {
             name: "Utility",
             info: "Loads the utility commands",
             enabled: true,
-            events: ["interactionCreate"],
+            events: ["interactionCreate"]
         })
     }
 
@@ -24,12 +24,13 @@ module.exports = class Utility extends Module {
         if (interaction.commandName == "settings") {
             switch (interaction.options.getFocused(true).name) {
                 case "module":
-                    let modules = [...this.client.moduleManager.modules.keys()];
+                    let modules = [...client.moduleManager.modules.values()].filter(x=>x.options.settings).map(x=>x.options.name);
                     let options = modules.map(m => ({ name: m, value: m }));
                     return interaction.respond(options);
                 case "key":
                     const module = interaction.options.getString("module");
                     const moduleSettings = this.client.moduleManager.modules.get(module).settings
+                    if(!moduleSettings) return interaction.respond([])
                     switch (interaction.options.getSubcommand()) {
                         case "add":
                         case "remove":
