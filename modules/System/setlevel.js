@@ -46,7 +46,7 @@ module.exports = class SetLevelCommand extends Command {
 
         try {
             await client.database.updateUser(data);
-            return await interaction.reply(`:white_check_mark: Successfully set powerlevel for ${user.displayName} to: ${Object.entries(PowerLevels).find(l => l[1] == level)[0]}`);
+            return await interaction.reply({ content: `:white_check_mark: Successfully set powerlevel for ${client.utils.parseUser(user)} to: ${Object.entries(PowerLevels).find(l => l[1] == level)[0]}`, allowedMentions: {} });
         } catch (e) {
             console.error(e);
             return await interaction.reply(":x: An internal error occurred");
