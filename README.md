@@ -7,10 +7,10 @@ Discord Modular Bot with Custom Module support.
 4. Replace `YourBotToken` with your bot's token in `.env` file
 5. Change the settings in `config.js` file
 6. Try the bot by executing `node index.js` in the repo's folder
-If you have troubles just open an issue!
+If you have troubles just open an issue or join my Discord server https://discord.gg/SJgMCrd
 
 ## Making a Module
-Plugins are stored in modules/ directory and are loaded into the bot on startup. Enabled modules are also runned when they get triggered by respective event.
+Modules are stored in modules/ directory and are loaded into the bot on startup. Enabled modules are executed when they get triggered by respective events.
 ```js
 const Module = require("../structures/Module.js"); // Import the base module
 
@@ -19,8 +19,19 @@ class Example extends Module {
         super(client, {
             name: "Example", // Name of the module
             info: "Description", // Description of the module
-            enabled: true, // Defines if this module would be enabled on startup
-            events: ["ready"] // Event that triggeres the module (can be more than one)
+            enabled: true, // Defines if this module should be enabled on startup
+            events: ["ready"], // Event that triggeres the module (can be more than one)
+            config: { // Default module configuration, it will be stored in a config.yml inside module directory
+                myOptions: {
+                    configurableString: "Hey!",
+                    configurableList: ["This", "is", "crazy!"]
+                }
+            },
+            settings: { // Default module settings. Can be modified per-guild with the /settings command
+                myDouble: 10.1,
+                myList: ["Hello", "world!"],
+                myString: "Hi!"
+            }
         })
     }
 
@@ -31,13 +42,3 @@ class Example extends Module {
 
 module.exports = Example;
 ```
-
-## Star History
-
-<a href="https://star-history.com/#Just1diaxx/ModularDiscordBot&Timeline">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Just1diaxx/ModularDiscordBot&type=Timeline&theme=dark" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Just1diaxx/ModularDiscordBot&type=Timeline" />
-   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Just1diaxx/ModularDiscordBot&type=Timeline" />
- </picture>
-</a>
