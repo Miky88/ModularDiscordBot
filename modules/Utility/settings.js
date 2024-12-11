@@ -20,6 +20,7 @@ module.exports = class Settings extends Command {
                             description: "Module to view settings for",
                             type: ApplicationCommandOptionType.String,
                             required: false,
+                            autocomplete: true
                             // choices: client.settings.map((v, k) => {return {name: k, value: k}})
                         }
                     ],
@@ -34,6 +35,7 @@ module.exports = class Settings extends Command {
                             description: "Module to set key of",
                             type: ApplicationCommandOptionType.String,
                             required: true,
+                            autocomplete: true
                             // choices: client.settings.map((v, k) => {return {name: k, value: k}})
                         },
                         {
@@ -61,6 +63,7 @@ module.exports = class Settings extends Command {
                             description: "Module to add key of",
                             type: ApplicationCommandOptionType.String,
                             required: true,
+                            autocomplete: true
                             // choices: client.settings.map((v, k) => {return {name: k, value: k}})
                         },
                         {
@@ -88,6 +91,7 @@ module.exports = class Settings extends Command {
                             description: "Module to remove value of",
                             type: ApplicationCommandOptionType.String,
                             required: true,
+                            autocomplete: true
                             // choices: client.settings.map((v, k) => {return {name: k, value: k}})
                         },
                         {
@@ -115,6 +119,7 @@ module.exports = class Settings extends Command {
                             description: "Module to set key of",
                             type: ApplicationCommandOptionType.String,
                             required: true,
+                            autocomplete: true
                             // choices: client.settings.map((v, k) => {return {name: k, value: k}})
                         },
                         {

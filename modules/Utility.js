@@ -22,18 +22,25 @@ module.exports = class Utility extends Module {
         if (!command) return;
 
         if (interaction.commandName == "settings") {
-            const module = interaction.options.getString("module");
-            const moduleSettings = this.client.moduleManager.modules.get(module).settings
-            switch (interaction.options.getSubcommand()) {
-                case "add":
-                case "remove":
-                    return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => moduleSettings.defaultSettings[key] instanceof Array).map(key => ({ name: key, value: key })))
-                case "set":
-                    return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => !(moduleSettings.defaultSettings[key] instanceof Array)).map(key => ({ name: key, value: key })))
-                case "reset":
-                    return interaction.respond(Object.keys(moduleSettings.defaultSettings).map(key => ({ name: key, value: key })))
+            switch (interaction.options.getFocused(true).name) {
+                case "module":
+                    let modules = [...this.client.moduleManager.modules.keys()];
+                    let options = modules.map(m => ({ name: m, value: m }));
+                    return interaction.respond(options);
+                case "key":
+                    const module = interaction.options.getString("module");
+                    const moduleSettings = this.client.moduleManager.modules.get(module).settings
+                    switch (interaction.options.getSubcommand()) {
+                        case "add":
+                        case "remove":
+                            return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => moduleSettings.defaultSettings[key] instanceof Array).map(key => ({ name: key, value: key })))
+                        case "set":
+                            return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => !(moduleSettings.defaultSettings[key] instanceof Array)).map(key => ({ name: key, value: key })))
+                        case "reset":
+                            return interaction.respond(Object.keys(moduleSettings.defaultSettings).map(key => ({ name: key, value: key })))
+                    }
             }
-
+            
             console.log(interaction);
         }
     }
