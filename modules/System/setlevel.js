@@ -22,8 +22,7 @@ module.exports = class SetLevelCommand extends Command {
                     required: true,
                     choices: Object.entries(PowerLevels).slice(1).map(c => ({ name: c[0], value: c[1] })) // omit OWNER
                 }
-            ],
-            moduleName: "System"
+            ]
         });
     }
 

@@ -99,8 +99,7 @@ module.exports = class ModManCommand extends Command {
                     description: "Get a list of loaded modules",
                     type: ApplicationCommandOptionType.Subcommand,
                 }
-            ],
-            moduleName: "System"
+            ]
         });
     }
 

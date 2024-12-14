@@ -17,8 +17,7 @@ module.exports = class ExecCommand extends Command {
                     type: ApplicationCommandOptionType.String,
                     required: true,
                 }
-            ],
-            moduleName: "System",
+            ]
         })
     }
 

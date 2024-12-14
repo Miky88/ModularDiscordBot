@@ -21,7 +21,7 @@ module.exports = class InteractionCommandHandler extends Module {
      */
     async ready(client) {
         client.application.commands
-            .set(client.moduleManager.commands.filter(c => c.data.moduleName != "System" ).map(c => c.toJson()))
+            .set(client.moduleManager.commands.filter(c => c.module.options.name).map(c => c.toJson()))
     }
 
     /**

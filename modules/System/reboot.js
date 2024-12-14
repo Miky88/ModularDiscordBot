@@ -6,8 +6,7 @@ module.exports = class RebootCommand extends Command {
         super(client, module, {
             name: 'reboot',
             description: 'Reboots the bot if running under PM2',
-            minLevel: PowerLevels.ADMIN,
-            moduleName: "System"
+            minLevel: PowerLevels.ADMIN
         });
     }
 
