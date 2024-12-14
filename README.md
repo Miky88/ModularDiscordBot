@@ -1,5 +1,5 @@
 # ModularBot
-Discord Modular Bot with Custom Plugin support.
+Discord Modular Bot with Custom Module support.
 ## Installation
 1. Clone or download the repository
 2. Run `npm install` on the repo's folder
@@ -7,25 +7,36 @@ Discord Modular Bot with Custom Plugin support.
 4. Replace `YourBotToken` with your bot's token in `.env` file
 5. Change the settings in `config.js` file
 6. Try the bot by executing `node index.js` in the repo's folder
-If you have troubles just open an issue!
+If you have troubles just open an issue or join my Discord server https://discord.gg/SJgMCrd
 
-## Making a Plugin
-Plugins are stored in plugins/ directory and are loaded into the bot on startup. Enabled plugins are also runned when they get triggered by respective event.
+## Making a Module
+Modules are stored in modules/ directory and are loaded into the bot on startup. Enabled modules are executed when they get triggered by respective events.
 ```js
-const BasePlugin = require("../modules/BasePlugin.js"); // Import the base plugin
+const Module = require("../structures/Module.js"); // Import the base module
 
-class Example extends BasePlugin {
-    constructor() {
-        super({
-            name: "Example", // Name of the plugin
-            info: "Description", // Description of the plugin
-            enabled: true, // Defines if this plugin would be enabled on startup
-            event: "ready" // Event that triggeres the plugin
+class Example extends Module {
+    constructor(client) {
+        super(client, {
+            name: "Example", // Name of the module
+            info: "Description", // Description of the module
+            enabled: true, // Defines if this module should be enabled on startup
+            events: ["ready"], // Event that triggeres the module (can be more than one)
+            config: { // Default module configuration, it will be stored in a config.yml inside module directory
+                myOptions: {
+                    configurableString: "Hey!",
+                    configurableList: ["This", "is", "crazy!"]
+                }
+            },
+            settings: { // Default module settings. Can be modified per-guild with the /settings command
+                myDouble: 10.1,
+                myList: ["Hello", "world!"],
+                myString: "Hi!"
+            }
         })
     }
 
-    async run(client, ...args) { // args are the arguments of Discord.js Events (es. for presenceUpdate you would have [oldPresence, newPresence]
-        this.log("Hi!")
+    async ready(client, ...args) { // args are the arguments of Discord.js Events (es. for presenceUpdate you would have [oldPresence, newPresence]
+        this.logger.log("Hi!")
     }
 }
 

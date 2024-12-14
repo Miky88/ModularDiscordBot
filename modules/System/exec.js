@@ -1,27 +1,34 @@
-const { MessageAttachment } = require("discord.js");
+const Command = require("../../structures/Command.js");
+const { AttachmentBuilder, ApplicationCommandOptionType } = require("discord.js");
 const exec = require("util").promisify(require("child_process").exec);
-const BaseCommand = require("../../modules/BaseCommand");
+const PowerLevels = require("../../structures/PowerLevels.js");
 
-module.exports = class ExecCommand extends BaseCommand {
-    constructor() {
-        super({
-            name: ":floppy_disk:exec",
-            info: "Runs shell commands on the host machine",
-            usage: "[code]",
-            cooldown: 3, // Command cooldown
-            minLevel: 10, // Minimum level require to execute the command
-            args: [
+module.exports = class ExecCommand extends Command {
+    constructor(client, module) {
+        super(client, module, {
+            name: "exec",
+            description: "Runs shell commands on the host machine",
+            cooldown: 3,
+            minLevel: PowerLevels.OWNER,
+            options: [
                 {
                     name: "code",
-                    type: "string"
+                    description: "Code to execute",
+                    type: ApplicationCommandOptionType.String,
+                    required: true,
                 }
             ],
             moduleName: "System",
         })
     }
 
-    async run(client, message, args) {
-        let script = args.code
+    /**
+     * 
+     * @param {import('../../index.js')} client 
+     * @param {import('discord.js').ChatInputCommandInteraction} interaction 
+     */
+    async run(client, interaction) {
+        let script = interaction.options.getString("code");
 
         try {
             let result = await exec(script).catch(err => {
@@ -43,19 +50,19 @@ module.exports = class ExecCommand extends BaseCommand {
                 );
 
             if (output.length > 1990) {
-                return message.channel.send({ attachments: [
-                    new MessageAttachment(Buffer.from(output), "output.txt")
+                return await interaction.reply({ attachments: [
+                    new AttachmentBuilder(Buffer.from(output), {name: "output.txt"})
                 ]});
             }
             if (outerr.length > 1990) {
-                return message.channel.send({ attachments: [
-                    new MessageAttachment(Buffer.from(outerr), "outerr.txt")
+                return await interaction.reply({ attachments: [
+                    new AttachmentBuilder(Buffer.from(outerr), {name: "outerr.txt"})
                 ]});
             }
 
-            message.channel.send(!!outerr ? outerr : output);
+            await interaction.reply(!!outerr ? outerr : output);
         } catch (err) {
-            console.error(err);
+            this.logger.error(err);
 
             let error = err
                 .toString()
@@ -63,7 +70,7 @@ module.exports = class ExecCommand extends BaseCommand {
                     client.config.token,
                     '"If someone tried to make you output the token, you were likely being scammed."'
                 );
-            return message.channel.send(error, { code: "bash" });
+            return await interaction.reply(error, { code: "bash" });
         }
     }
 }

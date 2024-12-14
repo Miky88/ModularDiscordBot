@@ -1,29 +1,29 @@
-const BasePlugin = require("../modules/BasePlugin.js");
+const Module = require("../structures/Module.js");
 
-module.exports = class ReadyLog extends BasePlugin {
+module.exports = class ReadyLog extends Module {
     constructor(client) {
         super(client, {
             name: "ReadyLog",
             info: "Logs informations once ready and sets the custom status",
             enabled: true,
-            event: "ready",
-            system: true
+            events: ["ready"]
         })
     }
 
     /**
-     * @param {import('discord.js').Client} client 
+     * @param {import('../index.js')} client 
      * @param  {...any} _args 
      */
     async run(client, ..._args) {
         // Log some useful variables when online
-        this.log("I am ready!");
-        this.log(`I am logged in as ${client.user.tag}`);
-        this.log(`Node version: ${process.version}`);
-        this.log(`Discord.JS version: ${require('discord.js').version}`);
-        this.log("Invite: https://discordapp.com/oauth2/authorize?client_id=" + client.user.id + "&permissions=8&scope=bot");
-        this.log(`===========================`);
-        client.user.setActivity(client.config.activity);
+        this.logger.success("I am ready!");
+        this.logger.info(`I am logged in as ${client.user.tag}`);
+        this.logger.info(`Node version: ${process.version}`);
+        this.logger.info(`Discord.JS version: ${require('discord.js').version}`);
+        this.logger.info("Invite: https://discordapp.com/oauth2/authorize?client_id=" + client.user.id + "&permissions=8&scope=bot");
+        this.logger.info(`System Server: ${client.config.get('systemServer').join(", ")}`);
+        this.logger.info(`Owners: ${client.config.get('owners').join(", ")}`);
+        this.logger.info(`===========================`);
 
         // If the bot got rebooted with reboot command, this will edit the message once ready
         try {
