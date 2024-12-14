@@ -15,7 +15,8 @@ module.exports = class ExecCommand extends BaseCommand {
                     name: "code",
                     type: "string"
                 }
-            ]
+            ],
+            moduleName: "System",
         })
     }
 
