@@ -27,7 +27,6 @@ module.exports = class Module {
     }) {
         this.client = client;
         this.options = { name, info, enabled, events, priority, usesDB, dependencies, settings};
-        this.options = { name, info, enabled, events, priority, usesDB, dependencies, settings};
         
         this.commands = new Discord.Collection();
         this.logger = new Logger(this.options.name);
@@ -80,7 +79,7 @@ module.exports = class Module {
         if (!this.options.usesDB)
             return null;
 
-        return this.client.database.db[`plugin_${this.options.name}`];
+        return this.client.database.db[`module_${this.options.name}`];
     }
 
     saveData(data) {
