@@ -188,20 +188,22 @@ module.exports = class ModManCommand extends Command {
                     .setTitle(`Module Manager - ${moduleName}`)
                     .setColor(0x0000FF)
                     .setDescription(response.description)
-                    .addField("Enabled", `${response.enabled}`, true)
-                    .addField("Loaded", `${response.loaded}`, true)
-                    .addField("Triggering Event", Array.isArray(response.event) ? response.event.join(", ") : response.event, true)
+                    .addFields(
+                        { name: "Enabled", value: `${response.enabled}`, inline: true },
+                        { name: "Loaded", value: `${response.loaded}`, inline: true },
+                        { name: "Triggering Events", value: Array.isArray(response.events) ? response.events.join(", ") : response.events, inline: true }
+                    )
                 return await interaction.reply({ embeds: [embed] })
             case "list":
                 embed
                     .setTitle("Module Manager")
-                    .addFields({name : "Loaded", value: Manager.list.loaded || "_Nothing_", inline: true })
+                    .addFields({ name : "Loaded", value: Manager.list.loaded || "_Nothing_", inline: true })
                     .setColor(0x0000FF)
-                Manager.list.unloaded ? embed.addField("Unloaded", Manager.list.unloaded, true) : undefined
+                Manager.list.unloaded ? embed.addFields({ name: "Unloaded", value: Manager.list.unloaded, inline: true }) : undefined
                 await interaction.reply({ embeds: [embed] })
                 break;
             default:
-                await interaction.reply(`:warning: Correct usage \`plugman (list|load|unload|enable|disable|info) <module name>\``)
+                await interaction.reply(`:warning: Correct usage \`modman (list|load|unload|enable|disable|info) <module name>\``)
                 break;
         }
     }
