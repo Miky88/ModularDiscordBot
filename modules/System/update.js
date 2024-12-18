@@ -1,5 +1,6 @@
 const Command = require("../../structures/Command.js");
 const PowerLevels = require("../../structures/PowerLevels.js");
+const exec = require("util").promisify(require("child_process").exec);
 
 module.exports = class UpdateCommand extends Command {
     constructor(client, module) {
@@ -7,7 +8,7 @@ module.exports = class UpdateCommand extends Command {
             name: "update",
             description: "Pulls commits from git and reboots the bot",
             cooldown: 3,
-            minLevel: PowerLevels.OWNER
+            minLevel: PowerLevels.OWNER,
         })
     }
 
@@ -17,16 +18,24 @@ module.exports = class UpdateCommand extends Command {
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      */
     async run(client, interaction) {
-        const [exec] = client.moduleManager.getCommand("exec");
-        if (!exec)
-            return interaction.reply("Unknown command `exec`, aborting.");
+        try {
+            let result = await exec("git pull --no-rebase").catch(err => {
+                throw err;
+            });
 
-        await exec.run(client, interaction, { code: "git pull --no-rebase" });
+            let output = result.stdout ? "```sh\n" + result.stdout + "```" : "";
+            let outerr = result.stderr ? "```sh\n" + result.stderr + "```" : "";
+
+            await interaction.reply(!!outerr ? outerr : output);
+        } catch (err) {
+            this.logger.log(err);
+            return await interaction.reply("```sh\n" + err + "```");
+        }
 
         const [reboot] = client.moduleManager.getCommand("reboot");
         if (!reboot)
             return interaction.reply("Unknown command `reboot`, aborting.");
 
-        await reboot.run(client, interaction, {});
+        await reboot.run(client, interaction);
     }
 }
