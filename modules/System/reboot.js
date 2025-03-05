@@ -1,3 +1,4 @@
+const { MessageFlags } = require('discord.js');
 const Command = require('../../structures/Command.js');
 const PowerLevels = require("../../structures/PowerLevels.js");
 
@@ -18,7 +19,7 @@ module.exports = class RebootCommand extends Command {
     async run(client, interaction) {
         const { promisify } = require("util");
         const write = promisify(require("fs").writeFile);
-        if (!interaction.replied) await interaction.reply({ ephemeral: true, content: "OK" });
+        if (!interaction.replied) await interaction.reply({ flags: [MessageFlags.Ephemeral], content: "OK" });
         const m = await interaction.channel.send(":hourglass_flowing_sand: Rebooting...");
         await write('./reboot.json', `{"id": "${m.id}", "channel": "${m.channel.id}"}`).catch(this.logger.error);
         

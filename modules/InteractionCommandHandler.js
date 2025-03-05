@@ -36,16 +36,16 @@ module.exports = class InteractionCommandHandler extends Module {
         try {
             /** @type {[Command, Module]} */
             let [cmd, module] = this.client.moduleManager.getCommand(interaction.commandName);
-            if (!cmd) return interaction.reply({ content: ":no_entry: Command not found", ephemeral: true });
+            if (!cmd) return interaction.reply({ content: ":no_entry: Command not found", flags: [Discord.MessageFlags.Ephemeral] });
 
             if (interaction.user.data.powerlevel < cmd.config.minLevel)
-                return interaction.reply({ content: `:no_entry: You don't have permission to use this command. The required permission level is ${Object.keys(PowerLevels).find(k => PowerLevels[k] == cmd.config.minLevel)}`, ephemeral: true });
+                return interaction.reply({ content: `:no_entry: You don't have permission to use this command. The required permission level is ${Object.keys(PowerLevels).find(k => PowerLevels[k] == cmd.config.minLevel)}`, flags: [Discord.MessageFlags.Ephemeral] });
 
             await cmd.run(client, interaction, module);
         } catch (e) {
             interaction.reply({
                 content: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers.",
-                ephemeral: true
+                flags: [Discord.MessageFlags.Ephemeral]
             })
             this.logger.error(e.stack || e)
         }
