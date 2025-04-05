@@ -14,12 +14,12 @@ module.exports = class ConfigurationManager {
         this.defaultConfig = defaultConfig
         this.module = module;
         this.name = name
-        this.path = (this.module instanceof Client) ? `config.yml` : `./modules/${this.module.constructor.name}/${this.name}.yml`
+        this.path = (this.module == 'Client') ? `config.yml` : `./modules/${this.module.constructor.name}/${this.name}.yml`
 
         // Create config file if it doesn't exist in /modules/<module>/config.yml
         if (!fs.existsSync(this.path)) {
             if(module.logger)
-                module.logger.info(`Creating ${this.name}.yml file for ${this.module.constructor.name}`)
+                module.logger.info(`Creating ${this.name}.yml file for ${this.module.constructor.name ? this.module.constructor.name : 'Client'}`)
             fs.writeFileSync(this.path, stringify(this.defaultConfig))
         }
 

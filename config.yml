@@ -2,6 +2,28 @@ activity: /help
 owners:
   - "311929179186790400"
   - "422418878459674624"
-  - "1174678858444836907"
 systemServer:
   - "1313550337474429001"
+intents:
+  - Guilds
+  - GuildModeration
+  - GuildBans
+  - GuildExpressions
+  - GuildEmojisAndStickers
+  - GuildIntegrations
+  - GuildWebhooks
+  - GuildInvites
+  - GuildVoiceStates
+  - GuildMessageReactions
+  - GuildMessageTyping
+  - DirectMessages
+  - DirectMessageReactions
+  - DirectMessageTyping
+  - GuildScheduledEvents
+  - AutoModerationConfiguration
+  - AutoModerationExecution
+  - GuildMessagePolls
+  - DirectMessagePolls
+partials:
+  - Reaction
+  - Message
