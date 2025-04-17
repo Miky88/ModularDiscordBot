@@ -4,8 +4,40 @@ module.exports = class Logger {
     /**
      * @param {String} name 
      */
-    constructor(name) {
+    constructor(name, saveToFile = true) {
         this.name = name;
+        this._saveToFile = saveToFile;
+    }
+
+    /**
+     * Saves the message to logs.txt
+     * @param {String} message
+     * @param {String} type error or simple log
+     * @param {Date} date  
+     */
+    saveToFile(date, type = "log", ...message) {
+        let final = "";
+
+        for (const msg of message) {
+            final += `${msg}`;
+        }
+
+        const dir = process.cwd();
+        const fs = require('fs');
+
+        if (type === "error") {
+            try {
+                fs.appendFileSync(dir + "/err.txt", `${date.toLocaleDateString('it')} ${date.getHours()}:${date.getMinutes()} [${this.name}] ${final}\n`)
+            } catch (err) {
+                if (err) throw err;
+            };
+        }
+
+        try {
+            fs.appendFileSync(dir + "/out.txt", `${date.toLocaleDateString('it')} ${date.getHours()}:${date.getMinutes()} [${this.name}] ${final}\n`)
+        } catch (err) {
+            if (err) throw err;
+        };
     }
 
     /**
@@ -20,6 +52,7 @@ module.exports = class Logger {
         }
 
         console.log(`[${this.name}] ${final}`);
+        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -34,6 +67,7 @@ module.exports = class Logger {
         }
 
         console.log(`[${chalk.red(this.name)}] ${chalk.red(final)}`);
+        if (this._saveToFile) this.saveToFile(new Date(), "error", final);
     }
 
     /**
@@ -48,6 +82,7 @@ module.exports = class Logger {
         }
 
         console.log(`[${chalk.yellow(this.name)}] ${chalk.yellow(final)}`);
+        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -62,6 +97,7 @@ module.exports = class Logger {
         }
 
         console.log(`[${chalk.green(this.name)}] ${chalk.green(final)}`);
+        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -76,6 +112,7 @@ module.exports = class Logger {
         }
 
         console.log(`[${chalk.blueBright(this.name)}] ${chalk.blueBright(final)}`);
+        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -90,6 +127,7 @@ module.exports = class Logger {
         }
 
         console.log(`[${chalk.magenta(this.name)}] ${chalk.magenta(final)}`);
+        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -104,6 +142,7 @@ module.exports = class Logger {
         }
 
         console.log(`[${chalk.cyan(this.name)}] ${chalk.cyan(final)}`);
+        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -119,5 +158,6 @@ module.exports = class Logger {
         }
 
         console.log(`[${chalk[color](this.name)}] ${chalk[color](final)}`)
+        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 }
