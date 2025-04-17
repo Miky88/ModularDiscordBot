@@ -4,3 +4,5 @@ node_modules
 reboot.json
 database.db
 config.yml
+out.txt
+err.txt
