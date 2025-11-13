@@ -7,7 +7,10 @@ module.exports = class Utility extends Module {
             name: "Utility",
             info: "Loads the utility commands",
             enabled: true,
-            events: ["interactionCreate"]
+            events: ["interactionCreate"],
+            settings: {
+                defaultServerLanguage: "en-GB"
+            }
         })
     }
 

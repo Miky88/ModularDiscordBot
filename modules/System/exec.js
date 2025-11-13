@@ -12,8 +12,8 @@ module.exports = class ExecCommand extends Command {
             minLevel: PowerLevels.OWNER,
             options: [
                 {
-                    name: "code",
-                    description: "Code to execute",
+                    name: "command",
+                    description: "Command to execute",
                     type: ApplicationCommandOptionType.String,
                     required: true,
                 }

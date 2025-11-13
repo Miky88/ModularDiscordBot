@@ -31,6 +31,16 @@ module.exports = class Command {
         this.logger = new Logger(this.constructor.name);
     }
 
+    t(_key, interactionOrLang, vars) {
+        let key = `commands.${this.config.name}.${_key}`;
+        return this.module.t(key, interactionOrLang, vars);
+    }
+
+    getLocalizationObject(_key) {
+        let key = `commands.${this.config.name}.${_key}`;
+        return this.module.getLocalizationObject(key);
+    }
+
     /**
      * @param {import('../index.js')} client 
      * @param {Interaction} interaction 
@@ -43,10 +53,27 @@ module.exports = class Command {
         const { name, description, options, type, defaultMemberPermissions, moduleName } = this.data;
         const isChatInput = !type || type === ApplicationCommandType.ChatInput;
     
+        let nameLocalizations = this.getLocalizationObject('name');
+        let descriptionLocalizations = isChatInput ? this.getLocalizationObject('description') : null;
+
+        options.forEach(option => {
+            if (option.name) {
+                const optionNameLoc = this.getLocalizationObject(`options.${option.name}.name`);
+                if (optionNameLoc) {
+                    option.nameLocalizations = optionNameLoc;
+                }
+            }
+        });
+
         return {
             name,
+            nameLocalizations,
             type,
-            ...(isChatInput && { description, options }),
+            ...(isChatInput && {
+                description,
+                descriptionLocalizations: descriptionLocalizations,
+                options
+            }),
             defaultMemberPermissions
         };
     }
