@@ -34,7 +34,7 @@ module.exports = class UpdateCommand extends Command {
 
         const [reboot] = client.moduleManager.getCommand("reboot");
         if (!reboot)
-            return interaction.reply("Unknown command `reboot`, aborting.");
+            return interaction.reply(this.t('messages.noreboot', interaction));
 
         await reboot.run(client, interaction);
     }

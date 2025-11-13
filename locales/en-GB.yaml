@@ -68,9 +68,15 @@ modules:
       setlevel:
         name: setlevel
         description: Set the power level of a user.
+        messages:
+          nopermission: ":x: You can't set this user's powerlevel."
+          success: ":white_check_mark: Successfully set powerlevel for {{user}} to: {{level}}"
+          error: ":x: An internal error occurred"
       update:
         name: update
         description: Update the bot to the latest version from the Git repository, and reboots the bot
+        messages:
+          noreboot: "Unknown command `reboot`, aborting."
   Utility:
     commands:
       perms:
@@ -78,6 +84,8 @@ modules:
         description: Check the permissions of a user or role in the current channel.
         options:
           user: The user to check permissions for.
+        messages:
+          nouserindb: ":warning: There's no user in database matching your query"
       ping:
         name: ping
         description: Check the bot's latency and responsiveness.
@@ -120,6 +128,12 @@ modules:
       stats:
         name: stats
         description: View bot statistics and information.
+        embed:
+          title: "STATISTICS"
+          memusage: "⚙️ Memory Usage"
+          uptime: "⏱️ Uptime"
+          versions: "🔢 Versions"
+          creationdate: "🎂 Creation date"
   InteractionCommandHandler:
     errors:
       command-not-found: ":no_entry: Command not found"

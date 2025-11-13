@@ -29,7 +29,7 @@ module.exports = class PermsCommand extends Command {
         if (!user) user = interaction.user;
 
         const data = await client.database.forceUser(user.id);
-        if (!data) return await interaction.reply(":warning: There's no user in database matching your query");
+        if (!data) return await interaction.reply(this.t('messages.nouserindb', interaction));
         if (interaction.user.data.powerlevel < 0 && data.user.id !== interaction.user.id) return;
 
         const embed = new EmbedBuilder()
