@@ -56,12 +56,19 @@ module.exports = class Command {
         let nameLocalizations = this.getLocalizationObject('name');
         let descriptionLocalizations = isChatInput ? this.getLocalizationObject('description') : null;
 
+        const attachLocs = (obj, path) => {
+            if (!obj?.name) return;
+            const nameLoc = this.getLocalizationObject(path + '.name');
+            if (nameLoc) {
+            obj.nameLocalizations = nameLoc;
+            obj.descriptionLocalizations = this.getLocalizationObject(path + '.description');
+            }
+        };
+
         options.forEach(option => {
-            if (option.name) {
-                const optionNameLoc = this.getLocalizationObject(`options.${option.name}.name`);
-                if (optionNameLoc) {
-                    option.nameLocalizations = optionNameLoc;
-                }
+            attachLocs(option, `options.${option.name}`);
+            if (Array.isArray(option.options) && option.options.length) {
+                option.options.forEach(sub => attachLocs(sub, `options.${option.name}.options.${sub.name}`));
             }
         });
 

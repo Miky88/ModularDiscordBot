@@ -3,62 +3,121 @@ modules:
     commands:
       eval:
         name: eval
-        description: Esegui codice JavaScript arbitrario.
+        description: Esegue codice JavaScript arbitrario.
         options:
           code: Il codice JavaScript da eseguire.
       exec:
         name: exec
-        description: Esegui un comando di sistema.
+        description: Esegue un comando di sistema.
         options:
           command: Il comando di sistema da eseguire.
       modman:
         name: modman
-        description: Gestisci i moduli (carica, scarica, ricarica).
+        description: Gestisce i moduli (carica, scarica, ricarica).
         options:
-          load: Carica un modulo
-          unload: Scarica un modulo
-          reload: Ricarica un modulo
-          enable: Abilita un modulo
-          disable: Disabilita un modulo
-          info: Ottieni informazioni su un modulo
-          list: Ottieni una lista dei moduli caricati
-          module: Modulo su cui eseguire l'azione
+          load:
+            name: load
+            description: Carica un modulo
+            options:
+              module:
+                name: module
+                description: Modulo su cui eseguire l'azione
+          unload:
+            name: unload
+            description: Scarica un modulo
+            options:
+              module:
+                name: module
+                description: Modulo su cui eseguire l'azione
+          reload:
+            name: reload
+            description: Ricarica un modulo
+            options:
+              module:
+                name: module
+                description: Modulo su cui eseguire l'azione
+          enable:
+            name: enable
+            description: Abilita un modulo
+            options:
+              module:
+                name: module
+                description: Modulo su cui eseguire l'azione
+          disable:
+            name: disable
+            description: Disabilita un modulo
+            options:
+              module:
+                name: module
+                description: Modulo su cui eseguire l'azione
+          info:
+            name: info
+            description: Ottiene informazioni su un modulo
+            options:
+              module:
+                name: module
+                description: Modulo su cui eseguire l'azione
+          list:
+            name: list
+            description: Ottiene l'elenco dei moduli caricati
       reboot:
         name: reboot
-        description: Riavvia il bot se in esecuzione sotto PM2 o un process manager.
+        description: Riavvia il bot se eseguito tramite PM2 o un process manager.
+        messages:
+          rebooting: ":hourglass_flowing_sand: Riavvio in corso..."
       setlevel:
         name: setlevel
         description: Imposta il livello di potere di un utente.
       update:
         name: update
-        description: Aggiorna il bot all'ultima versione dal repository Git e riavvia il bot.
+        description: Aggiorna il bot all'ultima versione dal repository Git e lo riavvia.
   Utility:
     commands:
       perms:
         name: perms
         description: Controlla i permessi di un utente o ruolo nel canale corrente.
         options:
-          user: L'utente per cui controllare i permessi.
+          user: L'utente di cui controllare i permessi.
       ping:
         name: ping
         description: Controlla la latenza e la reattività del bot.
         messages:
-          pinging: "Pingando..."
-          pong: ":ping_pong: Pong! La latenza è di **{{latency}}ms**. La latenza API è di **{{apiLatency}}ms**"
+          pinging: "Pinging..."
+          pong: ":ping_pong: Pong! La latenza è **{{latency}}ms**. La latenza API è **{{apiLatency}}ms**"
       settings:
         name: settings
-        description: Gestisci le impostazioni del server corrente
+        description: Gestisce le impostazioni del server corrente
         options:
-          view: Visualizza le impostazioni correnti
-          set: Imposta un'impostazione
-          reset: Reimposta un'impostazione al valore predefinito
-          setting: L'impostazione da gestire
-          value: Il valore da impostare per l'impostazione
+          view:
+            name: view
+            description: Visualizza le impostazioni correnti
+          set:
+            name: set
+            description: Imposta un'impostazione
+            options:
+              module:
+                name: module
+                description: Il modulo a cui appartiene l'impostazione
+              key:
+                name: key
+                description: L'impostazione da modificare
+              value:
+                name: value
+                description: Il valore da assegnare all'impostazione
+          reset:
+            name: reset
+            description: Reimposta un'impostazione al valore predefinito
+          setting:
+            name: setting
+            description: L'impostazione da gestire
+          value:
+            name: value
+            description: Il valore da assegnare all'impostazione
       stats:
         name: stats
-        description: Visualizza le statistiche e le informazioni del bot.
+        description: Mostra le statistiche e le informazioni del bot.
   InteractionCommandHandler:
     errors:
       command-not-found: ":no_entry: Comando non trovato"
-      insufficient-powerlevel: ":no_entry: Non hai il permesso di usare questo comando. Il livello di permesso richiesto è"
-      execution-error: ":no_entry: Ops, si è verificato un errore durante l'esecuzione del comando, contatta gli sviluppatori del bot."
+      insufficient-powerlevel: ":no_entry: Non hai il permesso per usare questo comando. Il livello richiesto è"
+      execution-error: ":no_entry: Ops, si è verificato un errore durante l'esecuzione del comando. Contatta gli sviluppatori del bot."

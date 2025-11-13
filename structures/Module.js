@@ -47,16 +47,25 @@ module.exports = class Module {
 
         if (interactionOrLang instanceof BaseInteraction) {
             const interaction = interactionOrLang;
-            let lang = this.client.defaultLang;
-            if (/** todo get from db*/ false)
-                lang = interaction.user.data.lang;
-            else if (/** todo get from db */ false)
-                lang = interaction.guild.settings.lang;
-            else if (interaction.locale)
+            
+            const utility = this.client.moduleManager.modules.get("Utility")?.settings;
+            const guildLang = interaction.guild ? utility?.get(interaction.guild.id)?.settings?.defaultServerLanguage : null;
+            const lang = (guildLang && this.client.i18n.languages[guildLang]) ? guildLang : this.client.i18n.defaultLang;
+
+            const userData = this.client.database.forceUser(interaction.user.id);
+
+            if (userData && userData.language && this.client.i18n.languages[userData.language])
+                lang = userData.language;
+            else if (interaction.locale && this.client.i18n.languages[interaction.locale])
                 lang = interaction.locale;
+            else if (guildLang)
+                lang = guildLang;
+            else
+                lang = this.client.i18n.defaultLang;
+
             return this.client.i18n.t(key, lang, vars);
         } else {
-            const lang = interactionOrLang || this.client.defaultLang;
+            const lang = interactionOrLang || this.client.i18n.defaultLang;
             return this.client.i18n.t(key, lang, vars);
         }
 

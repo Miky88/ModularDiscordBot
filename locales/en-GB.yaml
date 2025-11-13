@@ -15,14 +15,51 @@ modules:
         name: modman
         description: Manage modules (load, unload, reload).
         options:
-          load: Loads a module
-          unload: Unloads a module
-          reload: Reloads a module
-          enable: Enable a module
-          disable: Disable a module
-          info: Get information about a module
-          list: Get a list of loaded modules
-          module: Module to perform the action on
+          load:
+            name: load
+            description: Loads a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          unload:
+            name: unload
+            description: Unloads a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          reload:
+            name: reload
+            description: Reloads a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          enable:
+            name: enable
+            description: Enable a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          disable:
+            name: disable
+            description: Disable a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          info:
+            name: info
+            description: Get information about a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          list:
+            name: list
+            description: Get a list of loaded modules
       reboot:
         name: reboot
         description: Reboots the bot if running under PM2 or a process manager.
@@ -51,11 +88,35 @@ modules:
         name: settings
         description: Manage the current server settings
         options:
-          view: View current settings
-          set: Set a setting
-          reset: Reset a setting to default
-          setting: The setting to manage
-          value: The value to set the setting to
+          view:
+            name: view
+            description: View current settings
+          set:
+            name: set
+            description: Set a setting
+            options:
+              module:
+                name: module
+                description: The module to view settings for
+              key:
+                name: key
+                description: The setting to view
+              value:
+                name: value
+                description: The value to filter settings by
+          reset:
+            name: reset
+            description: Reset a setting to default
+            options:
+              module:
+                name: module
+                description: The module to view settings for
+              key:
+                name: key
+                description: The setting to view
+              value:
+                name: value
+                description: The value to filter settings by
       stats:
         name: stats
         description: View bot statistics and information.
