@@ -161,6 +161,7 @@ modules:
         messages:
           invalidLang: ":warning: The specified language is not supported."
           success: ":flag_gb: Your preferred language has been set to **English**!"
+          reset: ":globe_with_meridians: Your preferred language has been reset to **Default**!"
       
   InteractionCommandHandler:
     errors:
