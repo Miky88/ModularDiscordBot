@@ -1,3 +1,4 @@
+name: 'English (GB)'
 modules:
   System:
     commands:
@@ -150,6 +151,17 @@ modules:
           uptime: "⏱️ Uptime"
           versions: "🔢 Versions"
           creationdate: "🎂 Creation date"
+      setlang:
+        name: setlang
+        description: Set your preferred language for the bot
+        options:
+          language:
+            name: language
+            description: The language you want to set
+        messages:
+          invalidLang: ":warning: The specified language is not supported."
+          success: ":flag_gb: Your preferred language has been set to **English**!"
+      
   InteractionCommandHandler:
     errors:
       command-not-found: ":no_entry: Command not found"

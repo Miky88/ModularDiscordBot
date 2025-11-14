@@ -41,6 +41,7 @@ module.exports = class Database {
         const user = await this.db.users.insert({
             id: userID,
             powerlevel: PowerLevels.USER,
+            language: null
         })
         this.cacheUser(user)
         return user;

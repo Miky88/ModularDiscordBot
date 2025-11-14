@@ -37,7 +37,7 @@ module.exports = class Module {
             this.settings = new SettingsManager(client, this, settings);
     }
 
-    t(_key, interactionOrLang, vars) {
+    async t(_key, interactionOrLang, vars) {
         let key = `modules.${this.options.name}.${_key}`;
         // Lang:
         // - Check if forced on user data
@@ -52,7 +52,7 @@ module.exports = class Module {
             const guildLang = interaction.guild ? utility?.get(interaction.guild.id)?.settings?.defaultServerLanguage : null;
             let lang = this.client.i18n.defaultLang;
 
-            const userData = this.client.database.forceUser(interaction.user.id);
+            const userData = await this.client.database.forceUser(interaction.user.id);
 
             if (userData && userData.language && this.client.i18n.languages[userData.language])
                 lang = userData.language;

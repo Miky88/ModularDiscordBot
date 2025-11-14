@@ -31,16 +31,16 @@ module.exports = class StatsCommand extends Command {
 
         let embed = new EmbedBuilder()
             .setColor("Random")
-            .setTitle(this.t('embed.title', interaction))
+            .setTitle(await this.t('embed.title', interaction))
             .setDescription(`${client.user.username}`)
             .addFields(
                 {
-                    name: this.t('embed.memusage', interaction),
+                    name: await this.t('embed.memusage', interaction),
                     value: `${(process.memoryUsage().heapUsed / 1024 / 1024).toFixed(2)} MB`,
                     inline: true
                 },
                 {
-                    name: this.t('embed.uptime', interaction),
+                    name: await this.t('embed.uptime', interaction),
                     value: duration,
                     inline: true
                 },
@@ -50,12 +50,12 @@ module.exports = class StatsCommand extends Command {
                     inline: true
                 },
                 {
-                    name: this.t('embed.versions', interaction),
+                    name: await this.t('embed.versions', interaction),
                     value: `**• Discord.js**: v${version}\n**• Node.js**:    ${process.version}`,
                     inline: true
                 },
                 {
-                    name: this.t('embed.creationdate', interaction),
+                    name: await this.t('embed.creationdate', interaction),
                     value: elapsed,
                     inline: false
                 }

@@ -20,7 +20,7 @@ module.exports = class RebootCommand extends Command {
         const { promisify } = require("util");
         const write = promisify(require("fs").writeFile);
         if (!interaction.replied) await interaction.reply({ flags: [MessageFlags.Ephemeral], content: "OK" });
-        const m = await interaction.channel.send(this.t("messages.rebooting", interaction));
+        const m = await interaction.channel.send(await this.t("messages.rebooting", interaction));
         await write('./reboot.json', `{"id": "${m.id}", "channel": "${m.channel.id}"}`).catch(this.logger.error);
         
         process.exit(1);

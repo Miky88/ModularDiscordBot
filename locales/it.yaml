@@ -1,3 +1,4 @@
+name: 'Italiano'
 modules:
   System:
     commands:
@@ -116,6 +117,16 @@ modules:
       stats:
         name: stats
         description: Mostra le statistiche e le informazioni del bot.
+      setlang:
+        name: setlang
+        description: Imposta la tua lingua preferita per il bot.
+        options:
+          language:
+            name: language
+            description: La lingua che vuoi impostare
+        messages:
+          invalidLang: ":warning: La lingua specificata non è supportata."
+          success: ":flag_it: La tua lingua preferita è stata impostata su **Italiano**!"
   InteractionCommandHandler:
     errors:
       command-not-found: ":no_entry: Comando non trovato"
