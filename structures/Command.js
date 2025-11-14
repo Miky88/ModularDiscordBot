@@ -60,8 +60,15 @@ module.exports = class Command {
             if (!obj?.name) return;
             const nameLoc = this.getLocalizationObject(path + '.name');
             if (nameLoc) {
-            obj.nameLocalizations = nameLoc;
-            obj.descriptionLocalizations = this.getLocalizationObject(path + '.description');
+                obj.nameLocalizations = nameLoc;
+                // Only set descriptionLocalizations if it's a chat input option and the localization exists
+                const isChatInputOption = !obj.type || obj.type === ApplicationCommandType.ChatInput;
+                if (isChatInputOption) {
+                    const descLoc = this.getLocalizationObject(path + '.description');
+                    if (descLoc) {
+                        obj.descriptionLocalizations = descLoc;
+                    }
+                }
             }
         };
 
