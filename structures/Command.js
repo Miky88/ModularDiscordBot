@@ -63,20 +63,22 @@ module.exports = class Command {
                 obj.nameLocalizations = nameLoc;
                 // Only set descriptionLocalizations if it's a chat input option and the localization exists
                 const isChatInputOption = !obj.type || obj.type === ApplicationCommandType.ChatInput;
-                if (isChatInputOption) {
-                    const descLoc = this.getLocalizationObject(path + '.description');
-                    if (descLoc) {
-                        obj.descriptionLocalizations = descLoc;
-                    }
-                }
+        const attachLocsRecursive = (obj, path) => {
+            if (!obj?.name) return;
+            const nameLoc = this.getLocalizationObject(path + '.name');
+            if (nameLoc) {
+                obj.nameLocalizations = nameLoc;
+                obj.descriptionLocalizations = this.getLocalizationObject(path + '.description');
+            }
+            if (Array.isArray(obj.options) && obj.options.length) {
+                obj.options.forEach(sub => {
+                    attachLocsRecursive(sub, `${path}.options.${sub.name}`);
+                });
             }
         };
 
         options.forEach(option => {
-            attachLocs(option, `options.${option.name}`);
-            if (Array.isArray(option.options) && option.options.length) {
-                option.options.forEach(sub => attachLocs(sub, `options.${option.name}.options.${sub.name}`));
-            }
+            attachLocsRecursive(option, `options.${option.name}`);
         });
 
         return {
