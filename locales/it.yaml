@@ -127,7 +127,7 @@ modules:
         messages:
           invalidLang: ":warning: La lingua specificata non è supportata."
           success: ":flag_it: La tua lingua preferita è stata impostata su **Italiano**!"
-          reset: ":globe_with_meridians: La tua lingua preferita è stata reimpostata su **Predefinito**!"
+          reset: ":globe_with_meridians: Da adesso la tua lingua sarà sincronizzata nella lingua predefinita!"
   InteractionCommandHandler:
     errors:
       command-not-found: ":no_entry: Comando non trovato"
