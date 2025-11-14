@@ -9,7 +9,7 @@ module.exports = class Utility extends Module {
             enabled: true,
             events: ["interactionCreate"],
             settings: {
-                defaultServerLanguage: "en-GB"
+                defaultServerLanguage: ""
             }
         })
     }

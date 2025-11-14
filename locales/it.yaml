@@ -14,7 +14,7 @@ modules:
           command: Il comando di sistema da eseguire.
       modman:
         name: modman
-        description: Gestisce i moduli (carica, scarica, ricarica).
+        description: Gestisci i moduli (carica, scarica, ricarica).
         options:
           load:
             name: load
@@ -22,104 +22,139 @@ modules:
             options:
               module:
                 name: module
-                description: Modulo su cui eseguire l'azione
+                description: Modulo su cui eseguire l’azione
           unload:
             name: unload
             description: Scarica un modulo
             options:
               module:
                 name: module
-                description: Modulo su cui eseguire l'azione
+                description: Modulo su cui eseguire l’azione
           reload:
             name: reload
             description: Ricarica un modulo
             options:
               module:
                 name: module
-                description: Modulo su cui eseguire l'azione
+                description: Modulo su cui eseguire l’azione
           enable:
             name: enable
             description: Abilita un modulo
             options:
               module:
                 name: module
-                description: Modulo su cui eseguire l'azione
+                description: Modulo su cui eseguire l’azione
           disable:
             name: disable
             description: Disabilita un modulo
             options:
               module:
                 name: module
-                description: Modulo su cui eseguire l'azione
+                description: Modulo su cui eseguire l’azione
           info:
             name: info
-            description: Ottiene informazioni su un modulo
+            description: Ottieni informazioni su un modulo
             options:
               module:
                 name: module
-                description: Modulo su cui eseguire l'azione
+                description: Modulo su cui eseguire l’azione
           list:
             name: list
-            description: Ottiene l'elenco dei moduli caricati
+            description: Ottieni la lista dei moduli caricati
       reboot:
         name: reboot
-        description: Riavvia il bot se eseguito tramite PM2 o un process manager.
+        description: Riavvia il bot se in esecuzione tramite PM2 o un process manager.
         messages:
           rebooting: ":hourglass_flowing_sand: Riavvio in corso..."
       setlevel:
         name: setlevel
-        description: Imposta il livello di potere di un utente.
+        description: Imposta il power level di un utente.
+        messages:
+          nopermission: ":x: Non puoi impostare il power level di questo utente."
+          success: ":white_check_mark: Power level di {{user}} impostato a: {{level}}"
+          error: ":x: Si è verificato un errore interno"
       update:
         name: update
-        description: Aggiorna il bot all'ultima versione dal repository Git e lo riavvia.
+        description: Aggiorna il bot all’ultima versione dal repository Git e riavvia il bot
+        messages:
+          noreboot: "Comando `reboot` sconosciuto, annullo l'operazione."
+
   Utility:
     commands:
       perms:
         name: perms
         description: Controlla i permessi di un utente o ruolo nel canale corrente.
         options:
-          user: L'utente di cui controllare i permessi.
+          user: L’utente di cui controllare i permessi.
+        messages:
+          nouserindb: ":warning: Nessun utente nel database corrisponde alla tua ricerca"
       ping:
         name: ping
-        description: Controlla la latenza e la reattività del bot.
+        description: Controlla la latenza e responsività del bot.
         messages:
           pinging: "Pinging..."
           pong: ":ping_pong: Pong! La latenza è **{{latency}}ms**. La latenza API è **{{apiLatency}}ms**"
       settings:
         name: settings
-        description: Gestisce le impostazioni del server corrente
+        description: Gestisci le impostazioni del server corrente
         options:
           view:
             name: view
             description: Visualizza le impostazioni correnti
           set:
             name: set
-            description: Imposta un'impostazione
+            description: Imposta un valore
             options:
               module:
                 name: module
-                description: Il modulo a cui appartiene l'impostazione
+                description: Il modulo di cui visualizzare le impostazioni
               key:
                 name: key
-                description: L'impostazione da modificare
+                description: L’impostazione da visualizzare
               value:
                 name: value
-                description: Il valore da assegnare all'impostazione
+                description: Il valore per filtrare le impostazioni
           reset:
             name: reset
-            description: Reimposta un'impostazione al valore predefinito
-          setting:
-            name: setting
-            description: L'impostazione da gestire
-          value:
-            name: value
-            description: Il valore da assegnare all'impostazione
+            description: Ripristina un’impostazione al valore predefinito
+            options:
+              module:
+                name: module
+                description: Il modulo di cui visualizzare le impostazioni
+              key:
+                name: key
+                description: L’impostazione da ripristinare
+              value:
+                name: value
+                description: Il valore per filtrare le impostazioni
+        embeds:
+          set:
+            title: "Impostazione Aggiornata"
+          add:
+            title: "Impostazione Aggiunta"
+          remove:
+            title: "Impostazione Rimossa"
+          view:
+            settings: "Impostazioni Correnti"
+            nosettings:
+              title: "Nessuna Impostazione Trovata"
+              description: "Non ci sono impostazioni configurate per questo modulo."
+            page: "Pagina {{page}} di {{totalPages}}"
+          reset:
+            title: "Impostazione Ripristinata"
+            description: "L’impostazione è stata ripristinata al valore predefinito."
       stats:
         name: stats
-        description: Mostra le statistiche e le informazioni del bot.
+        description: Visualizza statistiche e informazioni sul bot.
+        embed:
+          title: "STATISTICHE"
+          memusage: "⚙️ Utilizzo Memoria"
+          uptime: "⏱️ Tempo di attività"
+          versions: "🔢 Versioni"
+          creationdate: "🎂 Data di creazione"
       setlang:
         name: setlang
-        description: Imposta la tua lingua preferita per il bot.
+        description: Imposta la tua lingua preferita per il bot
         options:
           language:
             name: language
@@ -127,9 +162,9 @@ modules:
         messages:
           invalidLang: ":warning: La lingua specificata non è supportata."
           success: ":flag_it: La tua lingua preferita è stata impostata su **Italiano**!"
-          reset: ":globe_with_meridians: Da adesso la tua lingua sarà sincronizzata nella lingua predefinita!"
+          reset: ":globe_with_meridians: D'ora in poi la tua lingua sarà sincronizzata con la lingua predefinita!"
   InteractionCommandHandler:
     errors:
       command-not-found: ":no_entry: Comando non trovato"
-      insufficient-powerlevel: ":no_entry: Non hai il permesso per usare questo comando. Il livello richiesto è"
+      insufficient-powerlevel: ":no_entry: Non hai i permessi per usare questo comando. Il livello richiesto è"
       execution-error: ":no_entry: Ops, si è verificato un errore durante l'esecuzione del comando. Contatta gli sviluppatori del bot."
