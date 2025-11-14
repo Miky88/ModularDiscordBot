@@ -50,7 +50,7 @@ module.exports = class Module {
             
             const utility = this.client.moduleManager.modules.get("Utility")?.settings;
             const guildLang = interaction.guild ? utility?.get(interaction.guild.id)?.settings?.defaultServerLanguage : null;
-            const lang = (guildLang && this.client.i18n.languages[guildLang]) ? guildLang : this.client.i18n.defaultLang;
+            let lang = this.client.i18n.defaultLang;
 
             const userData = this.client.database.forceUser(interaction.user.id);
 
@@ -58,10 +58,8 @@ module.exports = class Module {
                 lang = userData.language;
             else if (interaction.locale && this.client.i18n.languages[interaction.locale])
                 lang = interaction.locale;
-            else if (guildLang)
+            else if (guildLang && this.client.i18n.languages[guildLang])
                 lang = guildLang;
-            else
-                lang = this.client.i18n.defaultLang;
 
             return this.client.i18n.t(key, lang, vars);
         } else {
