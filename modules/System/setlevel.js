@@ -36,6 +36,9 @@ module.exports = class SetLevelCommand extends Command {
         let user = interaction.options.getUser('user');
 
         const data = await client.database.forceUser(user.id);
+        if (!data) {
+            return await interaction.reply(this.t('messages.usernotfound', interaction));
+        }
         if (interaction.user.data.powerlevel < 0 && data.user.id !== interaction.user.id) return;
 
         if (interaction.user.data.powerlevel <= data.powerlevel)
