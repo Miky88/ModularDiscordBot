@@ -1,4 +1,4 @@
-const { parse, stringify } = require('yaml')
+const { parse } = require('yaml')
 const fs = require("fs");
 const path = require("path");
 const Logger = require('./Logger');
