@@ -27,14 +27,14 @@ module.exports = class SetLangCommand extends Command {
     async run(client, interaction) {
         const lang = interaction.options.getString('language');
         if (!Object.keys(client.i18n.languages || {}).concat(['default']).includes(lang)) {
-            return interaction.reply({ content: await this.t('messages.invalidLang', interaction), flags: [MessageFlags.Ephemeral] });
+            return interaction.reply({ content: this.t('messages.invalidLang', interaction), flags: [MessageFlags.Ephemeral] });
         }
         const user = await client.database.getUser(interaction.user.id) || await client.database.addUser(interaction.user.id);
         user.language = lang === 'default' ? null : lang;
         client.database.updateUser(user);
         if (lang !== 'default')
-            interaction.reply({ content: await this.t('messages.success', interaction), flags: [MessageFlags.Ephemeral] });
+            interaction.reply({ content: this.t('messages.success', interaction), flags: [MessageFlags.Ephemeral] });
         else
-            interaction.reply({ content: await this.t('messages.reset', interaction), flags: [MessageFlags.Ephemeral] });
+            interaction.reply({ content: this.t('messages.reset', interaction), flags: [MessageFlags.Ephemeral] });
     }
 }

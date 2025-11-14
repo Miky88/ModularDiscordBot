@@ -15,7 +15,7 @@ module.exports = class PingCommand extends Command {
      * @param {import('discord.js').CommandInteraction} interaction 
      */
     async run(client, interaction) {
-        let m = await interaction.reply({ content: await this.t('messages.pinging', interaction), withResponse: true });
-        interaction.editReply(await this.t('messages.pong', interaction, { latency: m.createdTimestamp - interaction.createdTimestamp, apiLatency: Math.round(client.ws.ping) }));
+        let m = await interaction.reply({ content: this.t('messages.pinging', interaction), withResponse: true });
+        interaction.editReply(this.t('messages.pong', interaction, { latency: m.createdTimestamp - interaction.createdTimestamp, apiLatency: Math.round(client.ws.ping) }));
     }
 }

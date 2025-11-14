@@ -146,23 +146,23 @@ module.exports = class Settings extends Command {
             case "set": {
                 await await this.client.settings.get(interaction.options.getString("module")).set(guild.id, interaction.options.getString("key"), interaction.options.getString("value"));
                 const embed = new EmbedBuilder()
-                    .setTitle(await this.t('embeds.set.title', interaction))
-                    .setDescription(await this.t('embeds.set.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }));
+                    .setTitle(this.t('embeds.set.title', interaction))
+                    .setDescription(this.t('embeds.set.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }));
                 interaction.reply({ embeds: [embed] })
                 break;
             } case "add": {
                 await this.client.settings.get(interaction.options.getString("module")).add(guild.id, interaction.options.getString("key"), interaction.options.getString("value"));
                 const embed = new EmbedBuilder()
-                    .setTitle(await this.t('embeds.add.title', interaction))
-                    .setDescription(await this.t('embeds.add.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }));
+                    .setTitle(this.t('embeds.add.title', interaction))
+                    .setDescription(this.t('embeds.add.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }));
 
                 interaction.reply({ embeds: [embed] })
                 break;
             } case "remove": {
                 await this.client.settings.get(interaction.options.getString("module")).remove(guild.id, interaction.options.getString("key"), interaction.options.getString("value"));
                 const embed = new EmbedBuilder()
-                    .setTitle(await this.t('embeds.remove.title', interaction))
-                    .setDescription(await this.t('embeds.remove.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }))
+                    .setTitle(this.t('embeds.remove.title', interaction))
+                    .setDescription(this.t('embeds.remove.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }))
                 interaction.reply({ embeds: [embed] })
                 break;
             } case "view": {
@@ -172,28 +172,28 @@ module.exports = class Settings extends Command {
                 let settings = client.settings.map((v, k) => { return { module: k, settings: v.get(guild.id).settings } });
                 settings.forEach(async s => {
                     const embed = new EmbedBuilder()
-                        .setTitle(await this.t('embeds.view.settings', interaction, { module: s.module }))
+                        .setTitle(this.t('embeds.view.settings', interaction, { module: s.module }))
                         .setDescription(Object.entries(s.settings).map(([key, value]) => `\`${key}\`: ${Array.isArray(value) ? value.join(', ') : value}`).join('\n'))
                     embeds.push(embed);
                 });
                 if (embeds.length == 0) {
                     const embed = new EmbedBuilder()
-                        .setTitle(await this.t('embeds.view.nosettings.title', interaction))
-                        .setDescription(await this.t('embeds.view.nosettings.description', interaction))
+                        .setTitle(this.t('embeds.view.nosettings.title', interaction))
+                        .setDescription(this.t('embeds.view.nosettings.description', interaction))
                         .setColor('Random')
                     embeds.push(embed);
                 }
                 pagination.setAuthorizedUsers([interaction.user.id])
                 pagination.setEmbeds(embeds, async (embed, index, array) => {
-                    return embed.setFooter({ text: await this.t('embeds.view.page', interaction, { currentPage: index + 1, totalPages: array.length }) });
+                    return embed.setFooter({ text: this.t('embeds.view.page', interaction, { currentPage: index + 1, totalPages: array.length }) });
                 });
                 await pagination.render();
                 break;
             } case "reset": {
                 await this.client.settings.get(interaction.options.getString("module")).reset(guild.id, interaction.options.getString("key"));
                 const embed = new EmbedBuilder()
-                    .setTitle(await this.t('embeds.reset.title', interaction))
-                    .setDescription(await this.t('embeds.reset.description', interaction, { key: interaction.options.getString("key") }))
+                    .setTitle(this.t('embeds.reset.title', interaction))
+                    .setDescription(this.t('embeds.reset.description', interaction, { key: interaction.options.getString("key") }))
                 interaction.reply({ embeds: [embed] })
                 break;
             }

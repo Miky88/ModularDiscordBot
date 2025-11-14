@@ -37,21 +37,21 @@ module.exports = class SetLevelCommand extends Command {
 
         const data = await client.database.forceUser(user.id);
         if (!data) {
-            return await interaction.reply(await this.t('messages.usernotfound', interaction));
+            return await interaction.reply(this.t('messages.usernotfound', interaction));
         }
         if (interaction.user.data.powerlevel < 0 && data.user.id !== interaction.user.id) return;
 
         if (interaction.user.data.powerlevel <= data.powerlevel)
-            return await interaction.reply(await this.t('messages.nopermission', interaction));
+            return await interaction.reply(this.t('messages.nopermission', interaction));
 
         data.powerlevel = level;
 
         try {
             await client.database.updateUser(data);
-            return await interaction.reply({ content: await this.t('messages.success', interaction, { user: client.utils.parseUser(user), level: Object.entries(PowerLevels).find(l => l[1] == level)[0] }), allowedMentions: {} });
+            return await interaction.reply({ content: this.t('messages.success', interaction, { user: client.utils.parseUser(user), level: Object.entries(PowerLevels).find(l => l[1] == level)[0] }), allowedMentions: {} });
         } catch (e) {
             console.error(e);
-            return await interaction.reply(await this.t('messages.error', interaction));
+            return await interaction.reply(this.t('messages.error', interaction));
         }
     }
 }

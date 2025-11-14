@@ -37,8 +37,8 @@ module.exports = class Database {
     /**
      * @param {String} userID 
      */
-    async addUser(userID) {
-        const user = await this.db.users.insert({
+    addUser(userID) {
+        const user = this.db.users.insert({
             id: userID,
             powerlevel: PowerLevels.USER,
             language: null
@@ -66,8 +66,8 @@ module.exports = class Database {
     /**
      * @param {String} userID 
      */
-    async forceUser(userID) {
-        let user = await this.getUser(userID)
+    forceUser(userID) {
+        let user = this.getUser(userID)
         if (user) {
             if(user.powerlevel !== PowerLevels.OWNER && this.client.config.get('owners').includes(userID)) {
                 user.powerlevel = PowerLevels.OWNER
@@ -78,7 +78,7 @@ module.exports = class Database {
             }
             return user;
         }
-        return await this.addUser(userID)
+        return this.addUser(userID)
     }
 
     /**
