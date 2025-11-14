@@ -48,7 +48,7 @@ module.exports = class LocalizationManager {
 
     _interpolate(str, vars = {}) {
         if (str === undefined || str === null) return "";
-        const escapeRegExp = s => s.replace(/[.*+?^${}()|[\\]\\]/g, "\\$&");
+        const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
         return Object.entries(vars).reduce((out, [k, v]) => {
             const pattern = new RegExp(`{{\\s*${escapeRegExp(k)}\\s*}}`, "g");
             // use a function replacement to avoid interpretation of `$` in replacement strings
