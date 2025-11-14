@@ -146,58 +146,58 @@ module.exports = class Settings extends Command {
             case "set": {
                 await await this.client.settings.get(interaction.options.getString("module")).set(guild.id, interaction.options.getString("key"), interaction.options.getString("value"));
                 const embed = new EmbedBuilder()
-                    .setTitle('Value set')
-                    .setDescription(`Value \`${interaction.options.getString("value")}\` set for key \`${interaction.options.getString("key")}\``)
+                    .setTitle(this.t('embeds.set.title', interaction))
+                    .setDescription(this.t('embeds.set.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }));
                 interaction.reply({ embeds: [embed] })
                 break;
             } case "add": {
                 await this.client.settings.get(interaction.options.getString("module")).add(guild.id, interaction.options.getString("key"), interaction.options.getString("value"));
                 const embed = new EmbedBuilder()
-                    .setTitle('Value added')
-                    .setDescription(`Value \`${interaction.options.getString("value")}\` added to key \`${interaction.options.getString("key")}\``);
-                    
+                    .setTitle(this.t('embeds.add.title', interaction))
+                    .setDescription(this.t('embeds.add.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }));
+
                 interaction.reply({ embeds: [embed] })
                 break;
             } case "remove": {
                 await this.client.settings.get(interaction.options.getString("module")).remove(guild.id, interaction.options.getString("key"), interaction.options.getString("value"));
                 const embed = new EmbedBuilder()
-                    .setTitle('Value removed')
-                    .setDescription(`Value \`${interaction.options.getString("value")}\` removed from key \`${interaction.options.getString("key")}\``)
+                    .setTitle(this.t('embeds.remove.title', interaction))
+                    .setDescription(this.t('embeds.remove.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }))
                 interaction.reply({ embeds: [embed] })
                 break;
             } case "view": {
                 const pagination = new Pagination(interaction);
                 const embeds = [];
 
-                let settings = client.settings.map((v, k) => {return {module: k, settings: v.get(guild.id).settings}});
-                settings.forEach(s => {
+                let settings = client.settings.map((v, k) => { return { module: k, settings: v.get(guild.id).settings } });
+                settings.forEach(async s => {
                     const embed = new EmbedBuilder()
-                       .setTitle(`Settings for ${s.module}`)
-                       .setDescription(Object.entries(s.settings).map(([key, value]) => `\`${key}\`: ${Array.isArray(value)? value.join(', ') : value}`).join('\n'))
+                        .setTitle(this.t('embeds.view.settings', interaction, { module: s.module }))
+                        .setDescription(Object.entries(s.settings).map(([key, value]) => `\`${key}\`: ${Array.isArray(value) ? value.join(', ') : value}`).join('\n'))
                     embeds.push(embed);
                 });
                 if (embeds.length == 0) {
                     const embed = new EmbedBuilder()
-                       .setTitle('No settings found')
-                       .setDescription('There are no settings to show.')
-                       .setColor('Random')
+                        .setTitle(this.t('embeds.view.nosettings.title', interaction))
+                        .setDescription(this.t('embeds.view.nosettings.description', interaction))
+                        .setColor('Random')
                     embeds.push(embed);
                 }
                 pagination.setAuthorizedUsers([interaction.user.id])
-                pagination.setEmbeds(embeds, (embed, index, array) => {
-                    return embed.setFooter({ text: `Page: ${index + 1}/${array.length}` });
+                pagination.setEmbeds(embeds, async (embed, index, array) => {
+                    return embed.setFooter({ text: this.t('embeds.view.page', interaction, { currentPage: index + 1, totalPages: array.length }) });
                 });
                 await pagination.render();
                 break;
             } case "reset": {
                 await this.client.settings.get(interaction.options.getString("module")).reset(guild.id, interaction.options.getString("key"));
                 const embed = new EmbedBuilder()
-                    .setTitle('Key restored to its default value')
-                    .setDescription(`Key \`${interaction.options.getString("key")}\` has been restored to default.`)
+                    .setTitle(this.t('embeds.reset.title', interaction))
+                    .setDescription(this.t('embeds.reset.description', interaction, { key: interaction.options.getString("key") }))
                 interaction.reply({ embeds: [embed] })
                 break;
             }
         }
-        
+
     }
 }

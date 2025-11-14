@@ -1,6 +1,6 @@
-const Discord = require('discord.js');
+const { Collection, BaseInteraction } = require('discord.js');
 const fs = require('fs');
-const { Collection } = require('lokijs');
+const { Collection: LokiCollection } = require('lokijs');
 const BotClient = require('..');
 const ModulePriorities = require('./ModulePriorities');
 const ConfigurationManager = require('./ConfigurationManager');
@@ -28,20 +28,50 @@ module.exports = class Module {
         this.client = client;
         this.options = { name, info, enabled, events, priority, usesDB, dependencies, settings};
         
-        this.commands = new Discord.Collection();
+        this.commands = new Collection();
         this.logger = new Logger(this.options.name);
-
-        // if(usesDB)
-        //     client.database.db[`module_${this.options.name}`] = client.database.db.addCollection(`module_${this.options.name}`);
-
-
-        // if(usesDB)
-        //     client.database.db[`module_${this.options.name}`] = client.database.db.addCollection(`module_${this.options.name}`);
 
         if(config)
             this.config = new ConfigurationManager(this, config);
         if(settings)
             this.settings = new SettingsManager(client, this, settings);
+    }
+
+    t(_key, interactionOrLang, vars) {
+        let key = `modules.${this.options.name}.${_key}`;
+        // Lang:
+        // - Check if forced on user data
+        // - Check if forced on guild settings
+        // - Check discord interaction.language
+        // - Else, default
+
+        if (interactionOrLang instanceof BaseInteraction) {
+            const interaction = interactionOrLang;
+            
+            const utility = this.client.moduleManager.modules.get("Utility")?.settings;
+            const guildLang = interaction.guild ? utility?.get(interaction.guild.id)?.settings?.defaultServerLanguage : null;
+            let lang = this.client.i18n.defaultLang;
+
+            const userData = this.client.database.forceUser(interaction.user.id);
+
+            if (userData && userData.language && this.client.i18n.languages[userData.language])
+                lang = userData.language;
+            else if (interaction.locale && this.client.i18n.languages[interaction.locale])
+                lang = interaction.locale;
+            else if (guildLang && this.client.i18n.languages[guildLang])
+                lang = guildLang;
+
+            return this.client.i18n.t(key, lang, vars);
+        } else {
+            const lang = interactionOrLang || this.client.i18n.defaultLang;
+            return this.client.i18n.t(key, lang, vars);
+        }
+
+    }
+
+    getLocalizationObject(_key) {
+        let key = `modules.${this.options.name}.${_key}`;
+        return this.client.i18n.getLocalizationObject(key);
     }
 
     async loadCommands() {
@@ -73,7 +103,7 @@ module.exports = class Module {
     }
 
     /**
-     * @type {Collection}
+     * @type {LokiCollection}
      */
     get db() {
         if (!this.options.usesDB)

@@ -31,6 +31,16 @@ module.exports = class Command {
         this.logger = new Logger(this.constructor.name);
     }
 
+    t(_key, interactionOrLang, vars) {
+        let key = `commands.${this.config.name}.${_key}`;
+        return this.module.t(key, interactionOrLang, vars);
+    }
+
+    getLocalizationObject(_key) {
+        let key = `commands.${this.config.name}.${_key}`;
+        return this.module.getLocalizationObject(key);
+    }
+
     /**
      * @param {import('../index.js')} client 
      * @param {Interaction} interaction 
@@ -43,10 +53,36 @@ module.exports = class Command {
         const { name, description, options, type, defaultMemberPermissions, moduleName } = this.data;
         const isChatInput = !type || type === ApplicationCommandType.ChatInput;
     
+        let nameLocalizations = this.getLocalizationObject('name');
+        let descriptionLocalizations = isChatInput ? this.getLocalizationObject('description') : null;
+
+        const attachLocsRecursive = (obj, path) => {
+            if (!obj?.name) return;
+            const nameLoc = this.getLocalizationObject(path + '.name');
+            if (nameLoc) {
+                obj.nameLocalizations = nameLoc;
+                obj.descriptionLocalizations = this.getLocalizationObject(path + '.description');
+            }
+            if (Array.isArray(obj.options) && obj.options.length) {
+                obj.options.forEach(sub => {
+                    attachLocsRecursive(sub, `${path}.options.${sub.name}`);
+                });
+            }
+        };
+
+        options.forEach(option => {
+            attachLocsRecursive(option, `options.${option.name}`);
+        });
+
         return {
             name,
+            nameLocalizations,
             type,
-            ...(isChatInput && { description, options }),
+            ...(isChatInput && {
+                description,
+                descriptionLocalizations: descriptionLocalizations,
+                options
+            }),
             defaultMemberPermissions
         };
     }

@@ -6,6 +6,7 @@ const ModuleManager = require('./structures/ModuleManager.js');
 const Database = require('./structures/Database.js');
 const ConfigurationManager = require('./structures/ConfigurationManager.js');
 const Utils = require('./structures/Utils.js');
+const LocalizationManager = require('./structures/LocalizationManager.js');
 BigInt.prototype.toJSON = function () { return this.toString() } // MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
 
 // Discord
@@ -28,6 +29,7 @@ class BotClient extends Client {
         this.utils = new Utils();
         this.moduleManager = new ModuleManager(this);
         this.config = config;
+        this.i18n = new LocalizationManager();
 
         this.database = new Database(this);
         this.moduleManager.init();

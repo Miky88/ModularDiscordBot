@@ -7,7 +7,10 @@ module.exports = class Utility extends Module {
             name: "Utility",
             info: "Loads the utility commands",
             enabled: true,
-            events: ["interactionCreate"]
+            events: ["interactionCreate"],
+            settings: {
+                defaultServerLanguage: ""
+            }
         })
     }
 
@@ -21,6 +24,9 @@ module.exports = class Utility extends Module {
         const command = this.commands.get(interaction.commandName);
         if (!command) return;
 
+        if (interaction.commandName == "setlang") {
+            return interaction.respond(Object.keys(client.i18n.languages || {}).concat(['default']).map(lang => ({ name: client.i18n.languages[lang]?.name || 'Default', value: lang })));
+        }
         if (interaction.commandName == "settings") {
             switch (interaction.options.getFocused(true).name) {
                 case "module":

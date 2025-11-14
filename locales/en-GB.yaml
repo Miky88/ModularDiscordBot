@@ -1,0 +1,170 @@
+name: 'English'
+modules:
+  System:
+    commands:
+      eval:
+        name: eval
+        description: Execute arbitrary JavaScript code.
+        options:
+          code: The JavaScript code to execute.
+      exec:
+        name: exec
+        description: Execute a system command.
+        options:
+          command: The system command to execute.
+      modman:
+        name: modman
+        description: Manage modules (load, unload, reload).
+        options:
+          load:
+            name: load
+            description: Loads a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          unload:
+            name: unload
+            description: Unloads a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          reload:
+            name: reload
+            description: Reloads a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          enable:
+            name: enable
+            description: Enable a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          disable:
+            name: disable
+            description: Disable a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          info:
+            name: info
+            description: Get information about a module
+            options:
+              module:
+                name: module
+                description: Module to perform the action on
+          list:
+            name: list
+            description: Get a list of loaded modules
+      reboot:
+        name: reboot
+        description: Reboots the bot if running under PM2 or a process manager.
+        messages:
+          rebooting: ":hourglass_flowing_sand: Rebooting..."
+      setlevel:
+        name: setlevel
+        description: Set the power level of a user.
+        messages:
+          nopermission: ":x: You can't set this user's powerlevel."
+          success: ":white_check_mark: Successfully set powerlevel for {{user}} to: {{level}}"
+          error: ":x: An internal error occurred"
+      update:
+        name: update
+        description: Update the bot to the latest version from the Git repository, and reboots the bot
+        messages:
+          noreboot: "Unknown command `reboot`, aborting."
+  Utility:
+    commands:
+      perms:
+        name: perms
+        description: Check the permissions of a user or role in the current channel.
+        options:
+          user: The user to check permissions for.
+        messages:
+          nouserindb: ":warning: There's no user in database matching your query"
+      ping:
+        name: ping
+        description: Check the bot's latency and responsiveness.
+        messages:
+          pinging: "Pinging..."
+          pong: ":ping_pong: Pong! Latency is **{{latency}}ms**. API Latency is **{{apiLatency}}ms**"
+      settings:
+        name: settings
+        description: Manage the current server settings
+        options:
+          view:
+            name: view
+            description: View current settings
+          set:
+            name: set
+            description: Set a setting
+            options:
+              module:
+                name: module
+                description: The module to view settings for
+              key:
+                name: key
+                description: The setting to view
+              value:
+                name: value
+                description: The value to filter settings by
+          reset:
+            name: reset
+            description: Reset a setting to default
+            options:
+              module:
+                name: module
+                description: The module to view settings for
+              key:
+                name: key
+                description: The setting to view
+              value:
+                name: value
+                description: The value to filter settings by
+        embeds:
+          set:
+            title: "Setting Updated"
+          add:
+            title: "Setting Added"
+          remove:
+            title: "Setting Removed"
+          view:
+            settings: "Current Settings"
+            nosettings:
+              title: "No Settings Found"
+              description: "There are no settings configured for this module."
+            page: "Page {{page}} of {{totalPages}}"
+          reset:
+            title: "Setting Reset"
+            description: "The setting has been reset to its default value."
+      stats:
+        name: stats
+        description: View bot statistics and information.
+        embed:
+          title: "STATISTICS"
+          memusage: "⚙️ Memory Usage"
+          uptime: "⏱️ Uptime"
+          versions: "🔢 Versions"
+          creationdate: "🎂 Creation date"
+      setlang:
+        name: setlang
+        description: Set your preferred language for the bot
+        options:
+          language:
+            name: language
+            description: The language you want to set
+        messages:
+          invalidLang: ":warning: The specified language is not supported."
+          success: ":flag_gb: Your preferred language has been set to **English**!"
+          reset: ":globe_with_meridians: From now on your language will be synchronized to the default language!"
+      
+  InteractionCommandHandler:
+    errors:
+      command-not-found: ":no_entry: Command not found"
+      insufficient-powerlevel: ":no_entry: You don't have permission to use this command. The required permission level is"
+      execution-error: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers."
