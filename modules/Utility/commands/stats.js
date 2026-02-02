@@ -1,4 +1,4 @@
-const Command = require('../../structures/Command.js');
+const Command = require('../../../lib/Command.js');
 
 const { version } = require("discord.js");
 const moment = require("moment");
@@ -16,7 +16,7 @@ module.exports = class StatsCommand extends Command {
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').CommandInteraction} interaction 
      */
     async run(client, interaction) {

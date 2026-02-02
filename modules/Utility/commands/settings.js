@@ -1,7 +1,7 @@
-const Command = require('../../structures/Command.js');
+const Command = require('../../../lib/Command.js');
 const { ApplicationCommandOptionType, EmbedBuilder, userMention, User, UserContextMenuCommandInteraction, PermissionsBitField } = require('discord.js');
 const { Pagination } = require('pagination.djs');
-const Module = require('../../structures/Module.js');
+const Module = require('../../../lib/Module.js');
 
 module.exports = class Settings extends Command {
     constructor(client, module) {
@@ -137,7 +137,7 @@ module.exports = class Settings extends Command {
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      */
     async run(client, interaction) {

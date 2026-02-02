@@ -1,5 +1,5 @@
-const Command = require("../../structures/Command.js");
-const PowerLevels = require("../../structures/PowerLevels.js");
+const Command = require("../../../lib/Command.js");
+const PowerLevels = require("../../../lib/PowerLevels.js");
 const exec = require("util").promisify(require("child_process").exec);
 
 module.exports = class UpdateCommand extends Command {
@@ -14,7 +14,7 @@ module.exports = class UpdateCommand extends Command {
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      */
     async run(client, interaction) {

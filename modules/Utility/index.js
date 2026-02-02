@@ -1,5 +1,5 @@
-const Module = require("../structures/Module.js");
-const ModulePriorities = require("../structures/ModulePriorities.js");
+const Module = require("../../lib/Module.js");
+const ModulePriorities = require("../../lib/ModulePriorities.js");
 
 module.exports = class Utility extends Module {
     constructor(client) {
@@ -16,7 +16,7 @@ module.exports = class Utility extends Module {
 
     /**
      * 
-     * @param {import('../index.js')} client 
+     * @param {import('../../index.js')} client 
      * @param {import('discord.js').Interaction} interaction 
      */
     async interactionCreate(client, interaction) {

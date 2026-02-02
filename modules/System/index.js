@@ -1,7 +1,7 @@
-const Module = require("../structures/Module.js");
+const Module = require("../../lib/Module.js");
 const Discord = require('discord.js');
 const fs = require('fs');
-const ModulePriorities = require("../structures/ModulePriorities.js");
+const ModulePriorities = require("../../lib/ModulePriorities.js");
 
 module.exports = class System extends Module {
     constructor(client) {
@@ -15,7 +15,7 @@ module.exports = class System extends Module {
     }
 
     /**
-     * @param {import('../index.js')} client 
+     * @param {import('../../index.js')} client 
      */
     async ready(client) {
         let serverIds = this.client.config.get('systemServer');
@@ -44,7 +44,7 @@ module.exports = class System extends Module {
     }
 
     /**
-     * @param {import('../index.js')} client
+     * @param {import('../../index.js')} client
      * @param {Discord.Interaction} interaction
      */
     async interactionCreate(client, interaction) {
@@ -62,15 +62,15 @@ module.exports = class System extends Module {
     // Override
     async loadCommands() {
         this.systemCommands = new Discord.Collection();
-        const commands = fs.existsSync(`./modules/${this.options.name}`) ? fs.readdirSync(`./modules/${this.options.name}`).filter(file => file.endsWith(".js")) : [];
+        const commands = fs.existsSync(`./modules/${this.options.name}/commands`) ? fs.readdirSync(`./modules/${this.options.name}/commands`).filter(file => file.endsWith(".js")) : [];
 
         commands.forEach(file => {
             try {
                 /**
                  * @type {import('./InteractionCommand')}
                  */
-                const command = require(`../modules/${this.options.name}/${file}`);
-                delete require.cache[require.resolve(`../modules/${this.options.name}/${file}`)];
+                const command = require(`../../modules/${this.options.name}/commands/${file}`);
+                delete require.cache[require.resolve(`../../modules/${this.options.name}/commands/${file}`)];
                 const _command = new command(this.client, this);
 
                 this.systemCommands.set(file.split(".")[0], _command);

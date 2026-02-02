@@ -1,4 +1,4 @@
-const Command = require('../../structures/Command.js');
+const Command = require('../../../lib/Command.js');
 
 module.exports = class PingCommand extends Command {
     constructor(client, module) {
@@ -11,7 +11,7 @@ module.exports = class PingCommand extends Command {
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').CommandInteraction} interaction 
      */
     async run(client, interaction) {

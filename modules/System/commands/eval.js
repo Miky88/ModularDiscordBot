@@ -1,7 +1,7 @@
-const Command = require("../../structures/Command.js");
+const Command = require("../../../lib/Command.js");
 const { inspect } = require("util");
 const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
-const PowerLevels = require("../../structures/PowerLevels.js");
+const PowerLevels = require("../../../lib/PowerLevels.js");
 
 module.exports = class EvalCommand extends Command {
     constructor(client, module) {
@@ -23,7 +23,7 @@ module.exports = class EvalCommand extends Command {
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      */
     async run(client, interaction) {

@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
-const Module = require("../structures/Module.js");
-const Command = require("../structures/Command.js");
-const BotClient = require('../index.js');
-const PowerLevels = require('../structures/PowerLevels.js');
-const ModulePriorities = require('../structures/ModulePriorities.js');
+const Module = require("../../lib/Module.js");
+const Command = require("../../lib/Command.js");
+const BotClient = require('../../index.js');
+const PowerLevels = require('../../lib/PowerLevels.js');
+const ModulePriorities = require('../../lib/ModulePriorities.js');
 
 module.exports = class InteractionCommandHandler extends Module {
     constructor(client) {

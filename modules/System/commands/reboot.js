@@ -1,6 +1,6 @@
 const { MessageFlags } = require('discord.js');
-const Command = require('../../structures/Command.js');
-const PowerLevels = require("../../structures/PowerLevels.js");
+const Command = require('../../../lib/Command.js');
+const PowerLevels = require("../../../lib/PowerLevels.js");
 
 module.exports = class RebootCommand extends Command {
     constructor(client, module) {
@@ -13,7 +13,7 @@ module.exports = class RebootCommand extends Command {
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      */
     async run(client, interaction) {

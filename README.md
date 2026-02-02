@@ -12,7 +12,7 @@ If you have troubles just open an issue or join my Discord server https://discor
 ## Making a Module
 Modules are stored in modules/ directory and are loaded into the bot on startup. Enabled modules are executed when they get triggered by respective events.
 ```js
-const Module = require("../structures/Module.js"); // Import the base module
+const Module = require("../lib/Module.js"); // Import the base module
 
 class Example extends Module {
     constructor(client) {

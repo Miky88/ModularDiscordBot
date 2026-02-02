@@ -1,4 +1,4 @@
-const Command = require('../../structures/Command.js');
+const Command = require('../../../lib/Command.js');
 const { ApplicationCommandOptionType, MessageFlags } = require('discord.js');
 
 module.exports = class SetLangCommand extends Command {
@@ -21,7 +21,7 @@ module.exports = class SetLangCommand extends Command {
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').CommandInteraction} interaction 
      */
     async run(client, interaction) {

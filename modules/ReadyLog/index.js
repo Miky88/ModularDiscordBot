@@ -1,4 +1,4 @@
-const Module = require("../structures/Module.js");
+const Module = require("../../lib/Module.js");
 
 module.exports = class ReadyLog extends Module {
     constructor(client) {
@@ -11,7 +11,7 @@ module.exports = class ReadyLog extends Module {
     }
 
     /**
-     * @param {import('../index.js')} client 
+     * @param {import('../../index.js')} client 
      * @param  {...any} _args 
      */
     async run(client, ..._args) {
