@@ -1,6 +1,6 @@
 const { MessageFlags } = require('discord.js');
-const Command = require('../../../lib/Command.js');
-const PowerLevels = require("../../../lib/PowerLevels.js");
+const Command = require('@core/Command.js');
+const PowerLevels = require("@core/PowerLevels.js");
 
 module.exports = class RebootCommand extends Command {
     constructor(client, module) {

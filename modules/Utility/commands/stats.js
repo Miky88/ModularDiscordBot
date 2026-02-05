@@ -1,4 +1,4 @@
-const Command = require('../../../lib/Command.js');
+const Command = require('@core/Command.js');
 
 const { version } = require("discord.js");
 const moment = require("moment");

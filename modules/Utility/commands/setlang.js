@@ -1,4 +1,4 @@
-const Command = require('../../../lib/Command.js');
+const Command = require('@core/Command.js');
 const { ApplicationCommandOptionType, MessageFlags } = require('discord.js');
 
 module.exports = class SetLangCommand extends Command {

@@ -36,8 +36,8 @@ module.exports = class ModuleManager {
      */
     load(moduleName) {
         try {
-            const module = require(`../modules/${moduleName}/index.js`);
-            delete require.cache[require.resolve(`../modules/${moduleName}/index.js`)];
+            const module = require(`@modules/${moduleName}/${moduleName}.js`);
+            delete require.cache[require.resolve(`@modules/${moduleName}/${moduleName}.js`)];
             const _module = new module(this.client);
             if (_module.options.dependencies.length > 0) {
                 let dependencies = _module.options.dependencies;

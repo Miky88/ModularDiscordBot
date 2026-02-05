@@ -1,7 +1,7 @@
-const Command = require('../../../lib/Command.js');
+const Command = require('@core/Command.js');
 const { ApplicationCommandOptionType, EmbedBuilder, userMention, User, UserContextMenuCommandInteraction, PermissionsBitField } = require('discord.js');
 const { Pagination } = require('pagination.djs');
-const Module = require('../../../lib/Module.js');
+const Module = require('@core/Module.js');
 
 module.exports = class Settings extends Command {
     constructor(client, module) {

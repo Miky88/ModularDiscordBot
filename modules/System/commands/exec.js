@@ -1,7 +1,7 @@
-const Command = require("../../../lib/Command.js");
+const Command = require("@core/Command.js");
 const { AttachmentBuilder, ApplicationCommandOptionType } = require("discord.js");
 const exec = require("util").promisify(require("child_process").exec);
-const PowerLevels = require("../../../lib/PowerLevels.js");
+const PowerLevels = require("@core/PowerLevels.js");
 
 module.exports = class ExecCommand extends Command {
     constructor(client, module) {

@@ -1,7 +1,7 @@
-const Module = require("../../lib/Module.js");
+const Module = require("@core/Module.js");
 const Discord = require('discord.js');
 const fs = require('fs');
-const ModulePriorities = require("../../lib/ModulePriorities.js");
+const ModulePriorities = require("@core/ModulePriorities.js");
 
 module.exports = class System extends Module {
     constructor(client) {
@@ -9,7 +9,7 @@ module.exports = class System extends Module {
             name: "System",
             info: "Loads the system commands",
             enabled: true,
-            events: ["ready", "interactionCreate"],
+            events: ["clientReady", "interactionCreate"],
             priority: ModulePriorities.HIGHEST
         })
     }
@@ -17,7 +17,7 @@ module.exports = class System extends Module {
     /**
      * @param {import('../../index.js')} client 
      */
-    async ready(client) {
+    async clientReady(client) {
         let serverIds = this.client.config.get('systemServer');
 
         if (!serverIds) {

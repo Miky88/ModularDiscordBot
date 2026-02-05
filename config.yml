@@ -9,6 +9,7 @@ intents:
   - GuildMembers
   - GuildModeration
   - GuildBans
+  - GuildExpressions
   - GuildEmojisAndStickers
   - GuildIntegrations
   - GuildWebhooks

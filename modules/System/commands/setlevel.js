@@ -1,6 +1,6 @@
-const Command = require('../../../lib/Command.js');
+const Command = require('@core/Command.js');
 const { ApplicationCommandOptionType, EmbedBuilder, userMention, User, UserContextMenuCommandInteraction } = require('discord.js');
-const PowerLevels = require('../../../lib/PowerLevels.js');
+const PowerLevels = require('@core/PowerLevels.js');
 
 module.exports = class SetLevelCommand extends Command {
     constructor(client, module) {

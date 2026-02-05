@@ -1,7 +1,7 @@
-const Command = require("../../../lib/Command.js");
+const Command = require("@core/Command.js");
 const { inspect } = require("util");
 const { EmbedBuilder, ApplicationCommandOptionType } = require("discord.js");
-const PowerLevels = require("../../../lib/PowerLevels.js");
+const PowerLevels = require("@core/PowerLevels.js");
 
 module.exports = class EvalCommand extends Command {
     constructor(client, module) {

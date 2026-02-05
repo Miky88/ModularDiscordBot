@@ -20,7 +20,7 @@ class Example extends Module {
             name: "Example", // Name of the module
             info: "Description", // Description of the module
             enabled: true, // Defines if this module should be enabled on startup
-            events: ["ready"], // Event that triggeres the module (can be more than one)
+            events: ["clientReady"], // Event that triggeres the module (can be more than one)
             config: { // Default module configuration, it will be stored in a config.yml inside module directory
                 myOptions: {
                     configurableString: "Hey!",
@@ -35,7 +35,7 @@ class Example extends Module {
         })
     }
 
-    async ready(client, ...args) { // args are the arguments of Discord.js Events (es. for presenceUpdate you would have [oldPresence, newPresence]
+    async clientReady(client, ...args) { // args are the arguments of Discord.js Events (es. for presenceUpdate you would have [oldPresence, newPresence]
         this.logger.log("Hi!")
     }
 }

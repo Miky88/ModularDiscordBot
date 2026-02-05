@@ -1,5 +1,6 @@
 // Imports
 require('dotenv').config();
+require("module-alias/register");
 
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 const ModuleManager = require('./core/ModuleManager.js');

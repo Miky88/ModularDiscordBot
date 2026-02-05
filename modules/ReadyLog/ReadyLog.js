@@ -1,4 +1,4 @@
-const Module = require("../../lib/Module.js");
+const Module = require("@core/Module.js");
 
 module.exports = class ReadyLog extends Module {
     constructor(client) {
@@ -6,7 +6,7 @@ module.exports = class ReadyLog extends Module {
             name: "ReadyLog",
             info: "Logs informations once ready and sets the custom status",
             enabled: true,
-            events: ["ready"]
+            events: ["clientReady"]
         })
     }
 
@@ -14,7 +14,7 @@ module.exports = class ReadyLog extends Module {
      * @param {import('../../index.js')} client 
      * @param  {...any} _args 
      */
-    async run(client, ..._args) {
+    async clientReady(client, ..._args) {
         // Log some useful variables when online
         this.logger.success("I am ready!");
         this.logger.info(`I am logged in as ${client.user.tag}`);

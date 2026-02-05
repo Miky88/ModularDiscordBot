@@ -1,5 +1,5 @@
-const Module = require("../../lib/Module.js");
-const ModulePriorities = require("../../lib/ModulePriorities.js");
+const Module = require("@core/Module.js");
+const ModulePriorities = require("@core/ModulePriorities.js");
 
 module.exports = class Utility extends Module {
     constructor(client) {

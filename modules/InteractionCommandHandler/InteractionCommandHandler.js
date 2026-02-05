@@ -1,9 +1,9 @@
 const Discord = require('discord.js');
-const Module = require("../../lib/Module.js");
-const Command = require("../../lib/Command.js");
+const Module = require("@core/Module.js");
+const Command = require("@core/Command.js");
 const BotClient = require('../../index.js');
-const PowerLevels = require('../../lib/PowerLevels.js');
-const ModulePriorities = require('../../lib/ModulePriorities.js');
+const PowerLevels = require('@core/PowerLevels.js');
+const ModulePriorities = require('@core/ModulePriorities.js');
 
 module.exports = class InteractionCommandHandler extends Module {
     constructor(client) {
@@ -11,7 +11,7 @@ module.exports = class InteractionCommandHandler extends Module {
             name: "InteractionCommandHandler",
             info: "Adds interaction commands support.",
             enabled: true,
-            events: ["ready", "interactionCreate"],
+            events: ["clientReady", "interactionCreate"],
             priority: ModulePriorities.HIGH
         });
     }
@@ -19,7 +19,7 @@ module.exports = class InteractionCommandHandler extends Module {
     /**
      * @param {BotClient} client 
      */
-    async ready(client) {
+    async clientReady(client) {
         client.application.commands
             .set(client.moduleManager.commands.filter(c => c.module.options.name !== "System").map(c => c.toJson()))
     }
