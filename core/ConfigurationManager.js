@@ -1,7 +1,6 @@
 const { parse, stringify } = require('yaml')
 const Module = require('./Module.js')
 const fs = require('fs')
-const { Client } = require('discord.js')
 
 module.exports = class ConfigurationManager {
     /**
