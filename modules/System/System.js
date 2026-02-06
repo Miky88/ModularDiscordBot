@@ -62,14 +62,14 @@ module.exports = class System extends Module {
     // Override
     async loadCommands() {
         this.systemCommands = new Discord.Collection();
-        const commands = fs.existsSync(`./modules/${this.options.name}/commands`) ? fs.readdirSync(`./modules/${this.options.name}/commands`).filter(file => file.endsWith(".js")) : [];
+        const commands = fs.existsSync(`@modules/${this.options.name}/commands`) ? fs.readdirSync(`@modules/${this.options.name}/commands`).filter(file => file.endsWith(".js")) : [];
 
         commands.forEach(file => {
             try {
                 /**
                  * @type {import('./InteractionCommand')}
                  */
-                const command = require(`../../modules/${this.options.name}/commands/${file}`);
+                const command = require(`@modules/${this.options.name}/commands/${file}`);
                 delete require.cache[require.resolve(`../../modules/${this.options.name}/commands/${file}`)];
                 const _command = new command(this.client, this);
 
