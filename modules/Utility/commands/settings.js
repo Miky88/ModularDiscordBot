@@ -1,203 +1,163 @@
 const Command = require('@core/Command.js');
-const { ApplicationCommandOptionType, EmbedBuilder, userMention, User, UserContextMenuCommandInteraction, PermissionsBitField } = require('discord.js');
+const { ApplicationCommandOptionType, EmbedBuilder, MessageFlags, PermissionsBitField } = require('discord.js');
 const { Pagination } = require('pagination.djs');
-const Module = require('@core/Module.js');
 
 module.exports = class Settings extends Command {
     constructor(client, module) {
         super(client, module, {
             name: 'settings',
-            defaultMemberPermissions: [PermissionsBitField.Flags.ManageGuild],
             description: 'View, add or remove settings from this guild.',
+            defaultMemberPermissions: [PermissionsBitField.Flags.ManageGuild],
+            guildOnly: true,
             options: [
                 {
                     name: "view",
                     description: "View the current settings for this server.",
                     type: ApplicationCommandOptionType.Subcommand,
                     options: [
-                        {
-                            name: "module",
-                            description: "Module to view settings for",
-                            type: ApplicationCommandOptionType.String,
-                            required: false,
-                            autocomplete: true
-                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
-                        }
-                    ],
+                        { name: "module", description: "Module to view settings for", type: ApplicationCommandOptionType.String, required: false, autocomplete: true }
+                    ]
                 },
                 {
                     name: "set",
                     description: "Set the value of a key",
                     type: ApplicationCommandOptionType.Subcommand,
                     options: [
-                        {
-                            name: "module",
-                            description: "Module to set key of",
-                            type: ApplicationCommandOptionType.String,
-                            required: true,
-                            autocomplete: true
-                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
-                        },
-                        {
-                            name: "key",
-                            description: "Key to change the value of",
-                            type: ApplicationCommandOptionType.String,
-                            required: true,
-                            autocomplete: true
-                        },
-                        {
-                            name: "value",
-                            description: "Value to set the key to",
-                            type: ApplicationCommandOptionType.String,
-                            required: true
-                        }
+                        { name: "module", description: "Module to set key of",   type: ApplicationCommandOptionType.String, required: true, autocomplete: true },
+                        { name: "key",    description: "Key to change",          type: ApplicationCommandOptionType.String, required: true, autocomplete: true },
+                        { name: "value",  description: "Value to set",           type: ApplicationCommandOptionType.String, required: true }
                     ]
                 },
                 {
                     name: "add",
-                    description: "Add a value to a key",
+                    description: "Add a value to an array key",
                     type: ApplicationCommandOptionType.Subcommand,
                     options: [
-                        {
-                            name: "module",
-                            description: "Module to add key of",
-                            type: ApplicationCommandOptionType.String,
-                            required: true,
-                            autocomplete: true
-                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
-                        },
-                        {
-                            name: "key",
-                            description: "Key to perform action on",
-                            type: ApplicationCommandOptionType.String,
-                            required: true,
-                            autocomplete: true
-                        },
-                        {
-                            name: "value",
-                            description: "Value to add to the key",
-                            type: ApplicationCommandOptionType.String,
-                            required: true
-                        }
+                        { name: "module", description: "Module",                 type: ApplicationCommandOptionType.String, required: true, autocomplete: true },
+                        { name: "key",    description: "Array key",              type: ApplicationCommandOptionType.String, required: true, autocomplete: true },
+                        { name: "value",  description: "Value to add",           type: ApplicationCommandOptionType.String, required: true }
                     ]
                 },
                 {
                     name: "remove",
-                    description: "Remove a value from a key",
+                    description: "Remove a value from an array key",
                     type: ApplicationCommandOptionType.Subcommand,
                     options: [
-                        {
-                            name: "module",
-                            description: "Module to remove value of",
-                            type: ApplicationCommandOptionType.String,
-                            required: true,
-                            autocomplete: true
-                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
-                        },
-                        {
-                            name: "key",
-                            description: "Key to perform action on",
-                            type: ApplicationCommandOptionType.String,
-                            required: true,
-                            autocomplete: true
-                        },
-                        {
-                            name: "value",
-                            description: "Value to remove from the key",
-                            type: ApplicationCommandOptionType.String,
-                            required: true
-                        }
+                        { name: "module", description: "Module",                 type: ApplicationCommandOptionType.String, required: true, autocomplete: true },
+                        { name: "key",    description: "Array key",              type: ApplicationCommandOptionType.String, required: true, autocomplete: true },
+                        { name: "value",  description: "Value to remove",        type: ApplicationCommandOptionType.String, required: true }
                     ]
                 },
                 {
                     name: "reset",
-                    description: "Retets the value of a key to it's default value",
+                    description: "Reset a key to its default value",
                     type: ApplicationCommandOptionType.Subcommand,
                     options: [
-                        {
-                            name: "module",
-                            description: "Module to set key of",
-                            type: ApplicationCommandOptionType.String,
-                            required: true,
-                            autocomplete: true
-                            // choices: client.settings.map((v, k) => {return {name: k, value: k}})
-                        },
-                        {
-                            name: "key",
-                            description: "Key to change the value of",
-                            type: ApplicationCommandOptionType.String,
-                            required: true,
-                            autocomplete: true
-                        },
+                        { name: "module", description: "Module",                 type: ApplicationCommandOptionType.String, required: true, autocomplete: true },
+                        { name: "key",    description: "Key to reset",           type: ApplicationCommandOptionType.String, required: true, autocomplete: true }
                     ]
-                },
+                }
             ]
         });
     }
 
     /**
-     * 
-     * @param {import('../../../index.js')} client 
-     * @param {import('discord.js').ChatInputCommandInteraction} interaction 
+     * @param {import('../../../index.js')} client
+     * @param {import('discord.js').ChatInputCommandInteraction} interaction
      */
     async run(client, interaction) {
         const guild = interaction.guild;
-        switch (interaction.options.getSubcommand()) {
-            case "set": {
-                await await this.client.settings.get(interaction.options.getString("module")).set(guild.id, interaction.options.getString("key"), interaction.options.getString("value"));
-                const embed = new EmbedBuilder()
-                    .setTitle(this.t('embeds.set.title', interaction))
-                    .setDescription(this.t('embeds.set.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }));
-                interaction.reply({ embeds: [embed] })
-                break;
-            } case "add": {
-                await this.client.settings.get(interaction.options.getString("module")).add(guild.id, interaction.options.getString("key"), interaction.options.getString("value"));
-                const embed = new EmbedBuilder()
-                    .setTitle(this.t('embeds.add.title', interaction))
-                    .setDescription(this.t('embeds.add.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }));
+        const actor = interaction.member;
+        const sub = interaction.options.getSubcommand();
+        const moduleName = interaction.options.getString("module");
+        const key = interaction.options.getString("key");
+        const value = interaction.options.getString("value");
 
-                interaction.reply({ embeds: [embed] })
-                break;
-            } case "remove": {
-                await this.client.settings.get(interaction.options.getString("module")).remove(guild.id, interaction.options.getString("key"), interaction.options.getString("value"));
-                const embed = new EmbedBuilder()
-                    .setTitle(this.t('embeds.remove.title', interaction))
-                    .setDescription(this.t('embeds.remove.description', interaction, { value: interaction.options.getString("value"), key: interaction.options.getString("key") }))
-                interaction.reply({ embeds: [embed] })
-                break;
-            } case "view": {
-                const pagination = new Pagination(interaction);
-                const embeds = [];
-
-                let settings = client.settings.map((v, k) => { return { module: k, settings: v.get(guild.id).settings } });
-                settings.forEach(async s => {
-                    const embed = new EmbedBuilder()
-                        .setTitle(this.t('embeds.view.settings', interaction, { module: s.module }))
-                        .setDescription(Object.entries(s.settings).map(([key, value]) => `\`${key}\`: ${Array.isArray(value) ? value.join(', ') : value}`).join('\n'))
-                    embeds.push(embed);
-                });
-                if (embeds.length == 0) {
-                    const embed = new EmbedBuilder()
-                        .setTitle(this.t('embeds.view.nosettings.title', interaction))
-                        .setDescription(this.t('embeds.view.nosettings.description', interaction))
-                        .setColor('Random')
-                    embeds.push(embed);
-                }
-                pagination.setAuthorizedUsers([interaction.user.id])
-                pagination.setEmbeds(embeds, async (embed, index, array) => {
-                    return embed.setFooter({ text: this.t('embeds.view.page', interaction, { currentPage: index + 1, totalPages: array.length }) });
-                });
-                await pagination.render();
-                break;
-            } case "reset": {
-                await this.client.settings.get(interaction.options.getString("module")).reset(guild.id, interaction.options.getString("key"));
-                const embed = new EmbedBuilder()
-                    .setTitle(this.t('embeds.reset.title', interaction))
-                    .setDescription(this.t('embeds.reset.description', interaction, { key: interaction.options.getString("key") }))
-                interaction.reply({ embeds: [embed] })
-                break;
-            }
+        const manager = moduleName ? client.settings.get(moduleName) : null;
+        if (sub !== 'view' && !manager) {
+            return interaction.reply({ content: `:x: No settings registered for module \`${moduleName}\`.`, flags: MessageFlags.Ephemeral });
         }
 
+        try {
+            switch (sub) {
+                case "set": {
+                    const coerced = manager.set(guild.id, key, value, { actor });
+                    const embed = new EmbedBuilder()
+                        .setTitle(this.t('embeds.set.title', interaction))
+                        .setDescription(this.t('embeds.set.description', interaction, { key, value: this._format(coerced) }));
+                    return interaction.reply({ embeds: [embed] });
+                }
+                case "add": {
+                    const arr = manager.add(guild.id, key, value, { actor });
+                    const embed = new EmbedBuilder()
+                        .setTitle(this.t('embeds.add.title', interaction))
+                        .setDescription(this.t('embeds.add.description', interaction, { key, value: this._format(arr) }));
+                    return interaction.reply({ embeds: [embed] });
+                }
+                case "remove": {
+                    const arr = manager.remove(guild.id, key, value, { actor });
+                    const embed = new EmbedBuilder()
+                        .setTitle(this.t('embeds.remove.title', interaction))
+                        .setDescription(this.t('embeds.remove.description', interaction, { key, value: this._format(arr) }));
+                    return interaction.reply({ embeds: [embed] });
+                }
+                case "reset": {
+                    const reset = manager.reset(guild.id, key, { actor });
+                    const embed = new EmbedBuilder()
+                        .setTitle(this.t('embeds.reset.title', interaction))
+                        .setDescription(this.t('embeds.reset.description', interaction, { key, value: this._format(reset) }));
+                    return interaction.reply({ embeds: [embed] });
+                }
+                case "view": {
+                    return this._view(interaction, moduleName);
+                }
+            }
+        } catch (err) {
+            return interaction.reply({ content: `:x: ${err.message}`, flags: MessageFlags.Ephemeral });
+        }
+    }
+
+    async _view(interaction, moduleNameFilter) {
+        const client = this.client;
+        const guild = interaction.guild;
+        const pagination = new Pagination(interaction);
+        const embeds = [];
+
+        const targets = moduleNameFilter
+            ? [[moduleNameFilter, client.settings.get(moduleNameFilter)]].filter(([, v]) => v)
+            : [...client.settings.entries()];
+
+        for (const [name, manager] of targets) {
+            const record = manager.get(guild.id);
+            const schema = manager.schema;
+            const lines = Object.entries(schema).map(([k, def]) => {
+                const v = record.settings[k];
+                return `\`${k}\`: ${this._format(v)} — \`${def.type}\``;
+            });
+            const embed = new EmbedBuilder()
+                .setTitle(this.t('embeds.view.settings', interaction, { module: name }))
+                .setDescription(lines.length ? lines.join('\n') : '_(no keys)_');
+            embeds.push(embed);
+        }
+
+        if (embeds.length === 0) {
+            embeds.push(new EmbedBuilder()
+                .setTitle(this.t('embeds.view.nosettings.title', interaction))
+                .setDescription(this.t('embeds.view.nosettings.description', interaction))
+                .setColor('Random'));
+        }
+
+        pagination.setAuthorizedUsers([interaction.user.id]);
+        pagination.setEmbeds(embeds, async (embed, index, array) => {
+            return embed.setFooter({ text: this.t('embeds.view.page', interaction, { page: index + 1, totalPages: array.length }) });
+        });
+        await pagination.render();
+    }
+
+    _format(v) {
+        if (v == null) return '_unset_';
+        if (Array.isArray(v)) return v.length ? v.map(x => `\`${x}\``).join(', ') : '_empty_';
+        if (typeof v === 'boolean') return v ? '`true`' : '`false`';
+        return `\`${v}\``;
     }
 }

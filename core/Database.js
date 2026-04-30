@@ -1,7 +1,6 @@
 const Loki = require('lokijs');
 const path = require('path');
 const fs = require('fs');
-const BotClient = require('../index.js');
 const Logger = require('./Logger.js');
 const PowerLevels = require('./PowerLevels.js');
 const DatabaseHandle = require('./DatabaseHandle.js');
@@ -16,7 +15,7 @@ module.exports = class Database {
      * Registry of database handles. The bot ships a single "core" handle backed
      * by `database.db` (housing the built-in `users` collection); each module
      * that opts in gets its own handle backed by `data/<Module>.db`.
-     * @param {BotClient} client
+     * @param {import('..')} client
      */
     constructor(client) {
         this.client = client;

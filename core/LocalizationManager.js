@@ -42,8 +42,6 @@ module.exports = class LocalizationManager {
         if (this.hotReload) this._installWatchers();
     }
 
-    // ───────────────────────────────────────────── loading
-
     load() {
         this.languages = {};
         this._files = {};
@@ -84,8 +82,6 @@ module.exports = class LocalizationManager {
             return {};
         }
     }
-
-    // ───────────────────────────────────────────── auto-sync
 
     /**
      * For each module locale file, ensure every key present in the reference
@@ -156,8 +152,6 @@ module.exports = class LocalizationManager {
         }
         return { merged: out, added };
     }
-
-    // ───────────────────────────────────────────── lookup
 
     _getKey(obj, key) {
         return key.split('.').reduce((o, k) => (o && o[k] !== undefined ? o[k] : undefined), obj);
@@ -248,8 +242,6 @@ module.exports = class LocalizationManager {
         }
     }
 
-    // ───────────────────────────────────────────── coverage
-
     reportCoverage() {
         const ref = this.languages[this.referenceLanguage];
         if (!ref) {
@@ -283,8 +275,6 @@ module.exports = class LocalizationManager {
         return walk(tree, ref);
     }
 
-    // ───────────────────────────────────────────── hot reload
-
     _installWatchers() {
         if (!fs.existsSync(this.modulesDir)) return;
         const watch = (dir) => {
@@ -307,8 +297,6 @@ module.exports = class LocalizationManager {
             if (this.autoSync) this.syncMissingKeys();
         }, 500);
     }
-
-    // ───────────────────────────────────────────── helpers
 
     _deepMerge(base, override) {
         if (!base || typeof base !== 'object') return override;

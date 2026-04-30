@@ -10,7 +10,7 @@ module.exports = class Command {
         type = ApplicationCommandType.ChatInput,
         cooldown = 0,
         minLevel = PowerLevels.USER,
-        defaultMemberPermissions = null, // Array 
+        defaultMemberPermissions = null, // Array — Discord-native default visibility/usage gate
         guildOnly = false,
         moduleName = 'Unspecified'
     }) {

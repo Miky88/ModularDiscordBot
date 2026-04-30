@@ -10,8 +10,9 @@ commands:
     name: ping
     description: Controlla la latenza e responsività del bot.
     messages:
-      pinging: "Pinging..."
-      pong: ":ping_pong: Pong! La latenza è **{{latency}}ms**. La latenza API è **{{apiLatency}}ms**"
+      pinging: Pinging...
+      pong: ":ping_pong: Pong! La latenza è **{{latency}}ms**. La latenza API è
+        **{{apiLatency}}ms**"
   settings:
     name: settings
     description: Gestisci le impostazioni del server corrente
@@ -47,29 +48,32 @@ commands:
             description: Il valore per filtrare le impostazioni
     embeds:
       set:
-        title: "Impostazione Aggiornata"
+        title: Impostazione Aggiornata
+        description: commands.settings.embeds.set.description
       add:
-        title: "Impostazione Aggiunta"
+        title: Impostazione Aggiunta
+        description: commands.settings.embeds.add.description
       remove:
-        title: "Impostazione Rimossa"
+        title: Impostazione Rimossa
+        description: commands.settings.embeds.remove.description
       view:
-        settings: "Impostazioni Correnti"
+        settings: Impostazioni Correnti
         nosettings:
-          title: "Nessuna Impostazione Trovata"
-          description: "Non ci sono impostazioni configurate per questo modulo."
-        page: "Pagina {{page}} di {{totalPages}}"
+          title: Nessuna Impostazione Trovata
+          description: Non ci sono impostazioni configurate per questo modulo.
+        page: Pagina {{page}} di {{totalPages}}
       reset:
-        title: "Impostazione Ripristinata"
-        description: "L’impostazione è stata ripristinata al valore predefinito."
+        title: Impostazione Ripristinata
+        description: L’impostazione è stata ripristinata al valore predefinito.
   stats:
     name: stats
     description: Visualizza statistiche e informazioni sul bot.
     embed:
-      title: "STATISTICHE"
-      memusage: "⚙️ Utilizzo Memoria"
-      uptime: "⏱️ Tempo di attività"
-      versions: "🔢 Versioni"
-      creationdate: "🎂 Data di creazione"
+      title: STATISTICHE
+      memusage: ⚙️ Utilizzo Memoria
+      uptime: ⏱️ Tempo di attività
+      versions: 🔢 Versioni
+      creationdate: 🎂 Data di creazione
   setlang:
     name: setlang
     description: Imposta la tua lingua preferita per il bot
@@ -80,4 +84,5 @@ commands:
     messages:
       invalidLang: ":warning: La lingua specificata non è supportata."
       success: ":flag_it: La tua lingua preferita è stata impostata su **Italiano**!"
-      reset: ":globe_with_meridians: D'ora in poi la tua lingua sarà sincronizzata con la lingua predefinita!"
+      reset: ":globe_with_meridians: D'ora in poi la tua lingua sarà sincronizzata con
+        la lingua predefinita!"

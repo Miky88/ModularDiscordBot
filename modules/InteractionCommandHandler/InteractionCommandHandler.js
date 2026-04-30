@@ -53,6 +53,20 @@ module.exports = class InteractionCommandHandler extends Module {
                 return { cancelEvent: true };
             }
 
+            // Per-guild custom-level override (admin-applied via /permissions).
+            // No module-side gate — Discord's `defaultMemberPermissions` is the
+            // baseline; this only kicks in when an admin has set `commandOverrides[name]`.
+            if (interaction.guild) {
+                const ok = client.permissions.check(interaction.member, { commandName: cmd.config.name });
+                if (!ok) {
+                    await this._safeReply(interaction, {
+                        content: ":no_entry: A server admin restricted this command to a higher level than yours.",
+                        flags: [Discord.MessageFlags.Ephemeral]
+                    });
+                    return { cancelEvent: true };
+                }
+            }
+
             await cmd.run(client, interaction, cmdModule);
         } catch (e) {
             client.errorHandler?.capture(e, {

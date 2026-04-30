@@ -1,6 +1,5 @@
 const { Collection, BaseInteraction } = require('discord.js');
 const fs = require('fs');
-const BotClient = require('..');
 const ModulePriorities = require('./ModulePriorities');
 const ConfigurationManager = require('./ConfigurationManager');
 const SettingsManager = require('./SettingsManager');
@@ -8,7 +7,7 @@ const Logger = require('./Logger');
 
 module.exports = class Module {
     /**
-     * @param {BotClient} client
+     * @param {import('..')} client
      * @param {object} options
      * @param {string} [options.name]
      * @param {string} [options.info]

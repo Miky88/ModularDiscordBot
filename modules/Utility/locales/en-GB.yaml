@@ -48,19 +48,22 @@ commands:
     embeds:
       set:
         title: "Setting Updated"
+        description: "`{{key}}` is now {{value}}."
       add:
         title: "Setting Added"
+        description: "`{{key}}` is now {{value}}."
       remove:
         title: "Setting Removed"
+        description: "`{{key}}` is now {{value}}."
       view:
-        settings: "Current Settings"
+        settings: "Settings — {{module}}"
         nosettings:
           title: "No Settings Found"
           description: "There are no settings configured for this module."
         page: "Page {{page}} of {{totalPages}}"
       reset:
         title: "Setting Reset"
-        description: "The setting has been reset to its default value."
+        description: "`{{key}}` has been reset to {{value}}."
   stats:
     name: stats
     description: View bot statistics and information.

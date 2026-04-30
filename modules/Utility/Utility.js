@@ -1,5 +1,6 @@
 const Module = require("@core/Module.js");
 const ModulePriorities = require("@core/ModulePriorities.js");
+const PermissionsUI = require("./lib/PermissionsUI.js");
 
 module.exports = class Utility extends Module {
     constructor(client) {
@@ -9,17 +10,28 @@ module.exports = class Utility extends Module {
             enabled: true,
             events: ["interactionCreate"],
             settings: {
-                defaultServerLanguage: ""
+                defaultServerLanguage: {
+                    type: 'string',
+                    default: '',
+                    description: 'Fallback language code for users without a personal preference (e.g., en-GB, it).'
+                }
             }
-        })
+        });
+
+        this.permissionsUI = new PermissionsUI(this);
     }
 
     /**
-     * 
-     * @param {import('../../index.js')} client 
-     * @param {import('discord.js').Interaction} interaction 
+     * @param {import('../../index.js')} client
+     * @param {import('discord.js').Interaction} interaction
      */
     async interactionCreate(client, interaction) {
+        // Component / modal interactions belonging to the permissions GUI.
+        if ((interaction.isMessageComponent?.() || interaction.isModalSubmit?.()) &&
+            interaction.customId?.startsWith('perms:')) {
+            return this.permissionsUI.handle(interaction);
+        }
+
         if (!interaction.isAutocomplete()) return;
         const command = this.commands.get(interaction.commandName);
         if (!command) return;
@@ -33,25 +45,23 @@ module.exports = class Utility extends Module {
         if (interaction.commandName == "settings") {
             switch (interaction.options.getFocused(true).name) {
                 case "module":
-                    let modules = [...client.moduleManager.modules.values()].filter(x=>x.options.settings).map(x=>x.options.name);
+                    let modules = [...client.moduleManager.modules.values()].filter(x => x.options.settings).map(x => x.options.name);
                     let options = modules.map(m => ({ name: m, value: m }));
                     return interaction.respond(options);
                 case "key":
-                    const module = interaction.options.getString("module");
-                    const moduleSettings = this.client.moduleManager.modules.get(module).settings
-                    if(!moduleSettings) return interaction.respond([])
-                    switch (interaction.options.getSubcommand()) {
-                        case "add":
-                        case "remove":
-                            return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => moduleSettings.defaultSettings[key] instanceof Array).map(key => ({ name: key, value: key })))
-                        case "set":
-                            return interaction.respond(Object.keys(moduleSettings.defaultSettings).filter(key => !(moduleSettings.defaultSettings[key] instanceof Array)).map(key => ({ name: key, value: key })))
-                        case "reset":
-                            return interaction.respond(Object.keys(moduleSettings.defaultSettings).map(key => ({ name: key, value: key })))
-                    }
+                    const moduleName = interaction.options.getString("module");
+                    const moduleSettings = this.client.moduleManager.modules.get(moduleName)?.settings;
+                    if (!moduleSettings) return interaction.respond([]);
+                    const schema = moduleSettings.schema;
+                    const isArrayType = (k) => String(schema[k].type).startsWith('array<');
+                    const sub = interaction.options.getSubcommand();
+                    const keys = Object.keys(schema);
+                    const filtered =
+                        sub === 'add' || sub === 'remove' ? keys.filter(isArrayType) :
+                        sub === 'set'                     ? keys.filter(k => !isArrayType(k)) :
+                        keys;
+                    return interaction.respond(filtered.map(k => ({ name: k, value: k })));
             }
-            
-            console.log(interaction);
         }
     }
 }
