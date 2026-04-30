@@ -1,0 +1,77 @@
+commands:
+  eval:
+    name: eval
+    description: Execute arbitrary JavaScript code.
+    options:
+      code: The JavaScript code to execute.
+  exec:
+    name: exec
+    description: Execute a system command.
+    options:
+      command: The system command to execute.
+  modman:
+    name: modman
+    description: Manage modules (load, unload, reload).
+    options:
+      load:
+        name: load
+        description: Loads a module
+        options:
+          module:
+            name: module
+            description: Module to perform the action on
+      unload:
+        name: unload
+        description: Unloads a module
+        options:
+          module:
+            name: module
+            description: Module to perform the action on
+      reload:
+        name: reload
+        description: Reloads a module
+        options:
+          module:
+            name: module
+            description: Module to perform the action on
+      enable:
+        name: enable
+        description: Enable a module
+        options:
+          module:
+            name: module
+            description: Module to perform the action on
+      disable:
+        name: disable
+        description: Disable a module
+        options:
+          module:
+            name: module
+            description: Module to perform the action on
+      info:
+        name: info
+        description: Get information about a module
+        options:
+          module:
+            name: module
+            description: Module to perform the action on
+      list:
+        name: list
+        description: Get a list of loaded modules
+  reboot:
+    name: reboot
+    description: Reboots the bot if running under PM2 or a process manager.
+    messages:
+      rebooting: ":hourglass_flowing_sand: Rebooting..."
+  setlevel:
+    name: setlevel
+    description: Set the power level of a user.
+    messages:
+      nopermission: ":x: You can't set this user's powerlevel."
+      success: ":white_check_mark: Successfully set powerlevel for {{user}} to: {{level}}"
+      error: ":x: An internal error occurred"
+  update:
+    name: update
+    description: Update the bot to the latest version from the Git repository, and reboots the bot
+    messages:
+      noreboot: "Unknown command `reboot`, aborting."

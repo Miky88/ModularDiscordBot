@@ -27,7 +27,6 @@ module.exports = class ModuleManager {
                 this.load(moduleName);
             }
         });
-        this.client.database.reconfigure();
         this.logger.success(`Successfully Loaded ${this.modules.size} modules`)
     }
 
@@ -50,14 +49,14 @@ module.exports = class ModuleManager {
             }
             if (_module.options.enabled)
                 _module.loadCommands()
-            if (_module.options.usesDB) {
-                this.client.database.db[`module_${_module.options.name}`] = this.client.database.db.addCollection(`module_${_module.options.name}`);
-                this.client.database.collections.push(`module_${_module.options.name}`);
-            }
-            if (_module.options.settings) {
+
+            const collections = [..._module.options.collections];
+            if (_module.options.settings) collections.push('settings');
+            if (collections.length > 0)
+                this.client.database.register(_module.options.name, { collections });
+
+            if (_module.options.settings)
                 _module.settings = new SettingsManager(this.client, _module, _module.options.settings);
-                this.client.database.collections.push(`settings_${_module.options.name}`);
-            }
 
             this.add(_module)
         } catch (error) {
@@ -78,8 +77,12 @@ module.exports = class ModuleManager {
             for (let [_name, module] of new Map([...this.modules.entries()].sort((a, b) => b[1].options.priority - a[1].options.priority))) {
                 if (module.options.enabled && module.options.events.includes(event)) {
                     let execution;
-
-                    execution = await module.run(this.client, event, ...args);
+                    try {
+                        execution = await module.run(this.client, event, ...args);
+                    } catch (err) {
+                        this.client.errorHandler?.capture(err, { module: _name, event });
+                        continue;
+                    }
 
                     if (execution?.cancelEvent)
                         break;

@@ -1,0 +1,83 @@
+commands:
+  perms:
+    name: perms
+    description: Controlla i permessi di un utente o ruolo nel canale corrente.
+    options:
+      user: L’utente di cui controllare i permessi.
+    messages:
+      nouserindb: ":warning: Nessun utente nel database corrisponde alla tua ricerca"
+  ping:
+    name: ping
+    description: Controlla la latenza e responsività del bot.
+    messages:
+      pinging: "Pinging..."
+      pong: ":ping_pong: Pong! La latenza è **{{latency}}ms**. La latenza API è **{{apiLatency}}ms**"
+  settings:
+    name: settings
+    description: Gestisci le impostazioni del server corrente
+    options:
+      view:
+        name: view
+        description: Visualizza le impostazioni correnti
+      set:
+        name: set
+        description: Imposta un valore
+        options:
+          module:
+            name: module
+            description: Il modulo di cui visualizzare le impostazioni
+          key:
+            name: key
+            description: L’impostazione da visualizzare
+          value:
+            name: value
+            description: Il valore per filtrare le impostazioni
+      reset:
+        name: reset
+        description: Ripristina un’impostazione al valore predefinito
+        options:
+          module:
+            name: module
+            description: Il modulo di cui visualizzare le impostazioni
+          key:
+            name: key
+            description: L’impostazione da ripristinare
+          value:
+            name: value
+            description: Il valore per filtrare le impostazioni
+    embeds:
+      set:
+        title: "Impostazione Aggiornata"
+      add:
+        title: "Impostazione Aggiunta"
+      remove:
+        title: "Impostazione Rimossa"
+      view:
+        settings: "Impostazioni Correnti"
+        nosettings:
+          title: "Nessuna Impostazione Trovata"
+          description: "Non ci sono impostazioni configurate per questo modulo."
+        page: "Pagina {{page}} di {{totalPages}}"
+      reset:
+        title: "Impostazione Ripristinata"
+        description: "L’impostazione è stata ripristinata al valore predefinito."
+  stats:
+    name: stats
+    description: Visualizza statistiche e informazioni sul bot.
+    embed:
+      title: "STATISTICHE"
+      memusage: "⚙️ Utilizzo Memoria"
+      uptime: "⏱️ Tempo di attività"
+      versions: "🔢 Versioni"
+      creationdate: "🎂 Data di creazione"
+  setlang:
+    name: setlang
+    description: Imposta la tua lingua preferita per il bot
+    options:
+      language:
+        name: language
+        description: La lingua che vuoi impostare
+    messages:
+      invalidLang: ":warning: La lingua specificata non è supportata."
+      success: ":flag_it: La tua lingua preferita è stata impostata su **Italiano**!"
+      reset: ":globe_with_meridians: D'ora in poi la tua lingua sarà sincronizzata con la lingua predefinita!"

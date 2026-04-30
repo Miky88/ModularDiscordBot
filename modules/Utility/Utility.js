@@ -25,7 +25,10 @@ module.exports = class Utility extends Module {
         if (!command) return;
 
         if (interaction.commandName == "setlang") {
-            return interaction.respond(Object.keys(client.i18n.languages || {}).concat(['default']).map(lang => ({ name: client.i18n.languages[lang]?.name || 'Default', value: lang })));
+            return interaction.respond(Object.keys(client.i18n.languages || {}).concat(['default']).map(lang => ({
+                name: lang === 'default' ? 'Default' : client.i18n.languageName(lang),
+                value: lang
+            })));
         }
         if (interaction.commandName == "settings") {
             switch (interaction.options.getFocused(true).name) {

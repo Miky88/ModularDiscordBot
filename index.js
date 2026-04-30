@@ -8,6 +8,7 @@ const Database = require('./core/Database.js');
 const ConfigurationManager = require('./core/ConfigurationManager.js');
 const Utils = require('./core/Utils.js');
 const LocalizationManager = require('./core/LocalizationManager.js');
+const ErrorHandler = require('./core/ErrorHandler.js');
 BigInt.prototype.toJSON = function () { return this.toString() } // MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
 
 // Discord
@@ -18,7 +19,19 @@ class BotClient extends Client {
             owners: ["311929179186790400", "422418878459674624"],
             systemServer: ["1313550337474429001"],
             intents: Object.keys(GatewayIntentBits).filter(i => isNaN(i)),
-            partials: ['Reaction', 'Message']
+            partials: ['Reaction', 'Message'],
+            errorReporting: {
+                channelId: null,
+                notifyOwners: false,
+                dedupWindowMs: 60000,
+                exitOnUncaught: true
+            },
+            i18n: {
+                defaultLang: 'en-GB',
+                referenceLanguage: 'en-GB',
+                autoSync: true,
+                hotReload: false
+            }
         });
         super({
             intents: config.get('intents').map(i => GatewayIntentBits[i]),
@@ -30,8 +43,9 @@ class BotClient extends Client {
         this.utils = new Utils();
         this.moduleManager = new ModuleManager(this);
         this.config = config;
-        this.i18n = new LocalizationManager();
+        this.i18n = new LocalizationManager(config.get('i18n'));
 
+        this.errorHandler = new ErrorHandler(this, config.get('errorReporting'));
         this.database = new Database(this);
         this.moduleManager.init();
     }

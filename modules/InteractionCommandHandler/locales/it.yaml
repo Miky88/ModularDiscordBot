@@ -1,0 +1,4 @@
+errors:
+  command-not-found: ":no_entry: Comando non trovato"
+  insufficient-powerlevel: ":no_entry: Non hai i permessi per usare questo comando. Il livello richiesto è"
+  execution-error: ":no_entry: Ops, si è verificato un errore durante l'esecuzione del comando. Contatta gli sviluppatori del bot."

@@ -1,0 +1,83 @@
+commands:
+  perms:
+    name: perms
+    description: Check the permissions of a user or role in the current channel.
+    options:
+      user: The user to check permissions for.
+    messages:
+      nouserindb: ":warning: There's no user in database matching your query"
+  ping:
+    name: ping
+    description: Check the bot's latency and responsiveness.
+    messages:
+      pinging: "Pinging..."
+      pong: ":ping_pong: Pong! Latency is **{{latency}}ms**. API Latency is **{{apiLatency}}ms**"
+  settings:
+    name: settings
+    description: Manage the current server settings
+    options:
+      view:
+        name: view
+        description: View current settings
+      set:
+        name: set
+        description: Set a setting
+        options:
+          module:
+            name: module
+            description: The module to view settings for
+          key:
+            name: key
+            description: The setting to view
+          value:
+            name: value
+            description: The value to filter settings by
+      reset:
+        name: reset
+        description: Reset a setting to default
+        options:
+          module:
+            name: module
+            description: The module to view settings for
+          key:
+            name: key
+            description: The setting to view
+          value:
+            name: value
+            description: The value to filter settings by
+    embeds:
+      set:
+        title: "Setting Updated"
+      add:
+        title: "Setting Added"
+      remove:
+        title: "Setting Removed"
+      view:
+        settings: "Current Settings"
+        nosettings:
+          title: "No Settings Found"
+          description: "There are no settings configured for this module."
+        page: "Page {{page}} of {{totalPages}}"
+      reset:
+        title: "Setting Reset"
+        description: "The setting has been reset to its default value."
+  stats:
+    name: stats
+    description: View bot statistics and information.
+    embed:
+      title: "STATISTICS"
+      memusage: "⚙️ Memory Usage"
+      uptime: "⏱️ Uptime"
+      versions: "🔢 Versions"
+      creationdate: "🎂 Creation date"
+  setlang:
+    name: setlang
+    description: Set your preferred language for the bot
+    options:
+      language:
+        name: language
+        description: The language you want to set
+    messages:
+      invalidLang: ":warning: The specified language is not supported."
+      success: ":flag_gb: Your preferred language has been set to **English**!"
+      reset: ":globe_with_meridians: From now on your language will be synchronized to the default language!"

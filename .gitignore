@@ -6,3 +6,5 @@ database.db
 config.yml
 out.txt
 err.txt
+data/
+logs/

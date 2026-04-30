@@ -1,0 +1,77 @@
+commands:
+  eval:
+    name: eval
+    description: Esegue codice JavaScript arbitrario.
+    options:
+      code: Il codice JavaScript da eseguire.
+  exec:
+    name: exec
+    description: Esegue un comando di sistema.
+    options:
+      command: Il comando di sistema da eseguire.
+  modman:
+    name: modman
+    description: Gestisci i moduli (carica, scarica, ricarica).
+    options:
+      load:
+        name: load
+        description: Carica un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      unload:
+        name: unload
+        description: Scarica un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      reload:
+        name: reload
+        description: Ricarica un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      enable:
+        name: enable
+        description: Abilita un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      disable:
+        name: disable
+        description: Disabilita un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      info:
+        name: info
+        description: Ottieni informazioni su un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      list:
+        name: list
+        description: Ottieni la lista dei moduli caricati
+  reboot:
+    name: reboot
+    description: Riavvia il bot se in esecuzione tramite PM2 o un process manager.
+    messages:
+      rebooting: ":hourglass_flowing_sand: Riavvio in corso..."
+  setlevel:
+    name: setlevel
+    description: Imposta il power level di un utente.
+    messages:
+      nopermission: ":x: Non puoi impostare il power level di questo utente."
+      success: ":white_check_mark: Power level di {{user}} impostato a: {{level}}"
+      error: ":x: Si è verificato un errore interno"
+  update:
+    name: update
+    description: Aggiorna il bot all’ultima versione dal repository Git e riavvia il bot
+    messages:
+      noreboot: "Comando `reboot` sconosciuto, annullo l'operazione."

@@ -24,17 +24,5 @@ module.exports = class ReadyLog extends Module {
         this.logger.info(`System Server: ${client.config.get('systemServer').join(", ")}`);
         this.logger.info(`Owners: ${client.config.get('owners').join(", ")}`);
         this.logger.info(`===========================`);
-
-        // If the bot got rebooted with reboot command, this will edit the message once ready
-        try {
-            const { id, channel } = require("./../reboot.json");
-            let c = client.channels.cache.get(channel);
-            await c.messages.fetch();
-            let m = c.messages.cache.get(id);
-            await m.edit(":white_check_mark: Rebooted. It took " + ((Date.now() - m.createdTimestamp) / 1000).toFixed(1) + "ms");
-            fs.unlink("./reboot.json", () => { });
-        } catch (e) {
-            // pass
-        }
     }
 }

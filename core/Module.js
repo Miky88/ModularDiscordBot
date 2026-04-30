@@ -1,6 +1,5 @@
 const { Collection, BaseInteraction } = require('discord.js');
 const fs = require('fs');
-const { Collection: LokiCollection } = require('lokijs');
 const BotClient = require('..');
 const ModulePriorities = require('./ModulePriorities');
 const ConfigurationManager = require('./ConfigurationManager');
@@ -9,30 +8,50 @@ const Logger = require('./Logger');
 
 module.exports = class Module {
     /**
-     * @param {BotClient} client 
-     * @param {} options
+     * @param {BotClient} client
+     * @param {object} options
+     * @param {string} [options.name]
+     * @param {string} [options.info]
+     * @param {boolean} [options.enabled]
      * @param {string[]} [options.events]
+     * @param {boolean | string[]} [options.databases] Either `true` for a single
+     *   `default` collection in `data/<Module>.db`, or an array of collection
+     *   names (e.g. `['guilds', 'logs']`) to declare upfront.
+     * @param {number} [options.priority]
+     * @param {string[]} [options.dependencies]
+     * @param {object} [options.config]
+     * @param {object} [options.settings]
      */
     constructor(client, {
         name = this.constructor.name,
         info = "No description provided.",
         enabled = false,
         events = [],
-        usesDB = false,
+        databases = false,
         priority = ModulePriorities.NORMAL,
         dependencies = [],
         config = null,
         settings = null
     }) {
         this.client = client;
-        this.options = { name, info, enabled, events, priority, usesDB, dependencies, settings};
-        
+
+        const declaredCollections = Array.isArray(databases)
+            ? [...databases]
+            : (databases ? ['default'] : []);
+
+        this.options = {
+            name, info, enabled, events, priority,
+            databases,
+            collections: declaredCollections,
+            dependencies, settings
+        };
+
         this.commands = new Collection();
         this.logger = new Logger(this.options.name);
 
-        if(config)
+        if (config)
             this.config = new ConfigurationManager(this, config);
-        if(settings)
+        if (settings)
             this.settings = new SettingsManager(client, this, settings);
     }
 
@@ -46,21 +65,23 @@ module.exports = class Module {
 
         if (interactionOrLang instanceof BaseInteraction) {
             const interaction = interactionOrLang;
-            
-            const utility = this.client.moduleManager.modules.get("Utility")?.settings;
-            const guildLang = interaction.guild ? utility?.get(interaction.guild.id)?.settings?.defaultServerLanguage : null;
-            let lang = this.client.i18n.defaultLang;
+            const i18n = this.client.i18n;
 
+            const utility = this.client.moduleManager.modules.get("Utility")?.settings;
+            const guildLang = interaction.guild
+                ? utility?.get(interaction.guild.id)?.settings?.defaultServerLanguage
+                : null;
             const userData = this.client.database.forceUser(interaction.user.id);
 
-            if (userData && userData.language && this.client.i18n.languages[userData.language])
-                lang = userData.language;
-            else if (interaction.locale && this.client.i18n.languages[interaction.locale])
-                lang = interaction.locale;
-            else if (guildLang && this.client.i18n.languages[guildLang])
-                lang = guildLang;
+            // Resolution order: user-forced → guild default → Discord interaction locale → bot default.
+            let lang = i18n.defaultLang;
+            const candidates = [userData?.language, guildLang, interaction.locale];
+            for (const candidate of candidates) {
+                const resolved = candidate && i18n.resolveLanguage(candidate);
+                if (resolved && i18n.languages[resolved]) { lang = resolved; break; }
+            }
 
-            return this.client.i18n.t(key, lang, vars);
+            return i18n.t(key, lang, vars);
         } else {
             const lang = interactionOrLang || this.client.i18n.defaultLang;
             return this.client.i18n.t(key, lang, vars);
@@ -102,23 +123,30 @@ module.exports = class Module {
     }
 
     /**
-     * @type {LokiCollection}
+     * The module's database handle. `null` if the module didn't opt in via
+     * the `databases` option. Use `this.db.collection(name)` to access a
+     * specific collection, or the convenience proxy (e.g. `this.db.guilds`)
+     * for collections declared at construction time.
+     * @type {import('./DatabaseHandle') | null}
      */
     get db() {
-        if (!this.options.usesDB)
-            return null;
-
-        return this.client.database.db[`module_${this.options.name}`];
+        if (this.options.collections.length === 0) return null;
+        return this.client.database.get(this.options.name) || null;
     }
 
-    saveData(data) {
+    /**
+     * Insert-or-update a row into one of the module's collections.
+     * @param {string} collectionName
+     * @param {object} data
+     */
+    saveData(collectionName, data) {
         if (!this.db)
-            throw new Error("You must use usesDB: true to use this method.")
+            throw new Error("You must declare `databases` in module options to use this method.");
         if (!data)
-            throw new Error("You must pass a valid argument to data.")
-        
-        if (data.$loki)
-            this.db.update(data);
-        else this.db.add(data);
+            throw new Error("You must pass a valid argument to data.");
+
+        const collection = this.db.collection(collectionName);
+        if (data.$loki) collection.update(data);
+        else collection.insert(data);
     }
 }
