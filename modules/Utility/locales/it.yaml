@@ -65,6 +65,61 @@ commands:
       reset:
         title: Impostazione Ripristinata
         description: L’impostazione è stata ripristinata al valore predefinito.
+    ui:
+      home:
+        title: commands.settings.ui.home.title
+        description: commands.settings.ui.home.description
+        modules-with-settings: commands.settings.ui.home.modules-with-settings
+        none: commands.settings.ui.home.none
+        pick-placeholder: commands.settings.ui.home.pick-placeholder
+        keys-suffix: commands.settings.ui.home.keys-suffix
+        overrides-suffix: commands.settings.ui.home.overrides-suffix
+      module:
+        title: commands.settings.ui.module.title
+        description: commands.settings.ui.module.description
+        keys: commands.settings.ui.module.keys
+        no-keys: commands.settings.ui.module.no-keys
+        pick-placeholder: commands.settings.ui.module.pick-placeholder
+        no-settings: commands.settings.ui.module.no-settings
+      key:
+        title: commands.settings.ui.key.title
+        no-description: commands.settings.ui.key.no-description
+        type: commands.settings.ui.key.type
+        default: commands.settings.ui.key.default
+        current: commands.settings.ui.key.current
+        permission-override: commands.settings.ui.key.permission-override
+        permission-override-value: commands.settings.ui.key.permission-override-value
+        unknown: commands.settings.ui.key.unknown
+      editors:
+        enum-placeholder: commands.settings.ui.editors.enum-placeholder
+        bool-true: commands.settings.ui.editors.bool-true
+        bool-false: commands.settings.ui.editors.bool-false
+        channel-placeholder: commands.settings.ui.editors.channel-placeholder
+        role-placeholder: commands.settings.ui.editors.role-placeholder
+        user-placeholder: commands.settings.ui.editors.user-placeholder
+        edit-button: commands.settings.ui.editors.edit-button
+        array-add-button: commands.settings.ui.editors.array-add-button
+        array-add-channel: commands.settings.ui.editors.array-add-channel
+        array-add-role: commands.settings.ui.editors.array-add-role
+        array-add-user: commands.settings.ui.editors.array-add-user
+        array-remove: commands.settings.ui.editors.array-remove
+      modals:
+        edit-title: commands.settings.ui.modals.edit-title
+        edit-label: commands.settings.ui.modals.edit-label
+        array-add-title: commands.settings.ui.modals.array-add-title
+        array-add-label: commands.settings.ui.modals.array-add-label
+      values:
+        unset: commands.settings.ui.values.unset
+        empty: commands.settings.ui.values.empty
+      buttons:
+        reset: commands.settings.ui.buttons.reset
+        back: commands.settings.ui.buttons.back
+        refresh: commands.settings.ui.buttons.refresh
+        close: commands.settings.ui.buttons.close
+      errors:
+        closed: commands.settings.ui.errors.closed
+        unknown-setting: commands.settings.ui.errors.unknown-setting
+        no-settings-module: commands.settings.ui.errors.no-settings-module
   stats:
     name: stats
     description: Visualizza statistiche e informazioni sul bot.
@@ -86,3 +141,112 @@ commands:
       success: ":flag_it: La tua lingua preferita è stata impostata su **Italiano**!"
       reset: ":globe_with_meridians: D'ora in poi la tua lingua sarà sincronizzata con
         la lingua predefinita!"
+  permissions:
+    name: commands.permissions.name
+    description: commands.permissions.description
+    ui:
+      home:
+        title: commands.permissions.ui.home.title
+        description: commands.permissions.ui.home.description
+        current-ladder: commands.permissions.ui.home.current-ladder
+        user-overrides: commands.permissions.ui.home.user-overrides
+        command-overrides: commands.permissions.ui.home.command-overrides
+        setting-overrides: commands.permissions.ui.home.setting-overrides
+        none: commands.permissions.ui.home.none
+        no-levels: commands.permissions.ui.home.no-levels
+        footer: commands.permissions.ui.home.footer
+        nav-placeholder: commands.permissions.ui.home.nav-placeholder
+        nav-levels: commands.permissions.ui.home.nav-levels
+        nav-levels-desc: commands.permissions.ui.home.nav-levels-desc
+        nav-roles: commands.permissions.ui.home.nav-roles
+        nav-roles-desc: commands.permissions.ui.home.nav-roles-desc
+        nav-users: commands.permissions.ui.home.nav-users
+        nav-users-desc: commands.permissions.ui.home.nav-users-desc
+        nav-cmds: commands.permissions.ui.home.nav-cmds
+        nav-cmds-desc: commands.permissions.ui.home.nav-cmds-desc
+        nav-sets: commands.permissions.ui.home.nav-sets
+        nav-sets-desc: commands.permissions.ui.home.nav-sets-desc
+      levels:
+        title: commands.permissions.ui.levels.title
+        description: commands.permissions.ui.levels.description
+        current-ladder: commands.permissions.ui.levels.current-ladder
+        no-levels: commands.permissions.ui.levels.no-levels
+        no-roles-bound: commands.permissions.ui.levels.no-roles-bound
+        default-tag: commands.permissions.ui.levels.default-tag
+        edit-placeholder: commands.permissions.ui.levels.edit-placeholder
+        delete-title: commands.permissions.ui.levels.delete-title
+        delete-description: commands.permissions.ui.levels.delete-description
+        delete-placeholder: commands.permissions.ui.levels.delete-placeholder
+        none-to-delete: commands.permissions.ui.levels.none-to-delete
+        weight-fmt: commands.permissions.ui.levels.weight-fmt
+        weight-fmt-default: commands.permissions.ui.levels.weight-fmt-default
+        modal-create-title: commands.permissions.ui.levels.modal-create-title
+        modal-edit-title: commands.permissions.ui.levels.modal-edit-title
+        modal-id-label: commands.permissions.ui.levels.modal-id-label
+        modal-id-placeholder: commands.permissions.ui.levels.modal-id-placeholder
+        modal-name-label: commands.permissions.ui.levels.modal-name-label
+        modal-name-placeholder: commands.permissions.ui.levels.modal-name-placeholder
+        modal-weight-label: commands.permissions.ui.levels.modal-weight-label
+        modal-weight-placeholder: commands.permissions.ui.levels.modal-weight-placeholder
+        empty-id-error: commands.permissions.ui.levels.empty-id-error
+        weight-not-int-error: commands.permissions.ui.levels.weight-not-int-error
+        unknown-level-error: commands.permissions.ui.levels.unknown-level-error
+      roles:
+        title: commands.permissions.ui.roles.title
+        intro: commands.permissions.ui.roles.intro
+        focused-line: commands.permissions.ui.roles.focused-line
+        bound-list: commands.permissions.ui.roles.bound-list
+        no-roles-bound: commands.permissions.ui.roles.no-roles-bound
+        all-levels: commands.permissions.ui.roles.all-levels
+        none: commands.permissions.ui.roles.none
+        bind-placeholder: commands.permissions.ui.roles.bind-placeholder
+        unbind-placeholder: commands.permissions.ui.roles.unbind-placeholder
+        level-pick-placeholder: commands.permissions.ui.roles.level-pick-placeholder
+        level-switch-placeholder: commands.permissions.ui.roles.level-switch-placeholder
+        level-pick-desc: commands.permissions.ui.roles.level-pick-desc
+      users:
+        title: commands.permissions.ui.users.title
+        description: commands.permissions.ui.users.description
+        active-overrides: commands.permissions.ui.users.active-overrides
+        none: commands.permissions.ui.users.none
+        selected-user: commands.permissions.ui.users.selected-user
+        selected-user-current: commands.permissions.ui.users.selected-user-current
+        selected-user-empty: commands.permissions.ui.users.selected-user-empty
+        pick-user-placeholder: commands.permissions.ui.users.pick-user-placeholder
+        clear: commands.permissions.ui.users.clear
+        clear-desc: commands.permissions.ui.users.clear-desc
+        assign-placeholder: commands.permissions.ui.users.assign-placeholder
+      cmds:
+        title: commands.permissions.ui.cmds.title
+        description: commands.permissions.ui.cmds.description
+        active-overrides: commands.permissions.ui.cmds.active-overrides
+        none: commands.permissions.ui.cmds.none
+        clear-placeholder: commands.permissions.ui.cmds.clear-placeholder
+        clear-desc: commands.permissions.ui.cmds.clear-desc
+        modal-title: commands.permissions.ui.cmds.modal-title
+        modal-command-label: commands.permissions.ui.cmds.modal-command-label
+        modal-command-placeholder: commands.permissions.ui.cmds.modal-command-placeholder
+        modal-level-label: commands.permissions.ui.cmds.modal-level-label
+        modal-level-placeholder: commands.permissions.ui.cmds.modal-level-placeholder
+      sets:
+        title: commands.permissions.ui.sets.title
+        description: commands.permissions.ui.sets.description
+        active-overrides: commands.permissions.ui.sets.active-overrides
+        none: commands.permissions.ui.sets.none
+        clear-placeholder: commands.permissions.ui.sets.clear-placeholder
+        clear-desc: commands.permissions.ui.sets.clear-desc
+        modal-title: commands.permissions.ui.sets.modal-title
+        modal-key-label: commands.permissions.ui.sets.modal-key-label
+        modal-key-placeholder: commands.permissions.ui.sets.modal-key-placeholder
+        modal-level-label: commands.permissions.ui.sets.modal-level-label
+        modal-level-placeholder: commands.permissions.ui.sets.modal-level-placeholder
+      buttons:
+        create: commands.permissions.ui.buttons.create
+        delete: commands.permissions.ui.buttons.delete
+        refresh: commands.permissions.ui.buttons.refresh
+        close: commands.permissions.ui.buttons.close
+        back: commands.permissions.ui.buttons.back
+        cancel: commands.permissions.ui.buttons.cancel
+        set-override: commands.permissions.ui.buttons.set-override
+      errors:
+        closed: commands.permissions.ui.errors.closed

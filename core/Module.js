@@ -1,6 +1,5 @@
 const { Collection, BaseInteraction } = require('discord.js');
 const fs = require('fs');
-const ModulePriorities = require('./ModulePriorities');
 const ConfigurationManager = require('./ConfigurationManager');
 const SettingsManager = require('./SettingsManager');
 const Logger = require('./Logger');
@@ -9,26 +8,26 @@ module.exports = class Module {
     /**
      * @param {import('..')} client
      * @param {object} options
-     * @param {string} [options.name]
-     * @param {string} [options.info]
-     * @param {boolean} [options.enabled]
-     * @param {string[]} [options.events]
-     * @param {boolean | string[]} [options.databases] Either `true` for a single
-     *   `default` collection in `data/<Module>.db`, or an array of collection
-     *   names (e.g. `['guilds', 'logs']`) to declare upfront.
-     * @param {number} [options.priority]
-     * @param {string[]} [options.dependencies]
-     * @param {object} [options.config]
-     * @param {object} [options.settings]
+     * @param {string}    [options.name]
+     * @param {string}    [options.info]
+     * @param {string}    [options.version]
+     * @param {string[]}  [options.events]                Discord event names this module handles.
+     * @param {string[]}  [options.dependencies]          Module names this module needs loaded.
+     * @param {string[]}  [options.runBefore]             Modules this one's event handlers should run before.
+     * @param {string[]}  [options.runAfter]              Modules this one's event handlers should run after.
+     * @param {boolean | string[]} [options.databases]    `true` for a single `default` collection or an array of collection names.
+     * @param {object}    [options.config]                Default per-module config schema.
+     * @param {object}    [options.settings]              Schema-driven per-guild settings.
      */
     constructor(client, {
         name = this.constructor.name,
         info = "No description provided.",
-        enabled = false,
+        version = null,
         events = [],
-        databases = false,
-        priority = ModulePriorities.NORMAL,
         dependencies = [],
+        runBefore = [],
+        runAfter = [],
+        databases = false,
         config = null,
         settings = null
     }) {
@@ -39,10 +38,13 @@ module.exports = class Module {
             : (databases ? ['default'] : []);
 
         this.options = {
-            name, info, enabled, events, priority,
+            name, info, version, events,
+            dependencies: [...dependencies],
+            runBefore: [...runBefore],
+            runAfter: [...runAfter],
             databases,
             collections: declaredCollections,
-            dependencies, settings
+            settings
         };
 
         this.commands = new Collection();
@@ -54,13 +56,45 @@ module.exports = class Module {
             this.settings = new SettingsManager(client, this, settings);
     }
 
+    // ───── lifecycle hooks ─────
+    // ModuleManager calls these in a defined order. Default implementations
+    // cover the common cases (loading commands on start, clearing on stop);
+    // override to add async setup, watch external resources, etc.
+
+    /**
+     * Called once after the constructor, before commands or events are wired.
+     * Place for one-shot async setup (cache prefill, schema migration, etc.).
+     */
+    async init(client) {}
+
+    /**
+     * Called when the module transitions to the enabled state — at boot for
+     * modules persisted as enabled, or via the manager's enable() action.
+     * Default: load slash commands so they're discoverable.
+     */
+    async start(client) {
+        await this.loadCommands();
+    }
+
+    /**
+     * Called when the module transitions to the disabled state, or before an
+     * unload. Default: drop the slash-command cache so the manager's
+     * aggregate `commands` getter no longer includes them.
+     */
+    async stop(client) {
+        this.commands.clear();
+    }
+
+    /**
+     * Called once when the module is being unloaded, after stop(). Last
+     * chance to release external resources (timers, intervals, sockets).
+     */
+    async destroy(client) {}
+
+    // ───── i18n ─────
+
     t(_key, interactionOrLang, vars) {
         let key = `modules.${this.options.name}.${_key}`;
-        // Lang:
-        // - Check if forced on user data
-        // - Check if forced on guild settings
-        // - Check discord interaction.language
-        // - Else, default
 
         if (interactionOrLang instanceof BaseInteraction) {
             const interaction = interactionOrLang;
@@ -85,7 +119,6 @@ module.exports = class Module {
             const lang = interactionOrLang || this.client.i18n.defaultLang;
             return this.client.i18n.t(key, lang, vars);
         }
-
     }
 
     getLocalizationObject(_key) {
@@ -93,39 +126,40 @@ module.exports = class Module {
         return this.client.i18n.getLocalizationObject(key);
     }
 
+    // ───── commands ─────
+
     async loadCommands() {
         const commands = fs.existsSync(`./modules/${this.options.name}/commands`) ? fs.readdirSync(`./modules/${this.options.name}/commands`).filter(file => file.endsWith(".js")) : [];
 
         commands.forEach(file => {
             try {
-                /**
-                 * @type {import('./Command')}
-                 */
                 const command = require(`../modules/${this.options.name}/commands/${file}`);
                 delete require.cache[require.resolve(`../modules/${this.options.name}/commands/${file}`)];
                 const _command = new command(this.client, this);
-                
+
                 this.commands.set(file.split(".")[0], _command);
                 this.logger.verbose(`Loaded command ${file.split(".")[0]} from ${this.options.name}`);
             } catch (e) {
                 this.logger.error(`Failed to load command ${file} from ${this.options.name}: ${e.stack || e}`);
             }
-        }); 
-    }
-
-    run(client, event, ...args) {
-        // Register automatic event method caller
-        const method = this[event];
-        if (!method)
-            return this.logger.error(`[${this.options.name}] There was no configured method for the ${event} event.`);
-        return method.call(this, client, ...args);
+        });
     }
 
     /**
-     * The module's database handle. `null` if the module didn't opt in via
-     * the `databases` option. Use `this.db.collection(name)` to access a
-     * specific collection, or the convenience proxy (e.g. `this.db.guilds`)
-     * for collections declared at construction time.
+     * Dispatched by ModuleManager. The last argument is an EventContext —
+     * call `ctx.stopPropagation()` to prevent later modules from seeing this
+     * event in this dispatch round.
+     */
+    run(client, event, ...rest) {
+        const method = this[event];
+        if (!method)
+            return this.logger.error(`[${this.options.name}] There was no configured method for the ${event} event.`);
+        return method.call(this, client, ...rest);
+    }
+
+    // ───── database ─────
+
+    /**
      * @type {import('./DatabaseHandle') | null}
      */
     get db() {
@@ -133,11 +167,6 @@ module.exports = class Module {
         return this.client.database.get(this.options.name) || null;
     }
 
-    /**
-     * Insert-or-update a row into one of the module's collections.
-     * @param {string} collectionName
-     * @param {object} data
-     */
     saveData(collectionName, data) {
         if (!this.db)
             throw new Error("You must declare `databases` in module options to use this method.");

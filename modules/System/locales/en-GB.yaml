@@ -11,53 +11,68 @@ commands:
       command: The system command to execute.
   modman:
     name: modman
-    description: Manage modules (load, unload, reload).
-    options:
-      load:
-        name: load
-        description: Loads a module
-        options:
-          module:
-            name: module
-            description: Module to perform the action on
+    description: Manage bot modules (load, unload, reload, enable/disable).
+    ui:
+      home:
+        title: 🧩 Module Manager
+        description: |
+          Inspect, enable/disable, reload, or unload modules. Picking a module from the dropdown opens its detail view with action buttons.
+
+          **Status badges**
+          ✅ loaded & enabled · 🟡 loaded & disabled · ⛔ on disk, not loaded · ⚠ load failed
+        failed-summary: "**Failed loads:**"
+        all-modules: All modules
+        none: _(none on disk)_
+        footer: "{{loaded}} loaded · {{available}} available · {{failed}} failed"
+        pick-placeholder: Pick a module to inspect…
+      detail:
+        no-description: _(no description)_
+        status: Status
+        version: Version
+        events: Events
+        dependencies: Dependencies
+        dependents: Dependents
+        commands: Commands
+        last-error: Last error
+        none: _(none)_
+        not-found: "Cannot inspect `{{name}}`: {{error}}"
+      status:
+        load-failed: Load failed
+        not-loaded: On disk, not loaded
+        enabled: Loaded & enabled
+        disabled: Loaded but disabled
+      buttons:
+        reload: Reload
+        load: Load
+        enable: Enable
+        disable: Disable
+        unload: Unload
+        back: Back
+        cancel: Cancel
+        force-unload: Force unload
+        load-module: Load module
+        reload-all: Reload all
+        refresh: Refresh
+        close: Close
       unload:
-        name: unload
-        description: Unloads a module
-        options:
-          module:
-            name: module
-            description: Module to perform the action on
-      reload:
-        name: reload
-        description: Reloads a module
-        options:
-          module:
-            name: module
-            description: Module to perform the action on
-      enable:
-        name: enable
-        description: Enable a module
-        options:
-          module:
-            name: module
-            description: Module to perform the action on
-      disable:
-        name: disable
-        description: Disable a module
-        options:
-          module:
-            name: module
-            description: Module to perform the action on
-      info:
-        name: info
-        description: Get information about a module
-        options:
-          module:
-            name: module
-            description: Module to perform the action on
-      list:
-        name: list
-        description: Get a list of loaded modules
+        title: 🗑️ Unload `{{name}}`
+        cascade-warning: |
+          Other modules depend on this one:
+          {{deps}}
+
+          Force-unload will cascade and unload them all in dependency order.
+        failed: "Unload failed: **{{code}}** — {{error}}"
+      reload-all:
+        title: 🔁 Reload all
+        none: _(no modules loaded)_
+      load-modal:
+        title: Load module
+        name-label: Module name (matches folder under modules/)
+        name-placeholder: Example
+      errors:
+        action-failed: "`{{action}}` failed for `{{name}}`: **{{code}}** — {{error}}"
+        load-failed: "Load failed: **{{code}}** — {{error}}"
+        closed: Closed.
   reboot:
     name: reboot
     description: Reboots the bot if running under PM2 or a process manager.

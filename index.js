@@ -10,6 +10,7 @@ const Utils = require('./core/Utils.js');
 const LocalizationManager = require('./core/LocalizationManager.js');
 const ErrorHandler = require('./core/ErrorHandler.js');
 const PermissionsManager = require('./core/Permissions.js');
+const Logger = require('./core/Logger.js');
 BigInt.prototype.toJSON = function () { return this.toString() } // MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
 
 // Discord
@@ -21,6 +22,7 @@ class BotClient extends Client {
             systemServer: ["1313550337474429001"],
             intents: Object.keys(GatewayIntentBits).filter(i => isNaN(i)),
             partials: ['Reaction', 'Message'],
+            verbose: false,
             errorReporting: {
                 channelId: null,
                 notifyOwners: false,
@@ -34,6 +36,7 @@ class BotClient extends Client {
                 hotReload: false
             }
         });
+        Logger.verboseEnabled = !!config.get('verbose');
         super({
             intents: config.get('intents').map(i => GatewayIntentBits[i]),
             partials: config.get('partials').map(i => Partials[i])
@@ -49,13 +52,14 @@ class BotClient extends Client {
         this.errorHandler = new ErrorHandler(this, config.get('errorReporting'));
         this.database = new Database(this);
         this.permissions = new PermissionsManager(this);
-        this.moduleManager.init();
     }
 };
 
 
-const client = new BotClient();
-
-client.login(process.env.TOKEN);
+(async () => {
+    const client = new BotClient();
+    await client.moduleManager.init();
+    await client.login(process.env.TOKEN);
+})();
 
 module.exports = BotClient;

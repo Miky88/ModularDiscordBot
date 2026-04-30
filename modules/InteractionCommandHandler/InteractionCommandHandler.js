@@ -1,23 +1,19 @@
 const Discord = require('discord.js');
 const Module = require("@core/Module.js");
 const Command = require("@core/Command.js");
-const BotClient = require('../../index.js');
 const PowerLevels = require('@core/PowerLevels.js');
-const ModulePriorities = require('@core/ModulePriorities.js');
 
 module.exports = class InteractionCommandHandler extends Module {
     constructor(client) {
         super(client, {
             name: "InteractionCommandHandler",
             info: "Adds interaction commands support.",
-            enabled: true,
-            events: ["clientReady", "interactionCreate"],
-            priority: ModulePriorities.HIGH
+            events: ["clientReady", "interactionCreate"]
         });
     }
-    
+
     /**
-     * @param {BotClient} client 
+     * @param {import('../../index.js')} client
      */
     async clientReady(client) {
         try {
@@ -29,11 +25,11 @@ module.exports = class InteractionCommandHandler extends Module {
     }
 
     /**
-     * @param {BotClient} client
+     * @param {import('../../index.js')} client
      * @param {Discord.Interaction} interaction
-     * @param {Module} module
+     * @param {import('@core/ModuleManager.js').EventContext} ctx
      */
-    async interactionCreate(client, interaction, module) {
+    async interactionCreate(client, interaction, ctx) {
         if (!interaction.isCommand() && !interaction.isContextMenuCommand()) return;
         interaction.user.data = await client.database.forceUser(interaction.user.id);
 
@@ -41,16 +37,18 @@ module.exports = class InteractionCommandHandler extends Module {
         try {
             [cmd, cmdModule] = this.client.moduleManager.getCommand(interaction.commandName);
             if (!cmd) {
-                await this._safeReply(interaction, { content: ":no_entry: Command not found", flags: [Discord.MessageFlags.Ephemeral] });
-                return { cancelEvent: true };
+                await this._safeReply(interaction, { content: this.t('errors.command-not-found', interaction), flags: [Discord.MessageFlags.Ephemeral] });
+                return ctx?.stopPropagation('command not found');
             }
 
             if (interaction.user.data.powerlevel < cmd.config.minLevel) {
                 await this._safeReply(interaction, {
-                    content: `:no_entry: You don't have permission to use this command. The required permission level is ${Object.keys(PowerLevels).find(k => PowerLevels[k] == cmd.config.minLevel)}`,
+                    content: this.t('errors.insufficient-powerlevel', interaction, {
+                        level: Object.keys(PowerLevels).find(k => PowerLevels[k] == cmd.config.minLevel)
+                    }),
                     flags: [Discord.MessageFlags.Ephemeral]
                 });
-                return { cancelEvent: true };
+                return ctx?.stopPropagation('insufficient powerlevel');
             }
 
             // Per-guild custom-level override (admin-applied via /permissions).
@@ -60,14 +58,22 @@ module.exports = class InteractionCommandHandler extends Module {
                 const ok = client.permissions.check(interaction.member, { commandName: cmd.config.name });
                 if (!ok) {
                     await this._safeReply(interaction, {
-                        content: ":no_entry: A server admin restricted this command to a higher level than yours.",
+                        content: this.t('errors.guild-override-denied', interaction),
                         flags: [Discord.MessageFlags.Ephemeral]
                     });
-                    return { cancelEvent: true };
+                    return ctx?.stopPropagation('guild override denied');
                 }
             }
 
+            const sub = interaction.options.getSubcommand?.(false);
+            const grp = interaction.options.getSubcommandGroup?.(false);
+            const cmdPath = [cmd.config.name, grp, sub].filter(Boolean).join(' ');
+            const where = interaction.guild ? `${interaction.guild.name} (${interaction.guildId})` : 'DM';
+            cmdModule.logger.verbose(`/${cmdPath} by ${interaction.user.tag} (${interaction.user.id}) in ${where}`);
+
+            const t0 = Date.now();
             await cmd.run(client, interaction, cmdModule);
+            cmdModule.logger.verbose(`/${cmdPath} completed in ${Date.now() - t0}ms`);
         } catch (e) {
             client.errorHandler?.capture(e, {
                 module: cmdModule?.options?.name,
@@ -76,19 +82,17 @@ module.exports = class InteractionCommandHandler extends Module {
                 guildId: interaction.guildId || undefined
             });
             await this._safeReply(interaction, {
-                content: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers.",
+                content: this.t('errors.execution-error', interaction),
                 flags: [Discord.MessageFlags.Ephemeral]
             });
         }
 
-        return { cancelEvent: true };
+        ctx?.stopPropagation('command handled');
     }
 
     /**
      * Best-effort interaction reply that won't throw if the interaction was
      * already replied/deferred or has expired.
-     * @param {Discord.Interaction} interaction
-     * @param {Discord.InteractionReplyOptions} payload
      */
     async _safeReply(interaction, payload) {
         try {

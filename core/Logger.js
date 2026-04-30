@@ -2,7 +2,13 @@ const chalk = require('chalk');
 
 module.exports = class Logger {
     /**
-     * @param {String} name 
+     * Global toggle for `verbose()` calls. Set once at boot from
+     * `config.verbose` in index.js. Defaults to `false` (verbose suppressed).
+     */
+    static verboseEnabled = false;
+
+    /**
+     * @param {String} name
      */
     constructor(name, saveToFile = true) {
         this.name = name;
@@ -131,10 +137,13 @@ module.exports = class Logger {
     }
 
     /**
-     * Verbose something on the console
+     * Verbose log — gated by the global `Logger.verboseEnabled` flag (set
+     * from `config.verbose` at boot in index.js). When disabled, this is a
+     * complete no-op (no console, no file).
      * @param {String} message
      */
     verbose(...message) {
+        if (!Logger.verboseEnabled) return;
         let final = "";
 
         for (const msg of message) {

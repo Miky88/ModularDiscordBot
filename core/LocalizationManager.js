@@ -172,7 +172,8 @@ module.exports = class LocalizationManager {
      * default. Returns the resolved language code (or null if nothing fits).
      */
     resolveLanguage(requested) {
-        if (!requested) return this.languages[this.defaultLang] ? this.defaultLang : null;
+        if (!requested || typeof requested !== 'string')
+            return this.languages[this.defaultLang] ? this.defaultLang : null;
         if (this.languages[requested]) return requested;
 
         const base = requested.split('-')[0];

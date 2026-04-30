@@ -58,6 +58,59 @@ commands:
       list:
         name: list
         description: Ottieni la lista dei moduli caricati
+    ui:
+      home:
+        title: commands.modman.ui.home.title
+        description: commands.modman.ui.home.description
+        failed-summary: commands.modman.ui.home.failed-summary
+        all-modules: commands.modman.ui.home.all-modules
+        none: commands.modman.ui.home.none
+        footer: commands.modman.ui.home.footer
+        pick-placeholder: commands.modman.ui.home.pick-placeholder
+      detail:
+        no-description: commands.modman.ui.detail.no-description
+        status: commands.modman.ui.detail.status
+        version: commands.modman.ui.detail.version
+        events: commands.modman.ui.detail.events
+        dependencies: commands.modman.ui.detail.dependencies
+        dependents: commands.modman.ui.detail.dependents
+        commands: commands.modman.ui.detail.commands
+        last-error: commands.modman.ui.detail.last-error
+        none: commands.modman.ui.detail.none
+        not-found: commands.modman.ui.detail.not-found
+      status:
+        load-failed: commands.modman.ui.status.load-failed
+        not-loaded: commands.modman.ui.status.not-loaded
+        enabled: commands.modman.ui.status.enabled
+        disabled: commands.modman.ui.status.disabled
+      buttons:
+        reload: commands.modman.ui.buttons.reload
+        load: commands.modman.ui.buttons.load
+        enable: commands.modman.ui.buttons.enable
+        disable: commands.modman.ui.buttons.disable
+        unload: commands.modman.ui.buttons.unload
+        back: commands.modman.ui.buttons.back
+        cancel: commands.modman.ui.buttons.cancel
+        force-unload: commands.modman.ui.buttons.force-unload
+        load-module: commands.modman.ui.buttons.load-module
+        reload-all: commands.modman.ui.buttons.reload-all
+        refresh: commands.modman.ui.buttons.refresh
+        close: commands.modman.ui.buttons.close
+      unload:
+        title: commands.modman.ui.unload.title
+        cascade-warning: commands.modman.ui.unload.cascade-warning
+        failed: commands.modman.ui.unload.failed
+      reload-all:
+        title: commands.modman.ui.reload-all.title
+        none: commands.modman.ui.reload-all.none
+      load-modal:
+        title: commands.modman.ui.load-modal.title
+        name-label: commands.modman.ui.load-modal.name-label
+        name-placeholder: commands.modman.ui.load-modal.name-placeholder
+      errors:
+        action-failed: commands.modman.ui.errors.action-failed
+        load-failed: commands.modman.ui.errors.load-failed
+        closed: commands.modman.ui.errors.closed
   reboot:
     name: reboot
     description: Riavvia il bot se in esecuzione tramite PM2 o un process manager.
@@ -74,4 +127,4 @@ commands:
     name: update
     description: Aggiorna il bot all’ultima versione dal repository Git e riavvia il bot
     messages:
-      noreboot: "Comando `reboot` sconosciuto, annullo l'operazione."
+      noreboot: Comando `reboot` sconosciuto, annullo l'operazione.

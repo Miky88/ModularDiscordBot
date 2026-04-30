@@ -6,7 +6,6 @@ module.exports = class Example extends Module {
         super(client, {
             name: "Example",
             info: "Very important module",
-            enabled: true,
             events: ["clientReady"],
             config: {
                 exampleString: 'Hello, world!',

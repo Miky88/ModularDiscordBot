@@ -14,56 +14,208 @@ commands:
       pong: ":ping_pong: Pong! Latency is **{{latency}}ms**. API Latency is **{{apiLatency}}ms**"
   settings:
     name: settings
-    description: Manage the current server settings
-    options:
-      view:
-        name: view
-        description: View current settings
-      set:
-        name: set
-        description: Set a setting
-        options:
-          module:
-            name: module
-            description: The module to view settings for
-          key:
-            name: key
-            description: The setting to view
-          value:
-            name: value
-            description: The value to filter settings by
-      reset:
-        name: reset
-        description: Reset a setting to default
-        options:
-          module:
-            name: module
-            description: The module to view settings for
-          key:
-            name: key
-            description: The setting to view
-          value:
-            name: value
-            description: The value to filter settings by
-    embeds:
-      set:
-        title: "Setting Updated"
-        description: "`{{key}}` is now {{value}}."
-      add:
-        title: "Setting Added"
-        description: "`{{key}}` is now {{value}}."
-      remove:
-        title: "Setting Removed"
-        description: "`{{key}}` is now {{value}}."
-      view:
-        settings: "Settings — {{module}}"
-        nosettings:
-          title: "No Settings Found"
-          description: "There are no settings configured for this module."
-        page: "Page {{page}} of {{totalPages}}"
-      reset:
-        title: "Setting Reset"
-        description: "`{{key}}` has been reset to {{value}}."
+    description: View or edit per-guild settings.
+    ui:
+      home:
+        title: ⚙️ Settings
+        description: |
+          Per-guild settings, grouped by module. Pick a module to edit its keys.
+
+          • Each key has a declared **type** (string, boolean, channel, …); editors below adapt to the type.
+          • To require a specific level for an individual key in this guild, use **/permissions → Setting overrides**.
+        modules-with-settings: Modules with settings
+        none: _(none)_
+        pick-placeholder: Pick a module to edit…
+        keys-suffix: "{{count}} key(s)"
+        overrides-suffix: "{{count}} override(s)"
+      module:
+        title: "⚙️ {{name}}"
+        description: Pick a key to edit, reset, or inspect.
+        keys: Keys
+        no-keys: _(no keys)_
+        pick-placeholder: Pick a key…
+        no-settings: "Module `{{name}}` has no settings."
+      key:
+        title: "⚙️ {{module}}.{{key}}"
+        no-description: _(no description)_
+        type: Type
+        default: Default
+        current: Current
+        permission-override: Permission override
+        permission-override-value: "requires `{{level}}` (set via /permissions)"
+        unknown: "No such setting `{{module}}.{{key}}`."
+      editors:
+        enum-placeholder: Pick a value…
+        bool-true: "True"
+        bool-false: "False"
+        channel-placeholder: Pick a channel…
+        role-placeholder: Pick a role…
+        user-placeholder: Pick a user…
+        edit-button: Edit value
+        array-add-button: Add value
+        array-add-channel: Add a channel…
+        array-add-role: Add a role…
+        array-add-user: Add a user…
+        array-remove: Remove a value…
+      modals:
+        edit-title: "Edit {{key}}"
+        edit-label: "New value ({{type}})"
+        array-add-title: "Add to {{key}}"
+        array-add-label: Value to add
+      values:
+        unset: _unset_
+        empty: _empty_
+      buttons:
+        reset: Reset to default
+        back: Back
+        refresh: Refresh
+        close: Close
+      errors:
+        closed: Closed.
+        unknown-setting: Unknown setting.
+        no-settings-module: "Module `{{module}}` has no settings."
+  permissions:
+    name: permissions
+    description: Manage per-guild permission levels and role bindings.
+    ui:
+      home:
+        title: 🔐 Permissions
+        description: |
+          Per-guild permission system. Admins define **levels** (a ladder of named tiers with numeric weights), then bind Discord roles to those levels. Module-side commands and settings stay open by default; you can re-gate individual ones via overrides.
+
+          **Resolver order** (first match wins):
+          `1.` Bot OWNER
+          `2.` Guild owner
+          `3.` Discord `Administrator` permission
+          `4.` Member's effective level (max over bound roles + user override) ≥ the level required by an override (if any). With no override set, access is allowed.
+        current-ladder: Current ladder
+        user-overrides: User overrides
+        command-overrides: Command overrides
+        setting-overrides: Setting overrides
+        none: _(none)_
+        no-levels: _(no levels)_
+        footer: "Tip: pick a section below to manage levels, role bindings, or overrides."
+        nav-placeholder: What would you like to manage?
+        nav-levels: Levels
+        nav-levels-desc: Create, rename, reweight, delete levels.
+        nav-roles: Role bindings
+        nav-roles-desc: Bind or unbind roles to levels.
+        nav-users: User overrides
+        nav-users-desc: Force a specific level on a user.
+        nav-cmds: Command overrides
+        nav-cmds-desc: Re-gate a slash command in this guild.
+        nav-sets: Setting overrides
+        nav-sets-desc: Re-gate a Module.key setting.
+      levels:
+        title: 👑 Levels
+        description: |
+          Levels are tiers of access with numeric **weights**. Higher weight = more access.
+
+          • **Default levels** (`member`, `helper`, `moderator`, `admin`) are seeded into every guild on first use, but they're yours — rename, reweight, or delete them freely.
+          • **Custom levels** (e.g. `senior_mod` at weight 7 between `moderator` and `admin`) can be created with any ID and weight.
+          • Levels alone do nothing — bind Discord roles to them in the **Role bindings** section, or assign individual users via **User overrides**.
+          • Deleting a level automatically clears any overrides referencing it.
+        current-ladder: Current ladder
+        no-levels: _(no levels)_
+        no-roles-bound: _(no roles bound)_
+        default-tag: " *(default)*"
+        edit-placeholder: Edit a level…
+        delete-title: 🗑️ Delete level
+        delete-description: Pick a level to delete. Any overrides referencing it will be cleared automatically.
+        delete-placeholder: Pick a level to delete…
+        none-to-delete: No levels to delete.
+        weight-fmt: "weight {{weight}}"
+        weight-fmt-default: "weight {{weight}} • default"
+        modal-create-title: Create a level
+        modal-edit-title: "Edit {{name}}"
+        modal-id-label: "Level ID (lowercase, no spaces)"
+        modal-id-placeholder: senior_mod
+        modal-name-label: Display name
+        modal-name-placeholder: Senior Moderator
+        modal-weight-label: "Weight (higher = more access)"
+        modal-weight-placeholder: "7"
+        empty-id-error: Level ID cannot be empty.
+        weight-not-int-error: Weight must be an integer.
+        unknown-level-error: 'Unknown level "{{level}}".'
+      roles:
+        title: 👥 Role bindings
+        intro: |
+          Bind Discord roles to levels. A member's **effective level** is the **highest weight** across every level any of their roles is bound to.
+
+          • A role may be bound to multiple levels — the resolver picks the strongest.
+          • Removing a role from a level only changes this binding; the Discord role itself is untouched.
+          • To force a specific user to a level regardless of their roles, use **User overrides**.
+        focused-line: "**Selected:** `{{id}}` — {{name}} (weight {{weight}})"
+        bound-list: "Bound: {{roles}}"
+        no-roles-bound: _(no roles bound yet)_
+        all-levels: All levels
+        none: _none_
+        bind-placeholder: "Bind a role to {{name}}…"
+        unbind-placeholder: "Unbind a role from {{name}}…"
+        level-pick-placeholder: Choose a level to manage…
+        level-switch-placeholder: Switch to a different level…
+        level-pick-desc: "{{count}} role(s) • weight {{weight}}"
+      users:
+        title: 👤 User overrides
+        description: |
+          Force a specific level on an individual user, **bypassing role bindings**. When set, the user's effective level becomes the override regardless of which roles they have.
+
+          • Useful for: testing, granting access to someone without giving them a role, or temporarily downgrading a user.
+          • Clear an override to fall back to normal role-based resolution.
+        active-overrides: Active overrides
+        none: _(none)_
+        selected-user: Selected user
+        selected-user-current: " (currently `{{level}}`)"
+        selected-user-empty: " *(no override yet)*"
+        pick-user-placeholder: Pick a user to set/clear an override…
+        clear: — Clear override —
+        clear-desc: "Remove this user's override."
+        assign-placeholder: Assign a level (or clear)…
+      cmds:
+        title: ⚡ Command overrides
+        description: |
+          By default, slash commands are gated only by Discord's native `defaultMemberPermissions` (visible in **Server Settings → Integrations → this bot**). This screen lets you add an additional **level requirement** on top, in this guild only.
+
+          • Example: gate `/kick` behind `moderator` — anyone with a role bound to `moderator` (or higher) can use it.
+          • Set with the **Set override** button (command name + level ID).
+          • Clear an override to revert to Discord-native default.
+          • Discord `Administrator`, the guild owner, and the bot OWNER always bypass overrides.
+        active-overrides: Active overrides
+        none: _(none)_
+        clear-placeholder: Clear an override…
+        clear-desc: "currently `{{level}}`"
+        modal-title: Set command override
+        modal-command-label: "Command name (without /)"
+        modal-command-placeholder: kick
+        modal-level-label: Level ID
+        modal-level-placeholder: moderator
+      sets:
+        title: ⚙️ Setting overrides
+        description: |
+          Re-gate individual settings by their `Module.key` path. By default, anyone who can run `/settings` can edit any key — set an override here to require a specific level for one particular key in this guild.
+
+          • Example: `Utility.defaultServerLanguage` → `admin` so only admins change the server's fallback language, even if mods can otherwise use `/settings`.
+          • Use **Set override** with a `Module.key` path (autocomplete in `/settings` shows the available keys per module).
+          • Clear an override to revert to the default `/settings` gate.
+        active-overrides: Active overrides
+        none: _(none)_
+        clear-placeholder: Clear an override…
+        clear-desc: "currently `{{level}}`"
+        modal-title: Set setting override
+        modal-key-label: "Setting key (Module.key)"
+        modal-key-placeholder: Utility.defaultServerLanguage
+        modal-level-label: Level ID
+        modal-level-placeholder: moderator
+      buttons:
+        create: Create level
+        delete: Delete level
+        refresh: Refresh
+        close: Close
+        back: Back
+        cancel: Cancel
+        set-override: Set override
+      errors:
+        closed: Closed.
   stats:
     name: stats
     description: View bot statistics and information.

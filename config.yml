@@ -41,3 +41,4 @@ i18n:
   referenceLanguage: en-GB
   autoSync: true
   hotReload: false
+verbose: false
