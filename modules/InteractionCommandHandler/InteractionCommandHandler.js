@@ -18,7 +18,7 @@ module.exports = class InteractionCommandHandler extends Module {
     async clientReady(client) {
         try {
             await client.application.commands
-                .set(client.moduleManager.commands.filter(c => c.module.options.name !== "System").map(c => c.toJson()));
+                .set(client.modules.getPublishableCommands().map(c => c.toJson()));
         } catch (err) {
             client.errorHandler?.capture(err, { source: 'commandRegistration', module: this.options.name });
         }
@@ -35,7 +35,7 @@ module.exports = class InteractionCommandHandler extends Module {
 
         let cmd, cmdModule;
         try {
-            [cmd, cmdModule] = this.client.moduleManager.getCommand(interaction.commandName);
+            [cmd, cmdModule] = this.client.modules.getCommand(interaction.commandName);
             if (!cmd) {
                 await this._safeReply(interaction, { content: this.t('errors.command-not-found', interaction), flags: [Discord.MessageFlags.Ephemeral] });
                 return ctx?.stopPropagation('command not found');

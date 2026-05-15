@@ -48,7 +48,7 @@ module.exports = class ModuleManager {
     constructor(client) {
         this.client = client;
         /** @type {Map<string, Module>} */
-        this.modules = new Map();
+        this._modules = new Map();
         /** @type {Set<string>} Discord events the manager has wired to the client. */
         this.events = new Set();
         /** @type {Map<string, Error>} Last load/start error per module name. */
@@ -56,8 +56,6 @@ module.exports = class ModuleManager {
 
         this.logger = new Logger(this.constructor.name);
     }
-
-    // ───────────────────────────────── boot
 
     /**
      * Discover, construct, init, and start every module on disk in correct
@@ -101,7 +99,7 @@ module.exports = class ModuleManager {
             if (this.errors.has(m.options.name)) continue;
             try {
                 this._wireDatabase(m);
-                this.modules.set(m.options.name, m);
+                this._modules.set(m.options.name, m);
                 await m.init(this.client);
 
                 if (this._isEnabledPersisted(m.options.name))
@@ -110,7 +108,7 @@ module.exports = class ModuleManager {
                 this.logger.verbose(`${m.options.name} loaded`);
             } catch (err) {
                 this.errors.set(m.options.name, err);
-                this.modules.delete(m.options.name);
+                this._modules.delete(m.options.name);
                 this.client.errorHandler?.capture(err, { source: 'ModuleManager.init', module: m.options.name });
             }
         }
@@ -118,17 +116,15 @@ module.exports = class ModuleManager {
         // Phase 5: wire Discord event listeners (one per event type).
         this._installEventDispatchers();
 
-        this.logger.success(`Successfully loaded ${this.modules.size} module(s)`);
+        this.logger.success(`Successfully loaded ${this._modules.size} module(s)`);
     }
-
-    // ───────────────────────────────── public ops
 
     /**
      * Load a module that isn't currently in the registry.
      * @returns {Promise<Result<Module>>}
      */
     async load(name) {
-        if (this.modules.has(name)) return this._fail(ERR.ALREADY_LOADED, `${name} is already loaded.`);
+        if (this._modules.has(name)) return this._fail(ERR.ALREADY_LOADED, `${name} is already loaded.`);
         if (!this._existsOnDisk(name)) return this._fail(ERR.NOT_FOUND, `${name} is not on disk.`);
 
         const built = this._construct(name);
@@ -137,12 +133,12 @@ module.exports = class ModuleManager {
 
         // Verify dependencies are satisfiable.
         for (const dep of mod.options.dependencies) {
-            if (!this.modules.has(dep) && !this._existsOnDisk(dep))
+            if (!this._modules.has(dep) && !this._existsOnDisk(dep))
                 return this._fail(ERR.MISSING_DEPENDENCY, `${name} requires "${dep}" which is missing.`);
         }
         // Recursively load any missing dependencies first.
         for (const dep of mod.options.dependencies) {
-            if (!this.modules.has(dep)) {
+            if (!this._modules.has(dep)) {
                 const r = await this.load(dep);
                 if (!r.ok) return this._fail(ERR.MISSING_DEPENDENCY, `Failed to load dependency "${dep}": ${r.error}`);
             }
@@ -150,7 +146,7 @@ module.exports = class ModuleManager {
 
         try {
             this._wireDatabase(mod);
-            this.modules.set(name, mod);
+            this._modules.set(name, mod);
             await mod.init(this.client);
             if (this._isEnabledPersisted(name))
                 await mod.start(this.client);
@@ -161,7 +157,7 @@ module.exports = class ModuleManager {
             return this._ok(mod);
         } catch (err) {
             this.errors.set(name, err);
-            this.modules.delete(name);
+            this._modules.delete(name);
             this.client.errorHandler?.capture(err, { source: 'ModuleManager.load', module: name });
             return this._fail(ERR.LOAD_ERROR, err.message);
         }
@@ -175,7 +171,7 @@ module.exports = class ModuleManager {
      * @returns {Promise<Result<{ unloaded: string[] }>>}
      */
     async unload(name, opts = {}) {
-        if (!this.modules.has(name)) return this._fail(ERR.NOT_LOADED, `${name} is not loaded.`);
+        if (!this._modules.has(name)) return this._fail(ERR.NOT_LOADED, `${name} is not loaded.`);
 
         const dependents = this._dependentsOf(name);
         if (dependents.length > 0 && !opts.force)
@@ -184,7 +180,7 @@ module.exports = class ModuleManager {
         const toUnload = opts.force ? [...dependents.reverse(), name] : [name];
 
         for (const target of toUnload) {
-            const mod = this.modules.get(target);
+            const mod = this._modules.get(target);
             if (!mod) continue;
             try {
                 if (this._isEnabledPersisted(target)) await mod.stop(this.client);
@@ -192,7 +188,7 @@ module.exports = class ModuleManager {
             } catch (err) {
                 this.client.errorHandler?.capture(err, { source: 'ModuleManager.unload', module: target });
             }
-            this.modules.delete(target);
+            this._modules.delete(target);
             this.logger.info(`${target} unloaded`);
         }
 
@@ -206,7 +202,7 @@ module.exports = class ModuleManager {
      * @returns {Promise<Result<Module>>}
      */
     async reload(name) {
-        if (!this.modules.has(name)) return this._fail(ERR.NOT_LOADED, `${name} is not loaded.`);
+        if (!this._modules.has(name)) return this._fail(ERR.NOT_LOADED, `${name} is not loaded.`);
 
         const wasEnabled = this._isEnabledPersisted(name);
         const u = await this.unload(name, { force: true });
@@ -227,7 +223,7 @@ module.exports = class ModuleManager {
      * Persist enabled = true and call start() if it wasn't already running.
      */
     async enable(name) {
-        const mod = this.modules.get(name);
+        const mod = this._modules.get(name);
         if (!mod) return this._fail(ERR.NOT_LOADED, `${name} is not loaded.`);
         if (this._isEnabledPersisted(name)) return this._ok(mod);
 
@@ -246,7 +242,7 @@ module.exports = class ModuleManager {
      * Persist enabled = false and call stop() if it was running.
      */
     async disable(name) {
-        const mod = this.modules.get(name);
+        const mod = this._modules.get(name);
         if (!mod) return this._fail(ERR.NOT_LOADED, `${name} is not loaded.`);
         if (!this._isEnabledPersisted(name)) return this._ok(mod);
 
@@ -261,16 +257,44 @@ module.exports = class ModuleManager {
         }
     }
 
-    isLoaded(name) { return this.modules.has(name); }
-    isEnabled(name) { return this.modules.has(name) && this._isEnabledPersisted(name); }
+    isLoaded(name) { return this._modules.has(name); }
+    isEnabled(name) { return this._modules.has(name) && this._isEnabledPersisted(name); }
     isOnDisk(name) { return this._existsOnDisk(name); }
+
+    /**
+     * @param {string} name
+     * @returns {Module | null} The loaded module, or null if not loaded.
+     */
+    getModule(name) {
+        return this._modules.get(name) || null;
+    }
+
+    /** All currently loaded modules, regardless of enabled state. */
+    allModules() {
+        return [...this._modules.values()];
+    }
+
+    /** Loaded modules that are persisted as enabled. */
+    enabledModules() {
+        return this.allModules().filter(m => this._isEnabledPersisted(m.options.name));
+    }
+
+    /**
+     * Slash commands eligible for global Discord registration. System
+     * commands are excluded — they're registered to the configured system
+     * guilds by the System module itself, not globally.
+     * @returns {Command[]}
+     */
+    getPublishableCommands() {
+        return this.commands.filter(c => c.module.options.name !== 'System');
+    }
 
     /**
      * Aggregated info for inspection / GUI.
      * @returns {Result<{ name, info, version, enabled, loaded, dependencies, dependents, events, commands, lastError }>}
      */
     info(name) {
-        const mod = this.modules.get(name);
+        const mod = this._modules.get(name);
         if (!mod) {
             if (this._existsOnDisk(name)) return this._ok({
                 name, loaded: false, enabled: false,
@@ -298,10 +322,10 @@ module.exports = class ModuleManager {
      */
     list() {
         const onDisk = this._discoverOnDisk();
-        const loaded = [...this.modules.keys()];
-        const available = onDisk.filter(n => !this.modules.has(n));
+        const loaded = [...this._modules.keys()];
+        const available = onDisk.filter(n => !this._modules.has(n));
         const failed = onDisk
-            .filter(n => this.errors.has(n) && !this.modules.has(n))
+            .filter(n => this.errors.has(n) && !this._modules.has(n))
             .map(n => ({ name: n, error: this.errors.get(n).message }));
         return { loaded, available, failed };
     }
@@ -310,7 +334,7 @@ module.exports = class ModuleManager {
      * @returns {[Command, Module] | [null, null]}
      */
     getCommand(name) {
-        for (const module of this.modules.values()) {
+        for (const module of this._modules.values()) {
             if (this._isEnabledPersisted(module.options.name) && module.commands?.has(name))
                 return [module.commands.get(name), module];
         }
@@ -320,14 +344,12 @@ module.exports = class ModuleManager {
     /** Aggregated commands across enabled modules. */
     get commands() {
         const out = [];
-        for (const m of this.modules.values()) {
+        for (const m of this._modules.values()) {
             if (!this._isEnabledPersisted(m.options.name)) continue;
             for (const c of m.commands.values()) out.push(c);
         }
         return out;
     }
-
-    // ───────────────────────────────── persistence
 
     _stateCollection() {
         const handle = this.client.database.get('core');
@@ -352,8 +374,6 @@ module.exports = class ModuleManager {
         }
     }
 
-    // ───────────────────────────────── construction
-
     _construct(name) {
         try {
             const modulePath = require.resolve(`@modules/${name}/${name}.js`);
@@ -369,15 +389,13 @@ module.exports = class ModuleManager {
     }
 
     _wireDatabase(mod) {
-        const collections = [...mod.options.collections];
+        const collections = [...mod.options.databases];
         if (mod.options.settings) collections.push('settings');
         if (collections.length > 0)
             this.client.database.register(mod.options.name, { collections });
         if (mod.options.settings && !mod.settings)
             mod.settings = new SettingsManager(this.client, mod, mod.options.settings);
     }
-
-    // ───────────────────────────────── topo sort
 
     /**
      * Generic Kahn's-algorithm topological sort.
@@ -405,12 +423,10 @@ module.exports = class ModuleManager {
     }
 
     _dependentsOf(name) {
-        return [...this.modules.values()]
+        return [...this._modules.values()]
             .filter(m => m.options.dependencies.includes(name))
             .map(m => m.options.name);
     }
-
-    // ───────────────────────────────── filesystem
 
     _modulesDir() { return path.resolve('./modules'); }
 
@@ -427,11 +443,9 @@ module.exports = class ModuleManager {
         return fs.existsSync(path.join(this._modulesDir(), name, `${name}.js`));
     }
 
-    // ───────────────────────────────── event dispatch
-
     _installEventDispatchers() {
         const allEvents = new Set();
-        for (const m of this.modules.values())
+        for (const m of this._modules.values())
             for (const e of m.options.events) allEvents.add(e);
 
         for (const event of allEvents) {
@@ -460,7 +474,7 @@ module.exports = class ModuleManager {
      * ignored. On cycle, fall back to alphabetical with a warning.
      */
     _dispatchOrderFor(event) {
-        const listeners = [...this.modules.values()].filter(m => m.options.events.includes(event));
+        const listeners = [...this._modules.values()].filter(m => m.options.events.includes(event));
         const names = new Set(listeners.map(m => m.options.name));
 
         // Build incoming-edge map: edges[X] = names that must run before X.
@@ -492,8 +506,6 @@ module.exports = class ModuleManager {
         return ordered;
     }
 
-    // ───────────────────────────────── Discord-side command sync
-
     /**
      * Re-publish global commands so unloaded modules' slash commands disappear.
      * Re-uses the same filter rule InteractionCommandHandler uses on boot.
@@ -501,14 +513,11 @@ module.exports = class ModuleManager {
     async _unregisterCommandsWithDiscord() {
         try {
             if (!this.client.isReady?.()) return;
-            const cmds = this.commands.filter(c => c.module.options.name !== 'System').map(c => c.toJson());
-            await this.client.application.commands.set(cmds);
+            await this.client.application.commands.set(this.getPublishableCommands().map(c => c.toJson()));
         } catch (err) {
             this.client.errorHandler?.capture(err, { source: 'ModuleManager._unregisterCommandsWithDiscord' });
         }
     }
-
-    // ───────────────────────────────── result helpers
 
     _ok(value) { return { ok: true, value }; }
     _fail(code, error) { return { ok: false, code, error }; }

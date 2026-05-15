@@ -59,10 +59,8 @@ module.exports = class ModmanUI {
         return true;
     }
 
-    // ───── HOME ─────
-
     _home(interaction) {
-        const { loaded, available, failed } = this.client.moduleManager.list();
+        const { loaded, available, failed } = this.client.modules.list();
         const allNames = [...new Set([...loaded, ...available, ...failed.map(f => f.name)])].sort();
 
         const lines = allNames.map(name => `${this._badge(name)} \`${name}\``);
@@ -100,7 +98,7 @@ module.exports = class ModmanUI {
     }
 
     _badge(name) {
-        const mm = this.client.moduleManager;
+        const mm = this.client.modules;
         if (!mm.isLoaded(name) && !mm.isOnDisk(name)) return '❓';
         if (!mm.isLoaded(name)) {
             const failed = mm.list().failed.some(f => f.name === name);
@@ -110,7 +108,7 @@ module.exports = class ModmanUI {
     }
 
     _statusText(interaction, name) {
-        const mm = this.client.moduleManager;
+        const mm = this.client.modules;
         if (!mm.isLoaded(name)) {
             const failed = mm.list().failed.some(f => f.name === name);
             return this._t(failed ? 'status.load-failed' : 'status.not-loaded', interaction);
@@ -118,10 +116,8 @@ module.exports = class ModmanUI {
         return this._t(mm.isEnabled(name) ? 'status.enabled' : 'status.disabled', interaction);
     }
 
-    // ───── DETAIL ─────
-
     _detail(interaction, name) {
-        const mm = this.client.moduleManager;
+        const mm = this.client.modules;
         const r = mm.info(name);
         if (!r.ok) return this._errorPanel(interaction, this._t('detail.not-found', interaction, { name, error: r.error }));
         const i = r.value;
@@ -158,10 +154,8 @@ module.exports = class ModmanUI {
         return { embeds: [embed], components };
     }
 
-    // ───── ACTIONS ─────
-
     async _action(interaction, name, kind) {
-        const mm = this.client.moduleManager;
+        const mm = this.client.modules;
         let result;
         switch (kind) {
             case 'reload':
@@ -182,7 +176,7 @@ module.exports = class ModmanUI {
     }
 
     async _unloadFlow(interaction, name) {
-        const mm = this.client.moduleManager;
+        const mm = this.client.modules;
         const r = await mm.unload(name);
         if (r.ok) return this._update(interaction, this._home(interaction));
 
@@ -200,7 +194,7 @@ module.exports = class ModmanUI {
     }
 
     async _reloadAll(interaction) {
-        const mm = this.client.moduleManager;
+        const mm = this.client.modules;
         const loaded = mm.list().loaded;
         const results = [];
         for (const name of loaded) {
@@ -233,13 +227,11 @@ module.exports = class ModmanUI {
 
     async _loadFromModal(interaction) {
         const name = interaction.fields.getTextInputValue('name').trim();
-        const r = await this.client.moduleManager.load(name);
+        const r = await this.client.modules.load(name);
         if (!r.ok)
             return this._update(interaction, this._errorPanel(interaction, this._t('errors.load-failed', interaction, { code: r.code, error: r.error })));
         return this._update(interaction, this._detail(interaction, name));
     }
-
-    // ───── helpers ─────
 
     _errorPanel(interaction, message) {
         const embed = new EmbedBuilder()

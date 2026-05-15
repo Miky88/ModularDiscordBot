@@ -41,7 +41,6 @@ module.exports = class PermsCommand extends Command {
                     value: `${Object.entries(PowerLevels).find(l => l[1] == data.powerlevel)[0]}`
                 },
             ])
-            // .setDescription(`todo`)
             .setColor("Random")
 
         await interaction.reply({ embeds: [embed] });

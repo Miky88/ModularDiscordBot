@@ -59,8 +59,6 @@ module.exports = class PermissionsUI {
         return true;
     }
 
-    // ───── HOME ─────
-
     _home(interaction) {
         const guildId = interaction.guild.id;
         const cfg = this.client.permissions.getConfig(guildId);
@@ -111,8 +109,6 @@ module.exports = class PermissionsUI {
             case 'sets':   return this._update(interaction, this._setsScreen(interaction));
         }
     }
-
-    // ───── LEVELS ─────
 
     _levelsScreen(interaction) {
         const guildId = interaction.guild.id;
@@ -239,8 +235,6 @@ module.exports = class PermissionsUI {
         await interaction.showModal(modal);
     }
 
-    // ───── ROLE BINDINGS ─────
-
     _rolesScreen(interaction, focusedLevelId = null) {
         const guildId = interaction.guild.id;
         const cfg = this.client.permissions.getConfig(guildId);
@@ -328,8 +322,6 @@ module.exports = class PermissionsUI {
         }
     }
 
-    // ───── USER OVERRIDES ─────
-
     _usersScreen(interaction, focusedUserId = null) {
         const guildId = interaction.guild.id;
         const cfg = this.client.permissions.getConfig(guildId);
@@ -402,8 +394,6 @@ module.exports = class PermissionsUI {
         }
     }
 
-    // ───── COMMAND OVERRIDES ─────
-
     _cmdsScreen(interaction) {
         const guildId = interaction.guild.id;
         const cfg = this.client.permissions.getConfig(guildId);
@@ -470,8 +460,6 @@ module.exports = class PermissionsUI {
         }
     }
 
-    // ───── SETTING OVERRIDES ─────
-
     _setsScreen(interaction) {
         const guildId = interaction.guild.id;
         const cfg = this.client.permissions.getConfig(guildId);
@@ -537,8 +525,6 @@ module.exports = class PermissionsUI {
             return this._update(interaction, this._setsScreen(interaction));
         }
     }
-
-    // ───── helpers ─────
 
     async _update(interaction, payload) {
         if (interaction.replied || interaction.deferred)

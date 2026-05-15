@@ -32,7 +32,7 @@ module.exports = class UpdateCommand extends Command {
             return await interaction.reply("```sh\n" + err + "```");
         }
 
-        const [reboot] = client.moduleManager.getCommand("reboot");
+        const [reboot] = client.modules.getCommand("reboot");
         if (!reboot)
             return interaction.reply(this.t('messages.noreboot', interaction));
 

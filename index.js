@@ -45,7 +45,7 @@ class BotClient extends Client {
         this.commands = new Collection();
         this.settings = new Collection();
         this.utils = new Utils();
-        this.moduleManager = new ModuleManager(this);
+        this.modules = new ModuleManager(this);
         this.config = config;
         this.i18n = new LocalizationManager(config.get('i18n'));
 
@@ -58,7 +58,7 @@ class BotClient extends Client {
 
 (async () => {
     const client = new BotClient();
-    await client.moduleManager.init();
+    await client.modules.init();
     await client.login(process.env.TOKEN);
 })();
 

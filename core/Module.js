@@ -15,7 +15,7 @@ module.exports = class Module {
      * @param {string[]}  [options.dependencies]          Module names this module needs loaded.
      * @param {string[]}  [options.runBefore]             Modules this one's event handlers should run before.
      * @param {string[]}  [options.runAfter]              Modules this one's event handlers should run after.
-     * @param {boolean | string[]} [options.databases]    `true` for a single `default` collection or an array of collection names.
+     * @param {string[]}  [options.databases]             Names of Loki collections this module wants in its database handle (e.g. `['guilds', 'logs']`). The module's per-file DB is created automatically when this list is non-empty.
      * @param {object}    [options.config]                Default per-module config schema.
      * @param {object}    [options.settings]              Schema-driven per-guild settings.
      */
@@ -27,23 +27,21 @@ module.exports = class Module {
         dependencies = [],
         runBefore = [],
         runAfter = [],
-        databases = false,
+        databases = [],
         config = null,
         settings = null
     }) {
         this.client = client;
 
-        const declaredCollections = Array.isArray(databases)
-            ? [...databases]
-            : (databases ? ['default'] : []);
+        if (!Array.isArray(databases) || databases.some(c => typeof c !== 'string'))
+            throw new Error(`Module "${name}": \`databases\` must be a string array.`);
 
         this.options = {
             name, info, version, events,
             dependencies: [...dependencies],
             runBefore: [...runBefore],
             runAfter: [...runAfter],
-            databases,
-            collections: declaredCollections,
+            databases: [...databases],
             settings
         };
 
@@ -56,7 +54,6 @@ module.exports = class Module {
             this.settings = new SettingsManager(client, this, settings);
     }
 
-    // ───── lifecycle hooks ─────
     // ModuleManager calls these in a defined order. Default implementations
     // cover the common cases (loading commands on start, clearing on stop);
     // override to add async setup, watch external resources, etc.
@@ -91,8 +88,6 @@ module.exports = class Module {
      */
     async destroy(client) {}
 
-    // ───── i18n ─────
-
     t(_key, interactionOrLang, vars) {
         let key = `modules.${this.options.name}.${_key}`;
 
@@ -100,7 +95,7 @@ module.exports = class Module {
             const interaction = interactionOrLang;
             const i18n = this.client.i18n;
 
-            const utility = this.client.moduleManager.modules.get("Utility")?.settings;
+            const utility = this.client.modules.getModule("Utility")?.settings;
             const guildLang = interaction.guild
                 ? utility?.get(interaction.guild.id)?.settings?.defaultServerLanguage
                 : null;
@@ -125,8 +120,6 @@ module.exports = class Module {
         let key = `modules.${this.options.name}.${_key}`;
         return this.client.i18n.getLocalizationObject(key);
     }
-
-    // ───── commands ─────
 
     async loadCommands() {
         const commands = fs.existsSync(`./modules/${this.options.name}/commands`) ? fs.readdirSync(`./modules/${this.options.name}/commands`).filter(file => file.endsWith(".js")) : [];
@@ -157,24 +150,29 @@ module.exports = class Module {
         return method.call(this, client, ...rest);
     }
 
-    // ───── database ─────
-
     /**
-     * @type {import('./DatabaseHandle') | null}
+     * The module's database handle, or `null` if the module didn't declare
+     * any `databases`. Access individual collections with `handle.collection(name)`.
+     * @returns {import('./DatabaseHandle') | null}
      */
     get db() {
-        if (this.options.collections.length === 0) return null;
+        if (this.options.databases.length === 0) return null;
         return this.client.database.get(this.options.name) || null;
     }
 
-    saveData(collectionName, data) {
-        if (!this.db)
-            throw new Error("You must declare `databases` in module options to use this method.");
-        if (!data)
-            throw new Error("You must pass a valid argument to data.");
-
-        const collection = this.db.collection(collectionName);
-        if (data.$loki) collection.update(data);
-        else collection.insert(data);
+    /**
+     * Convenience accessor: returns the named collection if it was declared
+     * in `options.databases`; throws otherwise. Prefer this over `db.collection(name)`
+     * for typo safety — undeclared names are rejected.
+     * @param {string} name
+     * @returns {import('lokijs').Collection}
+     */
+    collection(name) {
+        const handle = this.db;
+        if (!handle)
+            throw new Error(`Module "${this.options.name}" did not declare any databases.`);
+        if (!this.options.databases.includes(name))
+            throw new Error(`Module "${this.options.name}" did not declare collection "${name}" in \`databases\`.`);
+        return handle.collection(name);
     }
 }

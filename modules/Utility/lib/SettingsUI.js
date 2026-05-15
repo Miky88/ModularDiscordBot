@@ -70,8 +70,6 @@ module.exports = class SettingsUI {
         return true;
     }
 
-    // ───── HOME ─────
-
     _home(interaction) {
         const guildId = interaction.guild.id;
         const modules = [...this.client.settings.entries()];
@@ -111,8 +109,6 @@ module.exports = class SettingsUI {
         return { content: '', embeds: [embed], components };
     }
 
-    // ───── MODULE ─────
-
     _moduleScreen(interaction, moduleName) {
         const guildId = interaction.guild.id;
         const mgr = this.client.settings.get(moduleName);
@@ -151,8 +147,6 @@ module.exports = class SettingsUI {
 
         return { embeds: [embed], components };
     }
-
-    // ───── KEY ─────
 
     _keyScreen(interaction, moduleName, key) {
         const guildId = interaction.guild.id;
@@ -278,8 +272,6 @@ module.exports = class SettingsUI {
         return components;
     }
 
-    // ───── handlers ─────
-
     async _showEditModal(interaction, moduleName, key) {
         const mgr = this.client.settings.get(moduleName);
         if (!mgr || !mgr.has(key)) return this._safeError(interaction, this._t('errors.unknown-setting', interaction));
@@ -356,8 +348,6 @@ module.exports = class SettingsUI {
         }
         return this._update(interaction, this._keyScreen(interaction, moduleName, key));
     }
-
-    // ───── helpers ─────
 
     _format(interaction, v) {
         if (v == null || v === '') return this._t('values.unset', interaction);
