@@ -6,12 +6,14 @@ commands:
       code: Il codice JavaScript da eseguire.
       ephemeral: Risposta visibile solo a te (predefinito true).
     ui:
-      output-header: "🧪 Eval — Output"
-      error-header: "❌ Eval — Errore"
+      output-header: 🧪 Eval — Output
+      error-header: ❌ Eval — Errore
       empty: (nessun output)
-      truncated: "⚠️ Output troncato — mostrati {{shown}}/{{total}} caratteri. L'output completo è stato registrato nella console."
+      truncated: ⚠️ Output troncato — mostrati {{shown}}/{{total}} caratteri. L'output
+        completo è stato registrato nella console.
       not-allowed: ":no_entry: Solo i proprietari del bot possono usare questi controlli."
-      expired: ":hourglass: Questa sessione di eval è scaduta — esegui di nuovo `/eval`."
+      expired: ":hourglass: Questa sessione di eval è scaduta — esegui di nuovo
+        `/eval`."
       buttons:
         edit: Modifica
         retry: Riprova
@@ -75,57 +77,69 @@ commands:
         description: Ottieni la lista dei moduli caricati
     ui:
       home:
-        title: commands.modman.ui.home.title
-        description: commands.modman.ui.home.description
-        failed-summary: commands.modman.ui.home.failed-summary
-        all-modules: commands.modman.ui.home.all-modules
-        none: commands.modman.ui.home.none
-        footer: commands.modman.ui.home.footer
-        pick-placeholder: commands.modman.ui.home.pick-placeholder
+        title: 🧩 Module Manager
+        description: >
+          Inspect, enable/disable, reload, or unload modules. Picking a module
+          from the dropdown opens its detail view with action buttons.
+
+
+          **Status badges**
+
+          ✅ loaded & enabled · 🟡 loaded & disabled · ⛔ on disk, not loaded · ⚠
+          load failed
+        failed-summary: "**Failed loads:**"
+        all-modules: All modules
+        none: _(none on disk)_
+        footer: "{{loaded}} loaded · {{available}} available · {{failed}} failed"
+        pick-placeholder: Pick a module to inspect…
       detail:
-        no-description: commands.modman.ui.detail.no-description
-        status: commands.modman.ui.detail.status
-        version: commands.modman.ui.detail.version
-        events: commands.modman.ui.detail.events
-        dependencies: commands.modman.ui.detail.dependencies
-        dependents: commands.modman.ui.detail.dependents
-        commands: commands.modman.ui.detail.commands
-        last-error: commands.modman.ui.detail.last-error
-        none: commands.modman.ui.detail.none
-        not-found: commands.modman.ui.detail.not-found
+        no-description: _(no description)_
+        status: Status
+        version: Version
+        events: Events
+        dependencies: Dependencies
+        dependents: Dependents
+        commands: Commands
+        last-error: Last error
+        none: _(none)_
+        not-found: "Cannot inspect `{{name}}`: {{error}}"
       status:
-        load-failed: commands.modman.ui.status.load-failed
-        not-loaded: commands.modman.ui.status.not-loaded
-        enabled: commands.modman.ui.status.enabled
-        disabled: commands.modman.ui.status.disabled
+        load-failed: Load failed
+        not-loaded: On disk, not loaded
+        enabled: Loaded & enabled
+        disabled: Loaded but disabled
       buttons:
-        reload: commands.modman.ui.buttons.reload
-        load: commands.modman.ui.buttons.load
-        enable: commands.modman.ui.buttons.enable
-        disable: commands.modman.ui.buttons.disable
-        unload: commands.modman.ui.buttons.unload
-        back: commands.modman.ui.buttons.back
-        cancel: commands.modman.ui.buttons.cancel
-        force-unload: commands.modman.ui.buttons.force-unload
-        load-module: commands.modman.ui.buttons.load-module
-        reload-all: commands.modman.ui.buttons.reload-all
-        refresh: commands.modman.ui.buttons.refresh
-        close: commands.modman.ui.buttons.close
+        reload: Reload
+        load: Load
+        enable: Enable
+        disable: Disable
+        unload: Unload
+        back: Back
+        cancel: Cancel
+        force-unload: Force unload
+        load-module: Load module
+        reload-all: Reload all
+        refresh: Refresh
+        close: Close
       unload:
-        title: commands.modman.ui.unload.title
-        cascade-warning: commands.modman.ui.unload.cascade-warning
-        failed: commands.modman.ui.unload.failed
+        title: 🗑️ Unload `{{name}}`
+        cascade-warning: |
+          Other modules depend on this one:
+          {{deps}}
+
+          Force-unload will cascade and unload them all in dependency order.
+        failed: "Unload failed: **{{code}}** — {{error}}"
       reload-all:
-        title: commands.modman.ui.reload-all.title
-        none: commands.modman.ui.reload-all.none
+        title: 🔁 Reload all
+        none: _(no modules loaded)_
       load-modal:
-        title: commands.modman.ui.load-modal.title
-        name-label: commands.modman.ui.load-modal.name-label
-        name-placeholder: commands.modman.ui.load-modal.name-placeholder
+        title: Load module
+        name-label: Module name (matches folder under modules/)
+        name-placeholder: Example
       errors:
-        action-failed: commands.modman.ui.errors.action-failed
-        load-failed: commands.modman.ui.errors.load-failed
-        closed: commands.modman.ui.errors.closed
+        action-failed: "`{{action}}` failed for `{{name}}`: **{{code}}** — {{error}}"
+        load-failed: "Load failed: **{{code}}** — {{error}}"
+        closed: Closed.
   reboot:
     name: reboot
     description: Riavvia il bot se in esecuzione tramite PM2 o un process manager.
