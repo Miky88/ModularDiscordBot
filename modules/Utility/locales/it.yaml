@@ -67,59 +67,63 @@ commands:
         description: L’impostazione è stata ripristinata al valore predefinito.
     ui:
       home:
-        title: commands.settings.ui.home.title
-        description: commands.settings.ui.home.description
-        modules-with-settings: commands.settings.ui.home.modules-with-settings
-        none: commands.settings.ui.home.none
-        pick-placeholder: commands.settings.ui.home.pick-placeholder
-        keys-suffix: commands.settings.ui.home.keys-suffix
-        overrides-suffix: commands.settings.ui.home.overrides-suffix
+        title: ⚙️ Impostazioni
+        description: |
+          Impostazioni del server, raggruppate per modulo. Scegli un modulo per modificare le sue chiavi.
+
+          • Ogni chiave ha un **tipo** dichiarato (stringa, booleano, canale, …); gli editor sottostanti si adattano al tipo.
+          • Per richiedere un livello specifico per una chiave individuale in questo server
+        modules-with-settings: Moduli con impostazioni
+        none: _(nessuno)_
+        pick-placeholder: Scegli un modulo da modificare…
+        keys-suffix: "{{count}} chiavi"
+        overrides-suffix: "{{count}} sovrascritti"
       module:
-        title: commands.settings.ui.module.title
-        description: commands.settings.ui.module.description
-        keys: commands.settings.ui.module.keys
-        no-keys: commands.settings.ui.module.no-keys
-        pick-placeholder: commands.settings.ui.module.pick-placeholder
-        no-settings: commands.settings.ui.module.no-settings
+        title: "⚙️ {{name}}"
+        description: Scegli una chiave da modificare, ripristinare o ispezionare.
+        keys: Chiavi
+        no-keys: _(nessuna chiave)_
+        pick-placeholder: Scegli una chiave…
+        no-settings: "Il modulo `{{name}}` non ha impostazioni."
       key:
-        title: commands.settings.ui.key.title
-        no-description: commands.settings.ui.key.no-description
-        type: commands.settings.ui.key.type
-        default: commands.settings.ui.key.default
-        current: commands.settings.ui.key.current
-        permission-override: commands.settings.ui.key.permission-override
-        permission-override-value: commands.settings.ui.key.permission-override-value
-        unknown: commands.settings.ui.key.unknown
+        title: "⚙️ {{module}}.{{key}}"
+        no-description: _(nessuna descrizione)_
+        type: Tipo
+        default: Predefinito
+        current: Corrente
+        permission-override: Sovrascrizione permesso
+        permission-override-value: "requires `{{level}}` (imposta con /permissions)"
+        unknown: "Impostazione `{{module}}.{{key}}` sconosciuta."
       editors:
-        enum-placeholder: commands.settings.ui.editors.enum-placeholder
-        bool-true: commands.settings.ui.editors.bool-true
-        bool-false: commands.settings.ui.editors.bool-false
-        channel-placeholder: commands.settings.ui.editors.channel-placeholder
-        role-placeholder: commands.settings.ui.editors.role-placeholder
-        user-placeholder: commands.settings.ui.editors.user-placeholder
-        edit-button: commands.settings.ui.editors.edit-button
-        array-add-button: commands.settings.ui.editors.array-add-button
-        array-add-channel: commands.settings.ui.editors.array-add-channel
-        array-add-role: commands.settings.ui.editors.array-add-role
-        array-add-user: commands.settings.ui.editors.array-add-user
-        array-remove: commands.settings.ui.editors.array-remove
+        enum-placeholder: Scegli un valore…
+        bool-true: "On"
+        bool-false: "Off"
+        channel-placeholder: Scegli un canale…
+        role-placeholder: Scegli un ruolo…
+        user-placeholder: Scegli un utente…
+        edit-button: Modifica valore
+        array-add-button: Aggiungi valore
+        array-add-channel: Aggiungi canale…
+        array-add-role: Aggiungi ruolo…
+        array-add-user: Aggiungi utente…
+        array-remove: Rimuovi valore…
       modals:
-        edit-title: commands.settings.ui.modals.edit-title
-        edit-label: commands.settings.ui.modals.edit-label
-        array-add-title: commands.settings.ui.modals.array-add-title
-        array-add-label: commands.settings.ui.modals.array-add-label
+        edit-title: "Modifica {{key}}"
+        edit-label: "Nuovo valore ({{type}})"
+        array-add-title: "Aggiungi a {{key}}"
+        array-add-label: Valore da aggiungere
       values:
-        unset: commands.settings.ui.values.unset
-        empty: commands.settings.ui.values.empty
+        unset: _non impostato_
+        empty: _vuoto_
       buttons:
-        reset: commands.settings.ui.buttons.reset
-        back: commands.settings.ui.buttons.back
-        refresh: commands.settings.ui.buttons.refresh
-        close: commands.settings.ui.buttons.close
+        reset: Reimposta al predefinito
+        back: Indietro
+        refresh: Ricarica
+        close: Chiudi
       errors:
-        closed: commands.settings.ui.errors.closed
-        unknown-setting: commands.settings.ui.errors.unknown-setting
-        no-settings-module: commands.settings.ui.errors.no-settings-module
+        closed: Chiuso.
+        unknown-setting: Impostazione sconosciuta.
+        no-settings-module: "Il modulo `{{module}}` non ha impostazioni."
   stats:
     name: stats
     description: Visualizza statistiche e informazioni sul bot.
