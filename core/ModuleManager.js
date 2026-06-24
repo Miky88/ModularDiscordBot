@@ -55,6 +55,9 @@ module.exports = class ModuleManager {
         this.errors = new Map();
 
         this.logger = new Logger(this.constructor.name);
+
+        /** Cached `module_states` collection — resolved once after the core DB is ready. */
+        this._stateCol = null;
     }
 
     /**
@@ -93,6 +96,12 @@ module.exports = class ModuleManager {
                 }
             }
         }
+
+        // The core DB holds persisted module-enabled state. Wait for its
+        // autoload before reading it: Loki replaces collection objects on load,
+        // so reading (or caching) `module_states` beforehand would see an empty
+        // collection and treat a persisted-disabled module as enabled.
+        await this.client.database.core.ready().catch(() => { /* degraded: empty state → modules default enabled */ });
 
         // Phase 4: register DB handles, init, then start (if persisted-enabled), in topo order.
         for (const m of order.value) {
@@ -352,8 +361,13 @@ module.exports = class ModuleManager {
     }
 
     _stateCollection() {
-        const handle = this.client.database.get('core');
-        return handle.addCollection('module_states');
+        // Resolved once and cached: this runs on the event-dispatch hot path
+        // (every event, for every module), so it must not re-look-up the handle
+        // and collection each call. Safe to cache because init() awaits the core
+        // DB's autoload before any state access, so the reference is stable.
+        if (this._stateCol) return this._stateCol;
+        this._stateCol = this.client.database.get('core').collection('module_states');
+        return this._stateCol;
     }
 
     _isEnabledPersisted(name) {
