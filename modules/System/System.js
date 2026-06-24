@@ -1,4 +1,4 @@
-const Module = require("@core/Module.js");
+const Module = require("@structures/Module.js");
 const Discord = require('discord.js');
 const fs = require('fs');
 const ModmanUI = require('./lib/ModmanUI.js');

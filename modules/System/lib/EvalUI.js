@@ -5,7 +5,7 @@ const {
     ModalBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
-const { safeReply, truncate } = require('@core/lib/InteractionHelpers.js');
+const { safeReply, truncate } = require('@structures/lib/InteractionHelpers.js');
 
 /** Placeholder substituted for anything that looks like the bot token. */
 const TOKEN_DECOY = '[REDACTED]';

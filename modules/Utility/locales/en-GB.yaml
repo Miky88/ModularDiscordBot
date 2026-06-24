@@ -94,6 +94,8 @@ commands:
         setting-overrides: Setting overrides
         none: _(none)_
         no-levels: _(no levels)_
+        pick-placeholder: Pick a level to manage…
+        level-counts: "{{roles}} role(s) · {{users}} override(s)"
         footer: "Tip: pick a section below to manage levels, role bindings, or overrides."
         nav-placeholder: What would you like to manage?
         nav-levels: Levels
@@ -106,6 +108,18 @@ commands:
         nav-cmds-desc: Re-gate a slash command in this guild.
         nav-sets: Setting overrides
         nav-sets-desc: Re-gate a Module.key setting.
+      level:
+        title: "🔐 {{name}}"
+        summary: |
+          `{{id}}` · weight **{{weight}}**{{tag}}
+
+          Use the menus below to choose which **Discord roles** map to this level and which **users** are forced to it (a user override beats their roles). Higher weight = more access.
+        roles-field: Discord roles
+        no-roles: _(none yet — pick roles below)_
+        users-field: User overrides
+        no-users: _(none yet — pick users below)_
+        roles-placeholder: Set the Discord roles for this level…
+        users-placeholder: Force this level on specific users…
       levels:
         title: 👑 Levels
         description: |
@@ -209,6 +223,9 @@ commands:
       buttons:
         create: Create level
         delete: Delete level
+        edit: Edit
+        commands: Commands
+        settings: Settings
         refresh: Refresh
         close: Close
         back: Back

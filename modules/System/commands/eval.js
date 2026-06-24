@@ -1,6 +1,6 @@
-const Command = require("@core/Command.js");
+const Command = require("@structures/Command.js");
 const { ApplicationCommandOptionType } = require("discord.js");
-const PowerLevels = require("@core/PowerLevels.js");
+const PowerLevels = require("@structures/PowerLevels.js");
 
 module.exports = class EvalCommand extends Command {
     constructor(client, module) {

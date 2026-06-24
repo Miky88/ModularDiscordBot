@@ -13,9 +13,10 @@ const PLACEHOLDER = /\{\{\s*([\w.-]+)\s*\}\}/g;
  * Per-module strings are merged under `modules.<Module>` in the language
  * tree, so modules ship their translations alongside their code.
  *
- * Auto-sync: on boot, missing keys are added to non-reference locale files
- * with the dotted path of the key as their value (so untranslated entries
- * are visible to translators in the file and to end-users at runtime).
+ * Auto-sync: on boot, keys missing from a non-reference locale file are seeded
+ * with the reference (default-language) string, and any legacy dotted-path
+ * placeholders are healed to the same — so locale files always contain readable
+ * text (never a `commands.x.y.z` placeholder) until a real translation lands.
  */
 module.exports = class LocalizationManager {
     /**
@@ -90,8 +91,9 @@ module.exports = class LocalizationManager {
 
     /**
      * For each module locale file, ensure every key present in the reference
-     * language exists. Missing keys are inserted with their dotted path as
-     * the value. Existing translations are never modified.
+     * language exists. Missing keys (and any leftover dotted-path placeholders)
+     * are seeded with the reference-language value. Real translations are never
+     * modified.
      */
     syncMissingKeys() {
         const refFiles = this._files[this.referenceLanguage];
@@ -120,7 +122,7 @@ module.exports = class LocalizationManager {
             if (added > 0) {
                 fs.writeFileSync(targetPath, stringify(merged));
                 targetFiles[moduleName] = targetPath;
-                this.logger.info(`[${lang}] ${moduleName}: stubbed ${added} missing key(s) at ${path.relative(process.cwd(), targetPath)}`);
+                this.logger.info(`[${lang}] ${moduleName}: seeded ${added} untranslated key(s) with default-language text at ${path.relative(process.cwd(), targetPath)}`);
 
                 if (!this.languages[lang]) this.languages[lang] = { modules: {} };
                 if (!this.languages[lang].modules) this.languages[lang].modules = {};
@@ -133,9 +135,13 @@ module.exports = class LocalizationManager {
     }
 
     /**
-     * Recursive walk: any leaf in `ref` not present in `target` is inserted
-     * with its dotted path (relative to the file root) as the value. Returns
-     * the resulting target tree and a count of insertions.
+     * Recursive walk: any leaf in `ref` that's missing from `target` — or still
+     * holds the legacy dotted-path placeholder for that key — is (re)seeded with
+     * the reference (default-language) value, so locale files contain readable
+     * text until a real translation lands, never a `commands.x.y.z` placeholder.
+     * Real translations are left untouched. Returns the resulting target tree
+     * and a count of changes. (`dotted` is the key's path from the file root,
+     * used only to recognise those old placeholders.)
      */
     _fillMissing(ref, target, prefix) {
         let added = 0;
@@ -149,8 +155,10 @@ module.exports = class LocalizationManager {
                 out[key] = childMerged;
                 added += childAdded;
             } else {
-                if (!(target && key in target)) {
-                    out[key] = dotted;
+                const missing = !(target && key in target);
+                const isLegacyStub = out[key] === dotted; // an old dotted-path placeholder
+                if (missing || isLegacyStub) {
+                    out[key] = refVal;
                     added++;
                 }
             }

@@ -3,14 +3,14 @@ require('dotenv').config();
 require("module-alias/register");
 
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
-const ModuleManager = require('./core/ModuleManager.js');
-const Database = require('./core/Database.js');
-const ConfigurationManager = require('./core/ConfigurationManager.js');
-const Utils = require('./core/Utils.js');
-const LocalizationManager = require('./core/LocalizationManager.js');
-const ErrorHandler = require('./core/ErrorHandler.js');
-const PermissionsManager = require('./core/Permissions.js');
-const Logger = require('./core/Logger.js');
+const ModuleManager = require('./structures/ModuleManager.js');
+const Database = require('./structures/Database.js');
+const ConfigurationManager = require('./structures/ConfigurationManager.js');
+const Utils = require('./structures/Utils.js');
+const LocalizationManager = require('./structures/LocalizationManager.js');
+const ErrorHandler = require('./structures/ErrorHandler.js');
+const PermissionsManager = require('./structures/Permissions.js');
+const Logger = require('./structures/Logger.js');
 BigInt.prototype.toJSON = function () { return this.toString() } // MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
 
 // Discord

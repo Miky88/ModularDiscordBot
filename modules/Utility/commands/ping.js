@@ -1,4 +1,4 @@
-const Command = require('@core/Command.js');
+const Command = require('@structures/Command.js');
 
 module.exports = class PingCommand extends Command {
     constructor(client, module) {

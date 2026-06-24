@@ -4,14 +4,24 @@ const {
     ModalBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
-const { safeUpdate, safeError } = require('@core/lib/InteractionHelpers.js');
+const { safeUpdate, safeError } = require('@structures/lib/InteractionHelpers.js');
 
 /**
  * Interactive in-Discord GUI for managing per-guild permission levels.
- * Custom-id convention: `perms:<screen>[:<arg>...]`. State that needs to
- * survive across interactions is encoded into the customId of the next
- * component (Discord components are stateless). All user-facing strings flow
- * through the locale system — see modules/Utility/locales/<lang>.yaml under
+ *
+ * Layout:
+ *   home   → pick a level to manage (or create one); shortcut buttons to the
+ *            command- and setting-override sections.
+ *   level  → one level's detail: its bound Discord roles and its user overrides
+ *            (each a pre-filled multi-select — add/remove in place), plus an
+ *            Edit modal (name + weight) and, for custom levels, Delete.
+ *   cmds   → command overrides.
+ *   sets   → setting overrides.
+ *
+ * Custom-id convention: `perms:<screen>[:<arg>...]`. State that needs to survive
+ * across interactions is encoded into the customId of the next component
+ * (Discord components are stateless). All user-facing strings flow through the
+ * locale system — see modules/Utility/locales/<lang>.yaml under
  * `commands.permissions.ui.*`.
  */
 module.exports = class PermissionsUI {
@@ -44,14 +54,12 @@ module.exports = class PermissionsUI {
 
         try {
             switch (screen) {
-                case 'home':       return safeUpdate(interaction, this._home(interaction));
-                case 'close':      return interaction.update({ content: this._t('errors.closed', interaction), embeds: [], components: [] });
-                case 'nav':        return this._nav(interaction, args[0]);
-                case 'level':      return this._level(interaction, args);
-                case 'role':       return this._role(interaction, args);
-                case 'user':       return this._user(interaction, args);
-                case 'cmd':        return this._cmd(interaction, args);
-                case 'set':        return this._set(interaction, args);
+                case 'home':  return safeUpdate(interaction, this._home(interaction));
+                case 'close': return interaction.update({ content: this._t('errors.closed', interaction), embeds: [], components: [] });
+                case 'nav':   return this._nav(interaction, args[0]);
+                case 'level': return this._level(interaction, args);
+                case 'cmd':   return this._cmd(interaction, args);
+                case 'set':   return this._set(interaction, args);
             }
         } catch (err) {
             this.client.errorHandler?.capture(err, { source: 'PermissionsUI', userId: interaction.user?.id });
@@ -66,143 +74,165 @@ module.exports = class PermissionsUI {
         const ladder = [...cfg.levels].sort((a, b) => a.weight - b.weight);
         const defaultTag = this._t('levels.default-tag', interaction);
 
-        const summary = ladder
-            .map(l => `**${l.weight}** · \`${l.id}\` ${l.name}${l.builtin ? defaultTag : ''} — ${l.roles.length} role(s)`)
-            .join('\n') || this._t('home.no-levels', interaction);
+        const summary = ladder.map(l => {
+            const users = Object.values(cfg.userOverrides).filter(lid => lid === l.id).length;
+            return `**${l.weight}** · \`${l.id}\` ${l.name}${l.builtin ? defaultTag : ''} — ` +
+                this._t('home.level-counts', interaction, { roles: l.roles.length, users });
+        }).join('\n') || this._t('home.no-levels', interaction);
 
         const embed = new EmbedBuilder()
             .setTitle(this._t('home.title', interaction))
             .setDescription(this._t('home.description', interaction))
             .addFields(
                 { name: this._t('home.current-ladder', interaction), value: summary, inline: false },
-                { name: this._t('home.user-overrides', interaction),    value: `${Object.keys(cfg.userOverrides).length}`, inline: true },
                 { name: this._t('home.command-overrides', interaction), value: `${Object.keys(cfg.commandOverrides).length}`, inline: true },
                 { name: this._t('home.setting-overrides', interaction), value: `${Object.keys(cfg.settingOverrides).length}`, inline: true }
-            )
-            .setFooter({ text: this._t('home.footer', interaction) });
-
-        const nav = new StringSelectMenuBuilder()
-            .setCustomId('perms:nav')
-            .setPlaceholder(this._t('home.nav-placeholder', interaction))
-            .addOptions(
-                { label: this._t('home.nav-levels', interaction), value: 'levels', description: this._t('home.nav-levels-desc', interaction), emoji: '👑' },
-                { label: this._t('home.nav-roles', interaction),  value: 'roles',  description: this._t('home.nav-roles-desc', interaction),  emoji: '👥' },
-                { label: this._t('home.nav-users', interaction),  value: 'users',  description: this._t('home.nav-users-desc', interaction),  emoji: '👤' },
-                { label: this._t('home.nav-cmds', interaction),   value: 'cmds',   description: this._t('home.nav-cmds-desc', interaction),   emoji: '⚡' },
-                { label: this._t('home.nav-sets', interaction),   value: 'sets',   description: this._t('home.nav-sets-desc', interaction),   emoji: '⚙️' }
             );
-
-        const buttons = new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.refresh', interaction)).setEmoji('🔄'),
-            new ButtonBuilder().setCustomId('perms:close').setStyle(ButtonStyle.Danger).setLabel(this._t('buttons.close', interaction)).setEmoji('❌')
-        );
-
-        return { content: '', embeds: [embed], components: [new ActionRowBuilder().addComponents(nav), buttons] };
-    }
-
-    async _nav(interaction, target) {
-        const value = interaction.values?.[0] || target;
-        switch (value) {
-            case 'levels': return safeUpdate(interaction, this._levelsScreen(interaction));
-            case 'roles':  return safeUpdate(interaction, this._rolesScreen(interaction));
-            case 'users':  return safeUpdate(interaction, this._usersScreen(interaction));
-            case 'cmds':   return safeUpdate(interaction, this._cmdsScreen(interaction));
-            case 'sets':   return safeUpdate(interaction, this._setsScreen(interaction));
-        }
-    }
-
-    _levelsScreen(interaction) {
-        const guildId = interaction.guild.id;
-        const cfg = this.client.permissions.getConfig(guildId);
-        const ladder = [...cfg.levels].sort((a, b) => a.weight - b.weight);
-        const defaultTag = this._t('levels.default-tag', interaction);
-
-        const embed = new EmbedBuilder()
-            .setTitle(this._t('levels.title', interaction))
-            .setDescription(this._t('levels.description', interaction))
-            .addFields({
-                name: this._t('levels.current-ladder', interaction),
-                value: ladder.map(l =>
-                    `**${l.weight}** · \`${l.id}\` — ${l.name}${l.builtin ? defaultTag : ''}\n` +
-                    `  ${l.roles.length ? l.roles.map(r => `<@&${r}>`).join(', ') : this._t('levels.no-roles-bound', interaction)}`
-                ).join('\n\n') || this._t('levels.no-levels', interaction)
-            });
 
         const components = [];
         if (ladder.length > 0) {
-            const editPick = new StringSelectMenuBuilder()
-                .setCustomId('perms:level:edit_pick')
-                .setPlaceholder(this._t('levels.edit-placeholder', interaction))
-                .addOptions(ladder.slice(0, 25).map(l => ({
-                    label: `${l.name} (${l.id})`,
-                    description: this._t(l.builtin ? 'levels.weight-fmt-default' : 'levels.weight-fmt', interaction, { weight: l.weight }),
-                    value: l.id
-                })));
-            components.push(new ActionRowBuilder().addComponents(editPick));
+            components.push(new ActionRowBuilder().addComponents(
+                new StringSelectMenuBuilder()
+                    .setCustomId('perms:level:pick')
+                    .setPlaceholder(this._t('home.pick-placeholder', interaction))
+                    .addOptions(ladder.slice(0, 25).map(l => ({
+                        label: `${l.name} (${l.id})`,
+                        description: this._t(l.builtin ? 'levels.weight-fmt-default' : 'levels.weight-fmt', interaction, { weight: l.weight }),
+                        value: l.id
+                    })))
+            ));
         }
         components.push(new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId('perms:level:create_btn').setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.create', interaction)).setEmoji('➕'),
-            new ButtonBuilder().setCustomId('perms:level:delete_pick').setStyle(ButtonStyle.Danger).setLabel(this._t('buttons.delete', interaction)).setEmoji('🗑️'),
-            new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
+            new ButtonBuilder().setCustomId('perms:level:create').setStyle(ButtonStyle.Success).setLabel(this._t('buttons.create', interaction)).setEmoji('➕'),
+            new ButtonBuilder().setCustomId('perms:nav:cmds').setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.commands', interaction)).setEmoji('⚡'),
+            new ButtonBuilder().setCustomId('perms:nav:sets').setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.settings', interaction)).setEmoji('⚙️'),
+            new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.refresh', interaction)).setEmoji('🔄'),
+            new ButtonBuilder().setCustomId('perms:close').setStyle(ButtonStyle.Danger).setLabel(this._t('buttons.close', interaction)).setEmoji('❌')
         ));
 
-        return { embeds: [embed], components };
+        return { content: '', embeds: [embed], components };
+    }
+
+    async _nav(interaction, target) {
+        switch (target) {
+            case 'cmds': return safeUpdate(interaction, this._cmdsScreen(interaction));
+            case 'sets': return safeUpdate(interaction, this._setsScreen(interaction));
+        }
+    }
+
+    /**
+     * One level's management view: bound Discord roles and forced user overrides
+     * as pre-filled multi-selects, plus Edit / Delete / Back. Falls back to home
+     * if the level no longer exists (e.g. deleted in another interaction).
+     */
+    _levelDetail(interaction, levelId) {
+        const guildId = interaction.guild.id;
+        const cfg = this.client.permissions.getConfig(guildId);
+        const level = cfg.levels.find(l => l.id === levelId);
+        if (!level) return this._home(interaction);
+
+        const guild = this.client.guilds.cache.get(guildId);
+        // Only pre-select roles that still exist, so a deleted role can't break
+        // the select's default values.
+        const validRoles = level.roles.filter(rid => guild?.roles?.cache?.has(rid));
+        const overriddenUsers = Object.entries(cfg.userOverrides).filter(([, lid]) => lid === levelId).map(([uid]) => uid);
+        const tag = level.builtin ? this._t('levels.default-tag', interaction) : '';
+
+        const embed = new EmbedBuilder()
+            .setTitle(this._t('level.title', interaction, { name: level.name }))
+            .setDescription(this._t('level.summary', interaction, { id: level.id, name: level.name, weight: level.weight, tag }))
+            .addFields(
+                { name: this._t('level.roles-field', interaction), value: level.roles.length ? level.roles.map(r => `<@&${r}>`).join(', ') : this._t('level.no-roles', interaction) },
+                { name: this._t('level.users-field', interaction), value: overriddenUsers.length ? overriddenUsers.map(u => `<@${u}>`).join(', ') : this._t('level.no-users', interaction) }
+            );
+
+        const roleSelect = new RoleSelectMenuBuilder()
+            .setCustomId(`perms:level:roles:${level.id}`)
+            .setPlaceholder(this._t('level.roles-placeholder', interaction))
+            .setMinValues(0).setMaxValues(25);
+        if (validRoles.length) roleSelect.setDefaultRoles(...validRoles.slice(0, 25));
+
+        const userSelect = new UserSelectMenuBuilder()
+            .setCustomId(`perms:level:users:${level.id}`)
+            .setPlaceholder(this._t('level.users-placeholder', interaction))
+            .setMinValues(0).setMaxValues(25);
+        if (overriddenUsers.length) userSelect.setDefaultUsers(...overriddenUsers.slice(0, 25));
+
+        const buttons = [
+            new ButtonBuilder().setCustomId(`perms:level:edit:${level.id}`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.edit', interaction)).setEmoji('✏️')
+        ];
+        if (!level.builtin)
+            buttons.push(new ButtonBuilder().setCustomId(`perms:level:delete:${level.id}`).setStyle(ButtonStyle.Danger).setLabel(this._t('buttons.delete', interaction)).setEmoji('🗑️'));
+        buttons.push(new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️'));
+
+        return {
+            content: '',
+            embeds: [embed],
+            components: [
+                new ActionRowBuilder().addComponents(roleSelect),
+                new ActionRowBuilder().addComponents(userSelect),
+                new ActionRowBuilder().addComponents(...buttons)
+            ]
+        };
     }
 
     async _level(interaction, args) {
-        const [action, ...rest] = args;
+        const [action, levelId] = args;
         const guildId = interaction.guild.id;
 
-        if (action === 'edit_pick') {
-            const levelId = interaction.values[0];
-            return this._showLevelModal(interaction, levelId);
-        }
-        if (action === 'create_btn') {
-            return this._showLevelModal(interaction, null);
-        }
-        if (action === 'create_modal') {
-            const id = interaction.fields.getTextInputValue('id').toLowerCase().replace(/[^a-z0-9_-]/g, '_').slice(0, 32);
-            const name = interaction.fields.getTextInputValue('name').slice(0, 64);
-            const weight = parseInt(interaction.fields.getTextInputValue('weight'), 10);
-            if (!id) return safeError(interaction, this._t('levels.empty-id-error', interaction));
-            if (!Number.isFinite(weight)) return safeError(interaction, this._t('levels.weight-not-int-error', interaction));
-            this.client.permissions.setLevel(guildId, { id, name, weight, roles: [] });
-            return safeUpdate(interaction, this._levelsScreen(interaction));
-        }
-        if (action === 'edit_modal') {
-            const levelId = rest[0];
-            const name = interaction.fields.getTextInputValue('name').slice(0, 64);
-            const weight = parseInt(interaction.fields.getTextInputValue('weight'), 10);
-            if (!Number.isFinite(weight)) return safeError(interaction, this._t('levels.weight-not-int-error', interaction));
-            this.client.permissions.setLevel(guildId, { id: levelId, name, weight });
-            return safeUpdate(interaction, this._levelsScreen(interaction));
-        }
-        if (action === 'delete_pick') {
-            const cfg = this.client.permissions.getConfig(guildId);
-            const candidates = [...cfg.levels].sort((a, b) => a.weight - b.weight);
-            if (candidates.length === 0)
-                return safeError(interaction, this._t('levels.none-to-delete', interaction));
+        switch (action) {
+            case 'pick':
+                return safeUpdate(interaction, this._levelDetail(interaction, interaction.values[0]));
 
-            const embed = new EmbedBuilder()
-                .setTitle(this._t('levels.delete-title', interaction))
-                .setDescription(this._t('levels.delete-description', interaction));
-            const select = new StringSelectMenuBuilder()
-                .setCustomId('perms:level:delete_confirm')
-                .setPlaceholder(this._t('levels.delete-placeholder', interaction))
-                .addOptions(candidates.slice(0, 25).map(l => ({
-                    label: `${l.name} (${l.id})`,
-                    description: this._t(l.builtin ? 'levels.weight-fmt-default' : 'levels.weight-fmt', interaction, { weight: l.weight }),
-                    value: l.id
-                })));
-            const back = new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId('perms:nav:levels').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.cancel', interaction)).setEmoji('⬅️')
-            );
-            return safeUpdate(interaction, { embeds: [embed], components: [new ActionRowBuilder().addComponents(select), back] });
-        }
-        if (action === 'delete_confirm') {
-            const levelId = interaction.values[0];
-            this.client.permissions.deleteLevel(guildId, levelId);
-            return safeUpdate(interaction, this._levelsScreen(interaction));
+            case 'create':
+                return this._showLevelModal(interaction, null);
+
+            case 'create_modal': {
+                const id = interaction.fields.getTextInputValue('id').toLowerCase().replace(/[^a-z0-9_-]/g, '_').slice(0, 32);
+                const name = interaction.fields.getTextInputValue('name').slice(0, 64);
+                const weight = parseInt(interaction.fields.getTextInputValue('weight'), 10);
+                if (!id) return safeError(interaction, this._t('levels.empty-id-error', interaction));
+                if (!Number.isFinite(weight)) return safeError(interaction, this._t('levels.weight-not-int-error', interaction));
+                this.client.permissions.setLevel(guildId, { id, name, weight, roles: [] });
+                return safeUpdate(interaction, this._levelDetail(interaction, id));
+            }
+
+            case 'edit':
+                return this._showLevelModal(interaction, levelId);
+
+            case 'edit_modal': {
+                const name = interaction.fields.getTextInputValue('name').slice(0, 64);
+                const weight = parseInt(interaction.fields.getTextInputValue('weight'), 10);
+                if (!Number.isFinite(weight)) return safeError(interaction, this._t('levels.weight-not-int-error', interaction));
+                this.client.permissions.setLevel(guildId, { id: levelId, name, weight });
+                return safeUpdate(interaction, this._levelDetail(interaction, levelId));
+            }
+
+            case 'roles': {
+                const level = this.client.permissions.getLevel(guildId, levelId);
+                if (!level) return safeUpdate(interaction, this._home(interaction));
+                const selected = new Set(interaction.values);
+                const current = new Set(level.roles);
+                for (const rid of selected) if (!current.has(rid)) this.client.permissions.bindRole(guildId, levelId, rid);
+                for (const rid of current) if (!selected.has(rid)) this.client.permissions.unbindRole(guildId, levelId, rid);
+                return safeUpdate(interaction, this._levelDetail(interaction, levelId));
+            }
+
+            case 'users': {
+                const cfg = this.client.permissions.getConfig(guildId);
+                if (!cfg.levels.some(l => l.id === levelId)) return safeUpdate(interaction, this._home(interaction));
+                const selected = new Set(interaction.values);
+                // Only users currently forced to THIS level — leaving a user
+                // overridden to a different level untouched.
+                const currentUsers = new Set(Object.entries(cfg.userOverrides).filter(([, lid]) => lid === levelId).map(([uid]) => uid));
+                for (const uid of selected) if (!currentUsers.has(uid)) this.client.permissions.setUserOverride(guildId, uid, levelId);
+                for (const uid of currentUsers) if (!selected.has(uid)) this.client.permissions.setUserOverride(guildId, uid, null);
+                return safeUpdate(interaction, this._levelDetail(interaction, levelId));
+            }
+
+            case 'delete':
+                this.client.permissions.deleteLevel(guildId, levelId);
+                return safeUpdate(interaction, this._home(interaction));
         }
     }
 
@@ -236,165 +266,6 @@ module.exports = class PermissionsUI {
         await interaction.showModal(modal);
     }
 
-    _rolesScreen(interaction, focusedLevelId = null) {
-        const guildId = interaction.guild.id;
-        const cfg = this.client.permissions.getConfig(guildId);
-        const ladder = [...cfg.levels].sort((a, b) => a.weight - b.weight);
-        const focused = focusedLevelId ? ladder.find(l => l.id === focusedLevelId) : null;
-
-        const embed = new EmbedBuilder().setTitle(this._t('roles.title', interaction));
-        const intro = this._t('roles.intro', interaction);
-
-        if (focused) {
-            embed.setDescription(
-                intro + '\n\n' +
-                this._t('roles.focused-line', interaction, { id: focused.id, name: focused.name, weight: focused.weight }) + '\n' +
-                (focused.roles.length
-                    ? this._t('roles.bound-list', interaction, { roles: focused.roles.map(r => `<@&${r}>`).join(', ') })
-                    : this._t('roles.no-roles-bound', interaction))
-            );
-        } else {
-            embed.setDescription(intro);
-            const none = this._t('roles.none', interaction);
-            embed.addFields({
-                name: this._t('roles.all-levels', interaction),
-                value: ladder.map(l =>
-                    `\`${l.id}\` — ${l.roles.length ? l.roles.map(r => `<@&${r}>`).join(', ') : none}`
-                ).join('\n') || this._t('home.no-levels', interaction)
-            });
-        }
-
-        const components = [];
-
-        if (focused) {
-            components.push(new ActionRowBuilder().addComponents(
-                new RoleSelectMenuBuilder()
-                    .setCustomId(`perms:role:bind:${focused.id}`)
-                    .setPlaceholder(this._t('roles.bind-placeholder', interaction, { name: focused.name }))
-                    .setMinValues(1).setMaxValues(1)
-            ));
-            if (focused.roles.length > 0) {
-                const unbind = new StringSelectMenuBuilder()
-                    .setCustomId(`perms:role:unbind:${focused.id}`)
-                    .setPlaceholder(this._t('roles.unbind-placeholder', interaction, { name: focused.name }))
-                    .addOptions(focused.roles.slice(0, 25).map(roleId => {
-                        const role = this.client.guilds.cache.get(guildId)?.roles?.cache?.get(roleId);
-                        return { label: role?.name || roleId, description: roleId, value: roleId };
-                    }));
-                components.push(new ActionRowBuilder().addComponents(unbind));
-            }
-        }
-
-        const levelPick = new StringSelectMenuBuilder()
-            .setCustomId('perms:role:level_pick')
-            .setPlaceholder(focused
-                ? this._t('roles.level-switch-placeholder', interaction)
-                : this._t('roles.level-pick-placeholder', interaction))
-            .addOptions(ladder.slice(0, 25).map(l => ({
-                label: `${l.name} (${l.id})`,
-                description: this._t('roles.level-pick-desc', interaction, { count: l.roles.length, weight: l.weight }),
-                value: l.id
-            })));
-        components.push(new ActionRowBuilder().addComponents(levelPick));
-
-        components.push(new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
-        ));
-
-        return { embeds: [embed], components };
-    }
-
-    async _role(interaction, args) {
-        const [action, levelId] = args;
-        const guildId = interaction.guild.id;
-
-        if (action === 'level_pick') {
-            return safeUpdate(interaction, this._rolesScreen(interaction, interaction.values[0]));
-        }
-        if (action === 'bind') {
-            const roleId = interaction.values[0];
-            this.client.permissions.bindRole(guildId, levelId, roleId);
-            return safeUpdate(interaction, this._rolesScreen(interaction, levelId));
-        }
-        if (action === 'unbind') {
-            const roleId = interaction.values[0];
-            this.client.permissions.unbindRole(guildId, levelId, roleId);
-            return safeUpdate(interaction, this._rolesScreen(interaction, levelId));
-        }
-    }
-
-    _usersScreen(interaction, focusedUserId = null) {
-        const guildId = interaction.guild.id;
-        const cfg = this.client.permissions.getConfig(guildId);
-        const entries = Object.entries(cfg.userOverrides);
-
-        const embed = new EmbedBuilder()
-            .setTitle(this._t('users.title', interaction))
-            .setDescription(this._t('users.description', interaction));
-
-        embed.addFields({
-            name: this._t('users.active-overrides', interaction),
-            value: entries.length
-                ? entries.map(([uid, lid]) => `<@${uid}> → \`${lid}\``).join('\n')
-                : this._t('users.none', interaction)
-        });
-
-        if (focusedUserId) {
-            const current = cfg.userOverrides[focusedUserId];
-            const suffix = current
-                ? this._t('users.selected-user-current', interaction, { level: current })
-                : this._t('users.selected-user-empty', interaction);
-            embed.addFields({ name: this._t('users.selected-user', interaction), value: `<@${focusedUserId}>${suffix}`, inline: false });
-        }
-
-        const components = [];
-
-        components.push(new ActionRowBuilder().addComponents(
-            new UserSelectMenuBuilder()
-                .setCustomId('perms:user:pick')
-                .setPlaceholder(this._t('users.pick-user-placeholder', interaction))
-                .setMinValues(1).setMaxValues(1)
-        ));
-
-        if (focusedUserId) {
-            const ladder = [...cfg.levels].sort((a, b) => a.weight - b.weight);
-            const opts = [
-                { label: this._t('users.clear', interaction), value: '__clear__', description: this._t('users.clear-desc', interaction) },
-                ...ladder.slice(0, 24).map(l => ({
-                    label: `${l.name} (${l.id})`,
-                    description: this._t('levels.weight-fmt', interaction, { weight: l.weight }),
-                    value: l.id
-                }))
-            ];
-            components.push(new ActionRowBuilder().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId(`perms:user:set:${focusedUserId}`)
-                    .setPlaceholder(this._t('users.assign-placeholder', interaction))
-                    .addOptions(opts)
-            ));
-        }
-
-        components.push(new ActionRowBuilder().addComponents(
-            new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
-        ));
-
-        return { embeds: [embed], components };
-    }
-
-    async _user(interaction, args) {
-        const [action, userId] = args;
-        const guildId = interaction.guild.id;
-
-        if (action === 'pick') {
-            return safeUpdate(interaction, this._usersScreen(interaction, interaction.values[0]));
-        }
-        if (action === 'set') {
-            const value = interaction.values[0];
-            this.client.permissions.setUserOverride(guildId, userId, value === '__clear__' ? null : value);
-            return safeUpdate(interaction, this._usersScreen(interaction));
-        }
-    }
-
     _cmdsScreen(interaction) {
         const guildId = interaction.guild.id;
         const cfg = this.client.permissions.getConfig(guildId);
@@ -425,7 +296,7 @@ module.exports = class PermissionsUI {
         }
         buttons.push(new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️'));
         components.push(new ActionRowBuilder().addComponents(...buttons));
-        return { embeds: [embed], components };
+        return { content: '', embeds: [embed], components };
     }
 
     async _cmd(interaction, args) {
@@ -491,7 +362,7 @@ module.exports = class PermissionsUI {
         }
         buttons.push(new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️'));
         components.push(new ActionRowBuilder().addComponents(...buttons));
-        return { embeds: [embed], components };
+        return { content: '', embeds: [embed], components };
     }
 
     async _set(interaction, args) {

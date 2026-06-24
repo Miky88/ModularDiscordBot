@@ -1,5 +1,5 @@
-const Command = require('@core/Command.js');
-const PowerLevels = require('@core/PowerLevels.js');
+const Command = require('@structures/Command.js');
+const PowerLevels = require('@structures/PowerLevels.js');
 
 /**
  * Entry point for the in-Discord module-manager GUI. The actual rendering

@@ -1,4 +1,4 @@
-const Command = require('@core/Command.js');
+const Command = require('@structures/Command.js');
 const { PermissionsBitField } = require('discord.js');
 
 /**

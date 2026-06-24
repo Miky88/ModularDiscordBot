@@ -1,4 +1,4 @@
-const Module = require("@core/Module.js");
+const Module = require("@structures/Module.js");
 const ImportantFile = require("./lib/importantFile.js");
 
 module.exports = class Example extends Module {

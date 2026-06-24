@@ -9,7 +9,7 @@ const Logger = require('./Logger.js');
  */
 module.exports = class DatabaseHandle {
     /**
-     * @param {string} name Logical name (usually the module name, or 'core')
+     * @param {string} name Logical name (usually the module name, or 'bot')
      * @param {object} opts
      * @param {string} opts.file Absolute or relative path to the Loki file
      * @param {string[]} [opts.collections] Collections to ensure on load

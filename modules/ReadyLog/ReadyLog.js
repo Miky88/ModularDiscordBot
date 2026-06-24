@@ -1,4 +1,4 @@
-const Module = require("@core/Module.js");
+const Module = require("@structures/Module.js");
 
 module.exports = class ReadyLog extends Module {
     constructor(client) {

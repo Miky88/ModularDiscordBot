@@ -1,8 +1,8 @@
 const Discord = require('discord.js');
-const Module = require("@core/Module.js");
-const Command = require("@core/Command.js");
-const PowerLevels = require('@core/PowerLevels.js');
-const { safeReply } = require('@core/lib/InteractionHelpers.js');
+const Module = require("@structures/Module.js");
+const Command = require("@structures/Command.js");
+const PowerLevels = require('@structures/PowerLevels.js');
+const { safeReply } = require('@structures/lib/InteractionHelpers.js');
 
 /** How often to evict expired per-user cooldown entries. */
 const COOLDOWN_SWEEP_MS = 60_000;
@@ -83,7 +83,7 @@ module.exports = class InteractionCommandHandler extends Module {
     /**
      * @param {import('../../index.js')} client
      * @param {Discord.Interaction} interaction
-     * @param {import('@core/ModuleManager.js').EventContext} ctx
+     * @param {import('@structures/ModuleManager.js').EventContext} ctx
      */
     async interactionCreate(client, interaction, ctx) {
         if (!interaction.isCommand() && !interaction.isContextMenuCommand()) return;

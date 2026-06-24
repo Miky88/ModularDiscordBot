@@ -1,4 +1,4 @@
-const Module = require("@core/Module.js");
+const Module = require("@structures/Module.js");
 const PermissionsUI = require("./lib/PermissionsUI.js");
 const SettingsUI = require("./lib/SettingsUI.js");
 

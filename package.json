@@ -29,7 +29,7 @@
     "yaml": "^2.8.3"
   },
   "_moduleAliases": {
-    "@core": "core",
+    "@structures": "structures",
     "@modules": "modules"
   }
 }

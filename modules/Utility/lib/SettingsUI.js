@@ -4,7 +4,7 @@ const {
     ModalBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
-const { safeUpdate, safeError, truncate, errorPanel } = require('@core/lib/InteractionHelpers.js');
+const { safeUpdate, safeError, truncate, errorPanel } = require('@structures/lib/InteractionHelpers.js');
 
 /**
  * In-Discord GUI for per-guild settings.

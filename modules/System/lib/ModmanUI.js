@@ -3,7 +3,7 @@ const {
     StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
-const { safeUpdate, safeError, truncate, errorPanel } = require('@core/lib/InteractionHelpers.js');
+const { safeUpdate, safeError, truncate, errorPanel } = require('@structures/lib/InteractionHelpers.js');
 
 /**
  * Interactive in-Discord GUI for managing bot modules.

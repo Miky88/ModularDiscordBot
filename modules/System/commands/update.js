@@ -1,5 +1,5 @@
-const Command = require("@core/Command.js");
-const PowerLevels = require("@core/PowerLevels.js");
+const Command = require("@structures/Command.js");
+const PowerLevels = require("@structures/PowerLevels.js");
 const exec = require("util").promisify(require("child_process").exec);
 
 module.exports = class UpdateCommand extends Command {

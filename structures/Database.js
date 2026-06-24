@@ -6,11 +6,11 @@ const PowerLevels = require('./PowerLevels.js');
 const DatabaseHandle = require('./DatabaseHandle.js');
 
 const DEFAULT_DATA_DIR = 'data';
-const CORE_FILE = 'database.db';
+const BOT_FILE = 'database.db';
 
 module.exports = class Database {
     /**
-     * Registry of database handles. The bot ships a single "core" handle backed
+     * Registry of database handles. The bot ships a single "bot" handle backed
      * by `database.db` (housing the built-in `users` collection); each module
      * that opts in gets its own handle backed by `data/<Module>.db`.
      * @param {import('..')} client
@@ -21,8 +21,8 @@ module.exports = class Database {
         /** @type {Map<string, DatabaseHandle>} */
         this.handles = new Map();
 
-        this.core = this.register('core', {
-            file: CORE_FILE,
+        this.bot = this.register('bot', {
+            file: BOT_FILE,
             collections: ['users'],
             // Unique index on `id`: O(1) `by('id')` lookups (no more linear
             // scans, and no need for the old in-memory userCache) and a DB-level
@@ -65,8 +65,8 @@ module.exports = class Database {
      */
     get(name) { return this.handles.get(name); }
 
-    /** Convenience accessor for the core users collection. */
-    get users() { return this.core.collection('users'); }
+    /** Convenience accessor for the bot users collection. */
+    get users() { return this.bot.collection('users'); }
 
     /**
      * Insert a user record, or return the existing one. Idempotent: the unique
@@ -160,7 +160,7 @@ module.exports = class Database {
      * the new per-module file layout. Detects collections named `module_<X>`
      * and `settings_<X>` and copies their rows into the matching per-module
      * handle (collections `default` and `settings` respectively). The `users`
-     * collection is left alone since the core handle already points at the
+     * collection is left alone since the bot handle already points at the
      * legacy file.
      *
      * @param {object} [opts]
@@ -169,7 +169,7 @@ module.exports = class Database {
      * @param {boolean} [opts.removeOriginal=false] Drop the migrated collections from the legacy file after copy.
      * @returns {Promise<{migrated: Array<{module: string, collection: string, rows: number}>, skipped: string[]}>}
      */
-    async migrate({ source = CORE_FILE, dryRun = false, removeOriginal = false } = {}) {
+    async migrate({ source = BOT_FILE, dryRun = false, removeOriginal = false } = {}) {
         const report = { migrated: [], skipped: [] };
 
         if (!fs.existsSync(source)) {
@@ -177,19 +177,19 @@ module.exports = class Database {
             return report;
         }
 
-        // If the source is the file the core handle already has open, reuse
+        // If the source is the file the bot handle already has open, reuse
         // that Loki instance — opening a second Loki on the same file would
-        // race with core's autosave.
-        const reuseCore = path.resolve(source) === path.resolve(this.core.file);
-        const legacy = reuseCore ? this.core.db : await this._loadStandalone(source);
+        // race with bot's autosave.
+        const reuseBot = path.resolve(source) === path.resolve(this.bot.file);
+        const legacy = reuseBot ? this.bot.db : await this._loadStandalone(source);
 
-        // When reusing the live core handle, pause its 1s autosave for the whole
+        // When reusing the live bot handle, pause its 1s autosave for the whole
         // migration. Otherwise a periodic flush could fire during one of the
         // awaits below and persist a half-migrated state, or contend with the
         // explicit save. Standalone sources are opened with autosave off, so this
-        // only matters for the core handle. Re-enabled in `finally` so a
-        // mid-migration throw can't leave the core DB unable to persist.
-        if (reuseCore) legacy.autosaveDisable();
+        // only matters for the bot handle. Re-enabled in `finally` so a
+        // mid-migration throw can't leave the bot DB unable to persist.
+        if (reuseBot) legacy.autosaveDisable();
         try {
             const legacyCollections = legacy.listCollections().map(c => c.name);
             this.logger.info(`Found ${legacyCollections.length} collection(s) in ${source}: ${legacyCollections.join(', ') || '(none)'}`);
@@ -229,13 +229,13 @@ module.exports = class Database {
                 // migrated/cleaned-up state to disk; the re-enabled timer takes
                 // over afterwards.
                 await new Promise((resolve, reject) => legacy.saveDatabase(err => err ? reject(err) : resolve()));
-                if (!reuseCore) await new Promise((resolve) => legacy.close(resolve));
+                if (!reuseBot) await new Promise((resolve) => legacy.close(resolve));
             }
 
             this.logger.success(`Migration ${dryRun ? 'dry-run ' : ''}complete: ${report.migrated.length} collection(s) migrated, ${report.skipped.length} skipped.`);
             return report;
         } finally {
-            if (reuseCore) legacy.autosaveEnable();
+            if (reuseBot) legacy.autosaveEnable();
         }
     }
 
