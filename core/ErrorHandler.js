@@ -2,13 +2,19 @@ const fs = require('fs');
 const path = require('path');
 const { EmbedBuilder } = require('discord.js');
 const Logger = require('./Logger.js');
+const { truncate } = require('./lib/InteractionHelpers.js');
 
 const DEFAULTS = {
     channelId: null,
     notifyOwners: false,
     dedupWindowMs: 60000,
     exitOnUncaught: true,
-    logsDir: 'logs'
+    logsDir: 'logs',
+    // Discord report backpressure: at most one report in flight, spaced by
+    // `reportThrottleMs`; past `reportQueueMax` buffered, the rest collapse into
+    // a single suppression summary.
+    reportQueueMax: 20,
+    reportThrottleMs: 1000
 };
 
 /**
@@ -26,9 +32,16 @@ module.exports = class ErrorHandler {
     constructor(client, opts = {}) {
         this.client = client;
         this.config = { ...DEFAULTS, ...opts };
-        this.logger = new Logger('ErrorHandler', false);
+        this.logger = new Logger('ErrorHandler');
         this._dedup = new Map();
         this._exiting = false;
+
+        // Serial, throttled, bounded queue for outbound Discord reports — so a
+        // flood of distinct errors can't spawn concurrent channel fetches + owner
+        // DMs without backpressure.
+        this._reportQueue = [];
+        this._reportDraining = false;
+        this._reportsDropped = 0;
 
         this._logsDir = path.resolve(process.cwd(), this.config.logsDir);
         if (!fs.existsSync(this._logsDir)) fs.mkdirSync(this._logsDir, { recursive: true });
@@ -52,6 +65,11 @@ module.exports = class ErrorHandler {
         process.on('warning', (warning) => {
             this.capture(warning, { source: 'nodeWarning', severity: 'warn' });
         });
+        // Best-effort only: 'exit' runs synchronously so a stream end() here
+        // can't await its async flush. The reliable flush lives in
+        // `_closeStreams()` (used by `_gracefulExit`); this just covers exits
+        // that don't go through it, and is a no-op after a graceful exit (which
+        // already closed the streams).
         process.on('exit', () => {
             try { this._streams.json?.end(); } catch {}
             try { this._streams.text?.end(); } catch {}
@@ -130,7 +148,53 @@ module.exports = class ErrorHandler {
         }
 
         if (severity !== 'warn' && (this.config.channelId || this.config.notifyOwners))
-            this._reportDiscord(record).catch(() => { /* already on disk */ });
+            this._enqueueDiscordReport(record);
+    }
+
+    /**
+     * Buffer a record for Discord reporting. The queue is bounded — past the
+     * cap, reports are counted and collapsed into a single suppression summary
+     * once the backlog drains, rather than buffered without limit.
+     */
+    _enqueueDiscordReport(record) {
+        if (this._reportQueue.length >= this.config.reportQueueMax) {
+            this._reportsDropped++;
+            return;
+        }
+        this._reportQueue.push(record);
+        this._drainReportQueue();
+    }
+
+    /**
+     * Drain the report queue one record at a time, throttled, so reports are
+     * never sent concurrently. Records enqueued while draining are picked up by
+     * the running loop; the `_reportDraining` guard prevents a second drainer.
+     */
+    async _drainReportQueue() {
+        if (this._reportDraining) return;
+        this._reportDraining = true;
+        try {
+            while (this._reportQueue.length || this._reportsDropped) {
+                // Backlog clear but some were dropped → emit one summary.
+                if (!this._reportQueue.length && this._reportsDropped) {
+                    const dropped = this._reportsDropped;
+                    this._reportsDropped = 0;
+                    this._reportQueue.push({
+                        timestamp: new Date().toISOString(),
+                        severity: 'warn',
+                        name: 'ErrorHandler',
+                        message: `${dropped} further error report(s) suppressed to avoid flooding.`
+                    });
+                }
+                const record = this._reportQueue.shift();
+                try { await this._reportDiscord(record); }
+                catch { /* already on disk */ }
+                if (this._reportQueue.length || this._reportsDropped)
+                    await new Promise(resolve => setTimeout(resolve, this.config.reportThrottleMs));
+            }
+        } finally {
+            this._reportDraining = false;
+        }
     }
 
     _headline(r, suppressed) {
@@ -162,7 +226,7 @@ module.exports = class ErrorHandler {
 
         const embed = new EmbedBuilder()
             .setTitle(`${record.severity === 'fatal' ? '\u{1F525} Fatal' : '\u{26A0} Error'}: ${record.name || 'Error'}`)
-            .setDescription('```\n' + this._truncate(record.message || '(no message)', 1000) + '\n```')
+            .setDescription('```\n' + truncate(record.message || '(no message)', 1000, '\n…[truncated]') + '\n```')
             .setColor(record.severity === 'fatal' ? 0xff3b3b : 0xe67e22)
             .setTimestamp(new Date(record.timestamp));
 
@@ -176,7 +240,7 @@ module.exports = class ErrorHandler {
         if (fields.length) embed.addFields(fields);
 
         if (record.stack)
-            embed.addFields({ name: 'Stack', value: '```\n' + this._truncate(record.stack, 1000) + '\n```' });
+            embed.addFields({ name: 'Stack', value: '```\n' + truncate(record.stack, 1000, '\n…[truncated]') + '\n```' });
 
         if (this.config.channelId) {
             try {
@@ -196,17 +260,29 @@ module.exports = class ErrorHandler {
         }
     }
 
-    _truncate(s, max) {
-        if (typeof s !== 'string') s = String(s);
-        return s.length <= max ? s : s.slice(0, max - 16) + '\n…[truncated]';
+    /**
+     * Flush and close the log streams, resolving once both have actually
+     * finished writing (the `end()` callback fires on flush) — or after a 2s
+     * safety timeout so a stalled flush can't hang shutdown. Unlike a bare
+     * `.end()` in `process.on('exit')` (which can't await), this waits for
+     * buffered data, important when the final write is a large stack trace.
+     * @returns {Promise<void>}
+     */
+    _closeStreams() {
+        const streams = [this._streams.json, this._streams.text].filter(s => s && !s.destroyed);
+        this._streams = { json: null, text: null, date: null };
+        if (!streams.length) return Promise.resolve();
+        const flushed = Promise.all(streams.map(s => new Promise(resolve => s.end(resolve))));
+        const safety = new Promise(resolve => { const t = setTimeout(resolve, 2000); t.unref?.(); });
+        return Promise.race([flushed, safety]);
     }
 
     _gracefulExit(code) {
         if (this._exiting) return;
         this._exiting = true;
         this.logger.warn('Exiting due to uncaught error — process supervisor should restart the bot.');
-        try { this._streams.json?.end(); } catch {}
-        try { this._streams.text?.end(); } catch {}
-        setTimeout(() => process.exit(code), 250);
+        // Wait for the log streams to flush before exiting, rather than racing a
+        // fixed timer (a large stack trace can take longer than 250ms to write).
+        this._closeStreams().finally(() => process.exit(code));
     }
 };

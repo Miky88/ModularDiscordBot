@@ -27,7 +27,9 @@ class BotClient extends Client {
                 channelId: null,
                 notifyOwners: false,
                 dedupWindowMs: 60000,
-                exitOnUncaught: true
+                exitOnUncaught: true,
+                reportQueueMax: 20,
+                reportThrottleMs: 1000
             },
             i18n: {
                 defaultLang: 'en-GB',
@@ -57,9 +59,16 @@ class BotClient extends Client {
 
 
 (async () => {
-    const client = new BotClient();
-    await client.modules.init();
-    await client.login(process.env.TOKEN);
+    let client;
+    try {
+        client = new BotClient();
+        await client.modules.init();
+        await client.login(process.env.TOKEN);
+    } catch (err) {
+        console.error('[boot] Fatal error during startup:', err?.stack || err);
+        client?.errorHandler?.capture(err, { source: 'boot', fatal: true });
+        process.exit(1);
+    }
 })();
 
 module.exports = BotClient;
