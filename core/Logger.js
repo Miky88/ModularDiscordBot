@@ -1,5 +1,13 @@
 const chalk = require('chalk');
 
+/**
+ * Console logger. Emits colorized, prefixed lines to stdout only.
+ *
+ * Persistent logging is intentionally NOT this class's job — the structured,
+ * date-rotated on-disk pipeline lives in `ErrorHandler` (logs/errors-*.jsonl
+ * and .log). Routine stdout is expected to be captured by the process
+ * supervisor (pm2 / systemd / docker), per the 12-factor approach.
+ */
 module.exports = class Logger {
     /**
      * Global toggle for `verbose()` calls. Set once at boot from
@@ -10,40 +18,8 @@ module.exports = class Logger {
     /**
      * @param {String} name
      */
-    constructor(name, saveToFile = true) {
+    constructor(name) {
         this.name = name;
-        this._saveToFile = saveToFile;
-    }
-
-    /**
-     * Saves the message to logs.txt
-     * @param {String} message
-     * @param {String} type error or simple log
-     * @param {Date} date  
-     */
-    saveToFile(date, type = "log", ...message) {
-        let final = "";
-
-        for (const msg of message) {
-            final += `${msg}`;
-        }
-
-        const dir = process.cwd();
-        const fs = require('fs');
-
-        if (type === "error") {
-            try {
-                fs.appendFileSync(dir + "/err.txt", `${date.toLocaleDateString('it')} ${date.getHours()}:${date.getMinutes()} [${this.name}] ${final}\n`)
-            } catch (err) {
-                if (err) throw err;
-            };
-        }
-
-        try {
-            fs.appendFileSync(dir + "/out.txt", `${date.toLocaleDateString('it')} ${date.getHours()}:${date.getMinutes()} [${this.name}] ${final}\n`)
-        } catch (err) {
-            if (err) throw err;
-        };
     }
 
     /**
@@ -51,14 +27,7 @@ module.exports = class Logger {
      * @param {String} message
      */
     log(...message) {
-        let final = "";
-
-        for (const msg of message) {
-            final += `${msg}`;
-        }
-
-        console.log(`[${this.name}] ${final}`);
-        if (this._saveToFile) this.saveToFile(new Date(), '', final);
+        console.log(`[${this.name}] ${message.join('')}`);
     }
 
     /**
@@ -66,14 +35,8 @@ module.exports = class Logger {
      * @param {String} message
      */
     error(...message) {
-        let final = "";
-
-        for (const msg of message) {
-            final += `${msg}`;
-        }
-
+        const final = message.join('');
         console.log(`[${chalk.red(this.name)}] ${chalk.red(final)}`);
-        if (this._saveToFile) this.saveToFile(new Date(), "error", final);
     }
 
     /**
@@ -81,14 +44,8 @@ module.exports = class Logger {
      * @param {String} message
      */
     warn(...message) {
-        let final = "";
-
-        for (const msg of message) {
-            final += `${msg}`;
-        }
-
+        const final = message.join('');
         console.log(`[${chalk.yellow(this.name)}] ${chalk.yellow(final)}`);
-        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -96,14 +53,8 @@ module.exports = class Logger {
      * @param {String} message
      */
     success(...message) {
-        let final = "";
-
-        for (const msg of message) {
-            final += `${msg}`;
-        }
-
+        const final = message.join('');
         console.log(`[${chalk.green(this.name)}] ${chalk.green(final)}`);
-        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -111,14 +62,8 @@ module.exports = class Logger {
      * @param {String} message
      */
     info(...message) {
-        let final = "";
-
-        for (const msg of message) {
-            final += `${msg}`;
-        }
-
+        const final = message.join('');
         console.log(`[${chalk.blueBright(this.name)}] ${chalk.blueBright(final)}`);
-        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -126,32 +71,20 @@ module.exports = class Logger {
      * @param {String} message
      */
     debug(...message) {
-        let final = "";
-
-        for (const msg of message) {
-            final += `${msg}`;
-        }
-
+        const final = message.join('');
         console.log(`[${chalk.magenta(this.name)}] ${chalk.magenta(final)}`);
-        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
      * Verbose log — gated by the global `Logger.verboseEnabled` flag (set
      * from `config.verbose` at boot in index.js). When disabled, this is a
-     * complete no-op (no console, no file).
+     * complete no-op.
      * @param {String} message
      */
     verbose(...message) {
         if (!Logger.verboseEnabled) return;
-        let final = "";
-
-        for (const msg of message) {
-            final += `${msg}`;
-        }
-
+        const final = message.join('');
         console.log(`[${chalk.cyan(this.name)}] ${chalk.cyan(final)}`);
-        if (this._saveToFile) this.saveToFile(new Date(), '', final);
     }
 
     /**
@@ -160,13 +93,7 @@ module.exports = class Logger {
      * @param {String} color
      */
     custom(color, ...message) {
-        let final = "";
-
-        for (const msg of message) {
-            final += `${msg}`;
-        }
-
-        console.log(`[${chalk[color](this.name)}] ${chalk[color](final)}`)
-        if (this._saveToFile) this.saveToFile(new Date(), '', final);
+        const final = message.join('');
+        console.log(`[${chalk[color](this.name)}] ${chalk[color](final)}`);
     }
 }
