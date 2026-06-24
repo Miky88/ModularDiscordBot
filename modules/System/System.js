@@ -2,6 +2,7 @@ const Module = require("@core/Module.js");
 const Discord = require('discord.js');
 const fs = require('fs');
 const ModmanUI = require('./lib/ModmanUI.js');
+const EvalUI = require('./lib/EvalUI.js');
 
 module.exports = class System extends Module {
     constructor(client) {
@@ -12,6 +13,7 @@ module.exports = class System extends Module {
         });
 
         this.modmanUI = new ModmanUI(this);
+        this.evalUI = new EvalUI(this);
     }
 
     /**
@@ -71,10 +73,11 @@ module.exports = class System extends Module {
      * @param {Discord.Interaction} interaction
      */
     async interactionCreate(client, interaction) {
-        // Modman GUI component / modal interactions.
-        if ((interaction.isMessageComponent?.() || interaction.isModalSubmit?.()) &&
-            interaction.customId?.startsWith('modman:')) {
-            return this.modmanUI.handle(interaction);
+        // GUI component / modal interactions belonging to the System module.
+        if (interaction.isMessageComponent?.() || interaction.isModalSubmit?.()) {
+            const id = interaction.customId || '';
+            if (id.startsWith('modman:')) return this.modmanUI.handle(interaction);
+            if (id.startsWith('eval:'))   return this.evalUI.handle(interaction);
         }
     }
 

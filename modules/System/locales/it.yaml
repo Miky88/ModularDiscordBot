@@ -4,6 +4,21 @@ commands:
     description: Esegue codice JavaScript arbitrario.
     options:
       code: Il codice JavaScript da eseguire.
+      ephemeral: Risposta visibile solo a te (predefinito true).
+    ui:
+      output-header: "🧪 Eval — Output"
+      error-header: "❌ Eval — Errore"
+      empty: (nessun output)
+      truncated: "⚠️ Output troncato — mostrati {{shown}}/{{total}} caratteri. L'output completo è stato registrato nella console."
+      not-allowed: ":no_entry: Solo i proprietari del bot possono usare questi controlli."
+      expired: ":hourglass: Questa sessione di eval è scaduta — esegui di nuovo `/eval`."
+      buttons:
+        edit: Modifica
+        retry: Riprova
+        publish: Invia pubblicamente
+      modal:
+        title: Modifica ed esegui
+        code-label: JavaScript
   exec:
     name: exec
     description: Esegue un comando di sistema.
@@ -128,3 +143,14 @@ commands:
     description: Aggiorna il bot all’ultima versione dal repository Git e riavvia il bot
     messages:
       noreboot: Comando `reboot` sconosciuto, annullo l'operazione.
+  settings:
+    ui:
+      home:
+        title: commands.settings.ui.home.title
+        description: commands.settings.ui.home.description
+        pick-placeholder: commands.settings.ui.home.pick-placeholder
+        modules-with-settings: commands.settings.ui.home.modules-with-settings
+        keys-suffix: commands.settings.ui.home.keys-suffix
+      buttons:
+        refresh: commands.settings.ui.buttons.refresh
+        close: commands.settings.ui.buttons.close

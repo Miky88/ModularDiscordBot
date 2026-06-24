@@ -4,6 +4,21 @@ commands:
     description: Execute arbitrary JavaScript code.
     options:
       code: The JavaScript code to execute.
+      ephemeral: Reply only visible to you (default true).
+    ui:
+      output-header: "🧪 Eval — Output"
+      error-header: "❌ Eval — Error"
+      empty: (no output)
+      truncated: "⚠️ Output truncated — showing {{shown}}/{{total}} characters. The full output was logged to the console."
+      not-allowed: ":no_entry: Only bot owners can use these controls."
+      expired: ":hourglass: This eval session expired — run `/eval` again."
+      buttons:
+        edit: Edit
+        retry: Retry
+        publish: Send publicly
+      modal:
+        title: Edit & re-run
+        code-label: JavaScript
   exec:
     name: exec
     description: Execute a system command.
