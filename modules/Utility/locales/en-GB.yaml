@@ -199,10 +199,11 @@ commands:
         clear-placeholder: Clear an override…
         clear-desc: "currently `{{level}}`"
         modal-title: Set command override
-        modal-command-label: "Command name (without /)"
-        modal-command-placeholder: kick
-        modal-level-label: Level ID
-        modal-level-placeholder: moderator
+        modal-command-label: Command
+        modal-command-placeholder: Pick a command…
+        modal-level-label: Level
+        modal-level-placeholder: Pick a level…
+        no-items: No commands available to override.
       sets:
         title: ⚙️ Setting overrides
         description: |
@@ -216,10 +217,11 @@ commands:
         clear-placeholder: Clear an override…
         clear-desc: "currently `{{level}}`"
         modal-title: Set setting override
-        modal-key-label: "Setting key (Module.key)"
-        modal-key-placeholder: Utility.defaultServerLanguage
-        modal-level-label: Level ID
-        modal-level-placeholder: moderator
+        modal-key-label: Setting
+        modal-key-placeholder: Pick a setting…
+        modal-level-label: Level
+        modal-level-placeholder: Pick a level…
+        no-items: No settings available to override.
       buttons:
         create: Create level
         delete: Delete level
@@ -233,6 +235,7 @@ commands:
         set-override: Set override
       errors:
         closed: Closed.
+        incomplete: Please choose all options.
   stats:
     name: stats
     description: View bot statistics and information.

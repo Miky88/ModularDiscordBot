@@ -1,7 +1,7 @@
 const {
     EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle,
     StringSelectMenuBuilder, RoleSelectMenuBuilder, UserSelectMenuBuilder,
-    ModalBuilder, TextInputBuilder, TextInputStyle,
+    ModalBuilder, LabelBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
 const { safeUpdate, safeError } = require('@structures/lib/InteractionHelpers.js');
@@ -159,11 +159,10 @@ module.exports = class PermissionsUI {
         if (overriddenUsers.length) userSelect.setDefaultUsers(...overriddenUsers.slice(0, 25));
 
         const buttons = [
-            new ButtonBuilder().setCustomId(`perms:level:edit:${level.id}`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.edit', interaction)).setEmoji('✏️')
+            new ButtonBuilder().setCustomId(`perms:level:edit:${level.id}`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.edit', interaction)).setEmoji('✏️'),
+            new ButtonBuilder().setCustomId(`perms:level:delete:${level.id}`).setStyle(ButtonStyle.Danger).setLabel(this._t('buttons.delete', interaction)).setEmoji('🗑️'),
+            new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
         ];
-        if (!level.builtin)
-            buttons.push(new ButtonBuilder().setCustomId(`perms:level:delete:${level.id}`).setStyle(ButtonStyle.Danger).setLabel(this._t('buttons.delete', interaction)).setEmoji('🗑️'));
-        buttons.push(new ButtonBuilder().setCustomId('perms:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️'));
 
         return {
             content: '',
@@ -266,6 +265,49 @@ module.exports = class PermissionsUI {
         await interaction.showModal(modal);
     }
 
+    /** Level options (id/name/weight) for a string-select. Capped at 25. */
+    _levelOptions(interaction) {
+        const cfg = this.client.permissions.getConfig(interaction.guild.id);
+        return [...cfg.levels].sort((a, b) => a.weight - b.weight).slice(0, 25).map(l => ({
+            label: `${l.name} (${l.id})`,
+            description: this._t('levels.weight-fmt', interaction, { weight: l.weight }),
+            value: l.id
+        }));
+    }
+
+    /** Registered (non-System) command names for a string-select. Capped at 25. */
+    _commandOptions() {
+        return [...new Set(this.client.modules.getPublishableCommands().map(c => c.config.name))]
+            .sort().slice(0, 25).map(n => ({ label: `/${n}`, value: n }));
+    }
+
+    /** Every `Module.key` settings path for a string-select. Capped at 25. */
+    _settingKeyOptions() {
+        const out = [];
+        for (const [moduleName, mgr] of this.client.settings)
+            for (const k of mgr.keys()) out.push({ label: `${moduleName}.${k}`, value: `${moduleName}.${k}` });
+        return out.slice(0, 25);
+    }
+
+    /**
+     * Build an override modal with two string-selects — a domain item (command
+     * or setting key, customId `item`) and a level (customId `level`) — so the
+     * admin picks valid values instead of typing them.
+     */
+    _overrideModal({ customId, title, itemLabel, itemPlaceholder, itemOptions, levelLabel, levelPlaceholder, levelOptions }) {
+        return new ModalBuilder()
+            .setCustomId(customId)
+            .setTitle(title)
+            .addLabelComponents(
+                new LabelBuilder().setLabel(itemLabel).setStringSelectMenuComponent(
+                    new StringSelectMenuBuilder().setCustomId('item').setPlaceholder(itemPlaceholder).addOptions(itemOptions)
+                ),
+                new LabelBuilder().setLabel(levelLabel).setStringSelectMenuComponent(
+                    new StringSelectMenuBuilder().setCustomId('level').setPlaceholder(levelPlaceholder).addOptions(levelOptions)
+                )
+            );
+    }
+
     _cmdsScreen(interaction) {
         const guildId = interaction.guild.id;
         const cfg = this.client.permissions.getConfig(guildId);
@@ -304,24 +346,23 @@ module.exports = class PermissionsUI {
         const guildId = interaction.guild.id;
 
         if (action === 'set_btn') {
-            const modal = new ModalBuilder()
-                .setCustomId('perms:cmd:set_modal')
-                .setTitle(this._t('cmds.modal-title', interaction));
-            modal.addComponents(
-                new ActionRowBuilder().addComponents(
-                    new TextInputBuilder().setCustomId('command').setLabel(this._t('cmds.modal-command-label', interaction))
-                        .setPlaceholder(this._t('cmds.modal-command-placeholder', interaction)).setStyle(TextInputStyle.Short).setRequired(true).setMaxLength(32)
-                ),
-                new ActionRowBuilder().addComponents(
-                    new TextInputBuilder().setCustomId('level').setLabel(this._t('cmds.modal-level-label', interaction))
-                        .setPlaceholder(this._t('cmds.modal-level-placeholder', interaction)).setStyle(TextInputStyle.Short).setRequired(true).setMaxLength(32)
-                )
-            );
-            return interaction.showModal(modal);
+            const itemOptions = this._commandOptions();
+            if (!itemOptions.length) return safeError(interaction, this._t('cmds.no-items', interaction));
+            return interaction.showModal(this._overrideModal({
+                customId: 'perms:cmd:set_modal',
+                title: this._t('cmds.modal-title', interaction),
+                itemLabel: this._t('cmds.modal-command-label', interaction),
+                itemPlaceholder: this._t('cmds.modal-command-placeholder', interaction),
+                itemOptions,
+                levelLabel: this._t('cmds.modal-level-label', interaction),
+                levelPlaceholder: this._t('cmds.modal-level-placeholder', interaction),
+                levelOptions: this._levelOptions(interaction)
+            }));
         }
         if (action === 'set_modal') {
-            const cmd = interaction.fields.getTextInputValue('command').replace(/^\//, '').trim();
-            const level = interaction.fields.getTextInputValue('level').trim();
+            const cmd = interaction.fields.getStringSelectValues('item')[0];
+            const level = interaction.fields.getStringSelectValues('level')[0];
+            if (!cmd || !level) return safeError(interaction, this._t('errors.incomplete', interaction));
             this.client.permissions.setCommandOverride(guildId, cmd, level);
             return safeUpdate(interaction, this._cmdsScreen(interaction));
         }
@@ -370,24 +411,23 @@ module.exports = class PermissionsUI {
         const guildId = interaction.guild.id;
 
         if (action === 'set_btn') {
-            const modal = new ModalBuilder()
-                .setCustomId('perms:set:set_modal')
-                .setTitle(this._t('sets.modal-title', interaction));
-            modal.addComponents(
-                new ActionRowBuilder().addComponents(
-                    new TextInputBuilder().setCustomId('key').setLabel(this._t('sets.modal-key-label', interaction))
-                        .setPlaceholder(this._t('sets.modal-key-placeholder', interaction)).setStyle(TextInputStyle.Short).setRequired(true).setMaxLength(80)
-                ),
-                new ActionRowBuilder().addComponents(
-                    new TextInputBuilder().setCustomId('level').setLabel(this._t('sets.modal-level-label', interaction))
-                        .setPlaceholder(this._t('sets.modal-level-placeholder', interaction)).setStyle(TextInputStyle.Short).setRequired(true).setMaxLength(32)
-                )
-            );
-            return interaction.showModal(modal);
+            const itemOptions = this._settingKeyOptions();
+            if (!itemOptions.length) return safeError(interaction, this._t('sets.no-items', interaction));
+            return interaction.showModal(this._overrideModal({
+                customId: 'perms:set:set_modal',
+                title: this._t('sets.modal-title', interaction),
+                itemLabel: this._t('sets.modal-key-label', interaction),
+                itemPlaceholder: this._t('sets.modal-key-placeholder', interaction),
+                itemOptions,
+                levelLabel: this._t('sets.modal-level-label', interaction),
+                levelPlaceholder: this._t('sets.modal-level-placeholder', interaction),
+                levelOptions: this._levelOptions(interaction)
+            }));
         }
         if (action === 'set_modal') {
-            const key = interaction.fields.getTextInputValue('key').trim();
-            const level = interaction.fields.getTextInputValue('level').trim();
+            const key = interaction.fields.getStringSelectValues('item')[0];
+            const level = interaction.fields.getStringSelectValues('level')[0];
+            if (!key || !level) return safeError(interaction, this._t('errors.incomplete', interaction));
             this.client.permissions.setSettingOverride(guildId, key, level);
             return safeUpdate(interaction, this._setsScreen(interaction));
         }
