@@ -4,6 +4,7 @@ const {
     ModalBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
+const { safeUpdate, safeError } = require('@core/lib/InteractionHelpers.js');
 
 /**
  * Interactive in-Discord GUI for managing per-guild permission levels.
@@ -43,7 +44,7 @@ module.exports = class PermissionsUI {
 
         try {
             switch (screen) {
-                case 'home':       return this._update(interaction, this._home(interaction));
+                case 'home':       return safeUpdate(interaction, this._home(interaction));
                 case 'close':      return interaction.update({ content: this._t('errors.closed', interaction), embeds: [], components: [] });
                 case 'nav':        return this._nav(interaction, args[0]);
                 case 'level':      return this._level(interaction, args);
@@ -54,7 +55,7 @@ module.exports = class PermissionsUI {
             }
         } catch (err) {
             this.client.errorHandler?.capture(err, { source: 'PermissionsUI', userId: interaction.user?.id });
-            await this._safeError(interaction, err.message);
+            await safeError(interaction, err.message);
         }
         return true;
     }
@@ -102,11 +103,11 @@ module.exports = class PermissionsUI {
     async _nav(interaction, target) {
         const value = interaction.values?.[0] || target;
         switch (value) {
-            case 'levels': return this._update(interaction, this._levelsScreen(interaction));
-            case 'roles':  return this._update(interaction, this._rolesScreen(interaction));
-            case 'users':  return this._update(interaction, this._usersScreen(interaction));
-            case 'cmds':   return this._update(interaction, this._cmdsScreen(interaction));
-            case 'sets':   return this._update(interaction, this._setsScreen(interaction));
+            case 'levels': return safeUpdate(interaction, this._levelsScreen(interaction));
+            case 'roles':  return safeUpdate(interaction, this._rolesScreen(interaction));
+            case 'users':  return safeUpdate(interaction, this._usersScreen(interaction));
+            case 'cmds':   return safeUpdate(interaction, this._cmdsScreen(interaction));
+            case 'sets':   return safeUpdate(interaction, this._setsScreen(interaction));
         }
     }
 
@@ -163,24 +164,24 @@ module.exports = class PermissionsUI {
             const id = interaction.fields.getTextInputValue('id').toLowerCase().replace(/[^a-z0-9_-]/g, '_').slice(0, 32);
             const name = interaction.fields.getTextInputValue('name').slice(0, 64);
             const weight = parseInt(interaction.fields.getTextInputValue('weight'), 10);
-            if (!id) return this._safeError(interaction, this._t('levels.empty-id-error', interaction));
-            if (!Number.isFinite(weight)) return this._safeError(interaction, this._t('levels.weight-not-int-error', interaction));
+            if (!id) return safeError(interaction, this._t('levels.empty-id-error', interaction));
+            if (!Number.isFinite(weight)) return safeError(interaction, this._t('levels.weight-not-int-error', interaction));
             this.client.permissions.setLevel(guildId, { id, name, weight, roles: [] });
-            return this._update(interaction, this._levelsScreen(interaction));
+            return safeUpdate(interaction, this._levelsScreen(interaction));
         }
         if (action === 'edit_modal') {
             const levelId = rest[0];
             const name = interaction.fields.getTextInputValue('name').slice(0, 64);
             const weight = parseInt(interaction.fields.getTextInputValue('weight'), 10);
-            if (!Number.isFinite(weight)) return this._safeError(interaction, this._t('levels.weight-not-int-error', interaction));
+            if (!Number.isFinite(weight)) return safeError(interaction, this._t('levels.weight-not-int-error', interaction));
             this.client.permissions.setLevel(guildId, { id: levelId, name, weight });
-            return this._update(interaction, this._levelsScreen(interaction));
+            return safeUpdate(interaction, this._levelsScreen(interaction));
         }
         if (action === 'delete_pick') {
             const cfg = this.client.permissions.getConfig(guildId);
             const candidates = [...cfg.levels].sort((a, b) => a.weight - b.weight);
             if (candidates.length === 0)
-                return this._safeError(interaction, this._t('levels.none-to-delete', interaction));
+                return safeError(interaction, this._t('levels.none-to-delete', interaction));
 
             const embed = new EmbedBuilder()
                 .setTitle(this._t('levels.delete-title', interaction))
@@ -196,19 +197,19 @@ module.exports = class PermissionsUI {
             const back = new ActionRowBuilder().addComponents(
                 new ButtonBuilder().setCustomId('perms:nav:levels').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.cancel', interaction)).setEmoji('⬅️')
             );
-            return this._update(interaction, { embeds: [embed], components: [new ActionRowBuilder().addComponents(select), back] });
+            return safeUpdate(interaction, { embeds: [embed], components: [new ActionRowBuilder().addComponents(select), back] });
         }
         if (action === 'delete_confirm') {
             const levelId = interaction.values[0];
             this.client.permissions.deleteLevel(guildId, levelId);
-            return this._update(interaction, this._levelsScreen(interaction));
+            return safeUpdate(interaction, this._levelsScreen(interaction));
         }
     }
 
     async _showLevelModal(interaction, levelId) {
         const isEdit = !!levelId;
         const existing = isEdit ? this.client.permissions.getLevel(interaction.guild.id, levelId) : null;
-        if (isEdit && !existing) return this._safeError(interaction, this._t('levels.unknown-level-error', interaction, { level: levelId }));
+        if (isEdit && !existing) return safeError(interaction, this._t('levels.unknown-level-error', interaction, { level: levelId }));
 
         const modal = new ModalBuilder()
             .setCustomId(isEdit ? `perms:level:edit_modal:${levelId}` : 'perms:level:create_modal')
@@ -308,17 +309,17 @@ module.exports = class PermissionsUI {
         const guildId = interaction.guild.id;
 
         if (action === 'level_pick') {
-            return this._update(interaction, this._rolesScreen(interaction, interaction.values[0]));
+            return safeUpdate(interaction, this._rolesScreen(interaction, interaction.values[0]));
         }
         if (action === 'bind') {
             const roleId = interaction.values[0];
             this.client.permissions.bindRole(guildId, levelId, roleId);
-            return this._update(interaction, this._rolesScreen(interaction, levelId));
+            return safeUpdate(interaction, this._rolesScreen(interaction, levelId));
         }
         if (action === 'unbind') {
             const roleId = interaction.values[0];
             this.client.permissions.unbindRole(guildId, levelId, roleId);
-            return this._update(interaction, this._rolesScreen(interaction, levelId));
+            return safeUpdate(interaction, this._rolesScreen(interaction, levelId));
         }
     }
 
@@ -385,12 +386,12 @@ module.exports = class PermissionsUI {
         const guildId = interaction.guild.id;
 
         if (action === 'pick') {
-            return this._update(interaction, this._usersScreen(interaction, interaction.values[0]));
+            return safeUpdate(interaction, this._usersScreen(interaction, interaction.values[0]));
         }
         if (action === 'set') {
             const value = interaction.values[0];
             this.client.permissions.setUserOverride(guildId, userId, value === '__clear__' ? null : value);
-            return this._update(interaction, this._usersScreen(interaction));
+            return safeUpdate(interaction, this._usersScreen(interaction));
         }
     }
 
@@ -451,12 +452,12 @@ module.exports = class PermissionsUI {
             const cmd = interaction.fields.getTextInputValue('command').replace(/^\//, '').trim();
             const level = interaction.fields.getTextInputValue('level').trim();
             this.client.permissions.setCommandOverride(guildId, cmd, level);
-            return this._update(interaction, this._cmdsScreen(interaction));
+            return safeUpdate(interaction, this._cmdsScreen(interaction));
         }
         if (action === 'clear_pick') {
             const cmd = interaction.values[0];
             this.client.permissions.setCommandOverride(guildId, cmd, null);
-            return this._update(interaction, this._cmdsScreen(interaction));
+            return safeUpdate(interaction, this._cmdsScreen(interaction));
         }
     }
 
@@ -517,27 +518,12 @@ module.exports = class PermissionsUI {
             const key = interaction.fields.getTextInputValue('key').trim();
             const level = interaction.fields.getTextInputValue('level').trim();
             this.client.permissions.setSettingOverride(guildId, key, level);
-            return this._update(interaction, this._setsScreen(interaction));
+            return safeUpdate(interaction, this._setsScreen(interaction));
         }
         if (action === 'clear_pick') {
             const key = interaction.values[0];
             this.client.permissions.setSettingOverride(guildId, key, null);
-            return this._update(interaction, this._setsScreen(interaction));
+            return safeUpdate(interaction, this._setsScreen(interaction));
         }
-    }
-
-    async _update(interaction, payload) {
-        if (interaction.replied || interaction.deferred)
-            return interaction.editReply(payload);
-        return interaction.update(payload);
-    }
-
-    async _safeError(interaction, message) {
-        const payload = { content: `:x: ${message}`, embeds: [], components: [], flags: MessageFlags.Ephemeral };
-        try {
-            if (interaction.replied || interaction.deferred) return interaction.followUp(payload);
-            if (interaction.isModalSubmit?.()) return interaction.reply(payload);
-            return interaction.reply(payload);
-        } catch { /* swallow */ }
     }
 };

@@ -3,6 +3,7 @@ const {
     StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
+const { safeUpdate, safeError, truncate, errorPanel } = require('@core/lib/InteractionHelpers.js');
 
 /**
  * Interactive in-Discord GUI for managing bot modules.
@@ -40,10 +41,10 @@ module.exports = class ModmanUI {
 
         try {
             switch (screen) {
-                case 'home':            return this._update(interaction, this._home(interaction));
+                case 'home':            return safeUpdate(interaction, this._home(interaction));
                 case 'close':           return interaction.update({ content: this._t('errors.closed', interaction), embeds: [], components: [] });
-                case 'pick':            return this._update(interaction, this._detail(interaction, interaction.values[0]));
-                case 'detail':          return this._update(interaction, this._detail(interaction, args[0]));
+                case 'pick':            return safeUpdate(interaction, this._detail(interaction, interaction.values[0]));
+                case 'detail':          return safeUpdate(interaction, this._detail(interaction, args[0]));
                 case 'reload':          return this._action(interaction, args[0], 'reload');
                 case 'toggle':          return this._action(interaction, args[0], 'toggle');
                 case 'unload':          return this._unloadFlow(interaction, args[0]);
@@ -54,7 +55,7 @@ module.exports = class ModmanUI {
             }
         } catch (err) {
             this.client.errorHandler?.capture(err, { source: 'ModmanUI', userId: interaction.user?.id });
-            await this._safeError(interaction, err.message);
+            await safeError(interaction, err.message);
         }
         return true;
     }
@@ -65,7 +66,7 @@ module.exports = class ModmanUI {
 
         const lines = allNames.map(name => `${this._badge(name)} \`${name}\``);
         const failedSummary = failed.length
-            ? `\n\n${this._t('home.failed-summary', interaction)}\n${failed.map(f => `⚠ \`${f.name}\` — ${this._truncate(f.error, 80)}`).join('\n')}`
+            ? `\n\n${this._t('home.failed-summary', interaction)}\n${failed.map(f => `⚠ \`${f.name}\` — ${truncate(f.error, 80)}`).join('\n')}`
             : '';
 
         const embed = new EmbedBuilder()
@@ -134,7 +135,7 @@ module.exports = class ModmanUI {
                 { name: this._t('detail.dependents', interaction),   value: i.dependents?.length   ? i.dependents.map(d => `\`${d}\``).join(', ') : none, inline: true },
                 { name: this._t('detail.commands', interaction),     value: i.commands?.length     ? i.commands.map(c => `\`/${c}\``).join(', ') : none, inline: false }
             );
-        if (i.lastError) embed.addFields({ name: this._t('detail.last-error', interaction), value: '```' + this._truncate(i.lastError, 1000) + '```' });
+        if (i.lastError) embed.addFields({ name: this._t('detail.last-error', interaction), value: '```' + truncate(i.lastError, 1000) + '```' });
 
         const components = [];
         const buttons1 = [];
@@ -169,16 +170,16 @@ module.exports = class ModmanUI {
                 break;
         }
         if (!result?.ok)
-            return this._update(interaction, this._errorPanel(interaction, this._t('errors.action-failed', interaction, {
+            return safeUpdate(interaction, this._errorPanel(interaction, this._t('errors.action-failed', interaction, {
                 action: kind, name, code: result?.code || 'ERROR', error: result?.error || 'unknown'
             })));
-        return this._update(interaction, this._detail(interaction, name));
+        return safeUpdate(interaction, this._detail(interaction, name));
     }
 
     async _unloadFlow(interaction, name) {
         const mm = this.client.modules;
         const r = await mm.unload(name);
-        if (r.ok) return this._update(interaction, this._home(interaction));
+        if (r.ok) return safeUpdate(interaction, this._home(interaction));
 
         if (r.code === 'DEPENDENCY_LOCKED') {
             const embed = new EmbedBuilder()
@@ -188,9 +189,9 @@ module.exports = class ModmanUI {
                 new ButtonBuilder().setCustomId(`modman:unload_force:${name}`).setStyle(ButtonStyle.Danger).setLabel(this._t('buttons.force-unload', interaction)).setEmoji('💥'),
                 new ButtonBuilder().setCustomId(`modman:detail:${name}`).setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.cancel', interaction)).setEmoji('⬅️')
             );
-            return this._update(interaction, { embeds: [embed], components: [buttons] });
+            return safeUpdate(interaction, { embeds: [embed], components: [buttons] });
         }
-        return this._update(interaction, this._errorPanel(interaction, this._t('unload.failed', interaction, { code: r.code, error: r.error })));
+        return safeUpdate(interaction, this._errorPanel(interaction, this._t('unload.failed', interaction, { code: r.code, error: r.error })));
     }
 
     async _reloadAll(interaction) {
@@ -204,7 +205,7 @@ module.exports = class ModmanUI {
         const embed = new EmbedBuilder()
             .setTitle(this._t('reload-all.title', interaction))
             .setDescription(results.join('\n') || this._t('reload-all.none', interaction));
-        return this._update(interaction, {
+        return safeUpdate(interaction, {
             embeds: [embed],
             components: [new ActionRowBuilder().addComponents(
                 new ButtonBuilder().setCustomId('modman:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
@@ -229,40 +230,16 @@ module.exports = class ModmanUI {
         const name = interaction.fields.getTextInputValue('name').trim();
         const r = await this.client.modules.load(name);
         if (!r.ok)
-            return this._update(interaction, this._errorPanel(interaction, this._t('errors.load-failed', interaction, { code: r.code, error: r.error })));
-        return this._update(interaction, this._detail(interaction, name));
+            return safeUpdate(interaction, this._errorPanel(interaction, this._t('errors.load-failed', interaction, { code: r.code, error: r.error })));
+        return safeUpdate(interaction, this._detail(interaction, name));
     }
 
     _errorPanel(interaction, message) {
-        const embed = new EmbedBuilder()
-            .setTitle(this._t('home.title', interaction))
-            .setDescription(`:x: ${message}`)
-            .setColor(0xE74C3C);
-        return {
-            embeds: [embed],
-            components: [new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId('modman:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
-            )]
-        };
-    }
-
-    async _update(interaction, payload) {
-        if (interaction.replied || interaction.deferred)
-            return interaction.editReply(payload);
-        return interaction.update(payload);
-    }
-
-    async _safeError(interaction, message) {
-        const payload = { content: `:x: ${message}`, embeds: [], components: [], flags: MessageFlags.Ephemeral };
-        try {
-            if (interaction.replied || interaction.deferred) return interaction.followUp(payload);
-            return interaction.reply(payload);
-        } catch { /* swallow */ }
-    }
-
-    _truncate(s, max) {
-        if (s == null) return '';
-        s = String(s);
-        return s.length <= max ? s : s.slice(0, max - 8) + '…[…]';
+        return errorPanel({
+            message,
+            title: this._t('home.title', interaction),
+            homeId: 'modman:home',
+            backLabel: this._t('buttons.back', interaction)
+        });
     }
 };

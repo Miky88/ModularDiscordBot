@@ -4,6 +4,7 @@ const {
     ModalBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
+const { safeUpdate, safeError, truncate, errorPanel } = require('@core/lib/InteractionHelpers.js');
 
 /**
  * In-Discord GUI for per-guild settings.
@@ -44,12 +45,12 @@ module.exports = class SettingsUI {
 
         try {
             switch (screen) {
-                case 'home':         return this._update(interaction, this._home(interaction));
+                case 'home':         return safeUpdate(interaction, this._home(interaction));
                 case 'close':        return interaction.update({ content: this._t('errors.closed', interaction), embeds: [], components: [] });
-                case 'mod_pick':     return this._update(interaction, this._moduleScreen(interaction, interaction.values[0]));
-                case 'mod':          return this._update(interaction, this._moduleScreen(interaction, args[0]));
-                case 'key_pick':     return this._update(interaction, this._keyScreen(interaction, args[0], interaction.values[0]));
-                case 'key':          return this._update(interaction, this._keyScreen(interaction, args[0], args[1]));
+                case 'mod_pick':     return safeUpdate(interaction, this._moduleScreen(interaction, interaction.values[0]));
+                case 'mod':          return safeUpdate(interaction, this._moduleScreen(interaction, args[0]));
+                case 'key_pick':     return safeUpdate(interaction, this._keyScreen(interaction, args[0], interaction.values[0]));
+                case 'key':          return safeUpdate(interaction, this._keyScreen(interaction, args[0], args[1]));
                 case 'edit_btn':     return this._showEditModal(interaction, args[0], args[1]);
                 case 'edit_modal':   return this._submitSet(interaction, args[0], args[1], interaction.fields.getTextInputValue('value'));
                 case 'bool':         return this._submitSet(interaction, args[0], args[1], args[2] === 'true');
@@ -65,7 +66,7 @@ module.exports = class SettingsUI {
             }
         } catch (err) {
             this.client.errorHandler?.capture(err, { source: 'SettingsUI', userId: interaction.user?.id });
-            await this._safeError(interaction, err.message);
+            await safeError(interaction, err.message);
         }
         return true;
     }
@@ -136,7 +137,7 @@ module.exports = class SettingsUI {
                     .setPlaceholder(this._t('module.pick-placeholder', interaction))
                     .addOptions(keys.slice(0, 25).map(k => ({
                         label: k,
-                        description: this._truncate(schema[k].description || schema[k].type, 100),
+                        description: truncate(schema[k].description || schema[k].type, 100),
                         value: k
                     })))
             ));
@@ -264,7 +265,7 @@ module.exports = class SettingsUI {
                     .setCustomId(`settings:arr_remove:${moduleName}:${key}`)
                     .setPlaceholder(this._t('editors.array-remove', interaction))
                     .addOptions(arr.slice(0, 25).map(v => ({
-                        label: this._truncate(String(v), 100),
+                        label: truncate(String(v), 100),
                         value: String(v)
                     })))
             ));
@@ -274,17 +275,17 @@ module.exports = class SettingsUI {
 
     async _showEditModal(interaction, moduleName, key) {
         const mgr = this.client.settings.get(moduleName);
-        if (!mgr || !mgr.has(key)) return this._safeError(interaction, this._t('errors.unknown-setting', interaction));
+        if (!mgr || !mgr.has(key)) return safeError(interaction, this._t('errors.unknown-setting', interaction));
         const def = mgr.schema[key];
         const current = mgr.getKey(interaction.guild.id, key);
 
         const modal = new ModalBuilder()
             .setCustomId(`settings:edit_modal:${moduleName}:${key}`)
-            .setTitle(this._t('modals.edit-title', interaction, { key: this._truncate(key, 40) }));
+            .setTitle(this._t('modals.edit-title', interaction, { key: truncate(key, 40) }));
         modal.addComponents(new ActionRowBuilder().addComponents(
             new TextInputBuilder()
                 .setCustomId('value')
-                .setLabel(this._t('modals.edit-label', interaction, { type: this._truncate(def.type, 40) }))
+                .setLabel(this._t('modals.edit-label', interaction, { type: truncate(def.type, 40) }))
                 .setStyle(def.type === 'string' ? TextInputStyle.Paragraph : TextInputStyle.Short)
                 .setRequired(true)
                 .setMaxLength(2000)
@@ -296,7 +297,7 @@ module.exports = class SettingsUI {
     async _showArrayAddModal(interaction, moduleName, key) {
         const modal = new ModalBuilder()
             .setCustomId(`settings:arr_add_modal:${moduleName}:${key}`)
-            .setTitle(this._t('modals.array-add-title', interaction, { key: this._truncate(key, 40) }));
+            .setTitle(this._t('modals.array-add-title', interaction, { key: truncate(key, 40) }));
         modal.addComponents(new ActionRowBuilder().addComponents(
             new TextInputBuilder()
                 .setCustomId('value').setLabel(this._t('modals.array-add-label', interaction))
@@ -307,85 +308,61 @@ module.exports = class SettingsUI {
 
     async _submitSet(interaction, moduleName, key, value) {
         const mgr = this.client.settings.get(moduleName);
-        if (!mgr) return this._safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
+        if (!mgr) return safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
         try {
             mgr.set(interaction.guild.id, key, value, { actor: interaction.member });
         } catch (err) {
-            return this._safeError(interaction, err.message);
+            return safeError(interaction, err.message);
         }
-        return this._update(interaction, this._keyScreen(interaction, moduleName, key));
+        return safeUpdate(interaction, this._keyScreen(interaction, moduleName, key));
     }
 
     async _submitAdd(interaction, moduleName, key, value) {
         const mgr = this.client.settings.get(moduleName);
-        if (!mgr) return this._safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
+        if (!mgr) return safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
         try {
             mgr.add(interaction.guild.id, key, value, { actor: interaction.member });
         } catch (err) {
-            return this._safeError(interaction, err.message);
+            return safeError(interaction, err.message);
         }
-        return this._update(interaction, this._keyScreen(interaction, moduleName, key));
+        return safeUpdate(interaction, this._keyScreen(interaction, moduleName, key));
     }
 
     async _submitRemove(interaction, moduleName, key, value) {
         const mgr = this.client.settings.get(moduleName);
-        if (!mgr) return this._safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
+        if (!mgr) return safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
         try {
             mgr.remove(interaction.guild.id, key, value, { actor: interaction.member });
         } catch (err) {
-            return this._safeError(interaction, err.message);
+            return safeError(interaction, err.message);
         }
-        return this._update(interaction, this._keyScreen(interaction, moduleName, key));
+        return safeUpdate(interaction, this._keyScreen(interaction, moduleName, key));
     }
 
     async _submitReset(interaction, moduleName, key) {
         const mgr = this.client.settings.get(moduleName);
-        if (!mgr) return this._safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
+        if (!mgr) return safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
         try {
             mgr.reset(interaction.guild.id, key, { actor: interaction.member });
         } catch (err) {
-            return this._safeError(interaction, err.message);
+            return safeError(interaction, err.message);
         }
-        return this._update(interaction, this._keyScreen(interaction, moduleName, key));
+        return safeUpdate(interaction, this._keyScreen(interaction, moduleName, key));
     }
 
     _format(interaction, v) {
         if (v == null || v === '') return this._t('values.unset', interaction);
         if (Array.isArray(v)) return v.length ? v.map(x => `\`${x}\``).join(', ') : this._t('values.empty', interaction);
         if (typeof v === 'boolean') return v ? '`true`' : '`false`';
-        return `\`${this._truncate(String(v), 200)}\``;
+        return `\`${truncate(String(v), 200)}\``;
     }
 
     _errorPanel(interaction, message) {
-        const embed = new EmbedBuilder()
-            .setTitle(this._t('home.title', interaction))
-            .setDescription(`:x: ${message}`)
-            .setColor(0xE74C3C);
-        return {
-            embeds: [embed],
-            components: [new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId('settings:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
-            )]
-        };
-    }
-
-    async _update(interaction, payload) {
-        if (interaction.replied || interaction.deferred)
-            return interaction.editReply(payload);
-        return interaction.update(payload);
-    }
-
-    async _safeError(interaction, message) {
-        const payload = { content: `:x: ${message}`, embeds: [], components: [], flags: MessageFlags.Ephemeral };
-        try {
-            if (interaction.replied || interaction.deferred) return interaction.followUp(payload);
-            return interaction.reply(payload);
-        } catch { /* swallow */ }
-    }
-
-    _truncate(s, max) {
-        if (s == null) return '';
-        s = String(s);
-        return s.length <= max ? s : s.slice(0, max - 1) + '…';
+        return errorPanel({
+            message,
+            title: this._t('home.title', interaction),
+            homeId: 'settings:home',
+            backLabel: this._t('buttons.back', interaction)
+        });
     }
 };
