@@ -42,9 +42,16 @@ module.exports = class Command {
     }
 
     /**
-     * @param {import('../index.js')} client 
-     * @param {Interaction} interaction 
-     * @param {import('./Module.js')} module 
+     * Execute the command. Commands are **terminal** handlers — invoked directly
+     * by `InteractionCommandHandler`, not dispatched through the module event
+     * chain — so the trailing argument is the owning `module`, not an
+     * `EventContext`. (Module event handlers receive `ctx` as their last arg
+     * because they participate in propagation and may call `ctx.stopPropagation()`;
+     * a command never needs to, since the handler already stops propagation on
+     * its behalf once the command has run. See `Module.run`.)
+     * @param {import('../index.js')} client
+     * @param {Interaction} interaction
+     * @param {import('./Module.js')} module
      * @returns {Promise<any>}
      */
     run(client, interaction, module) {}

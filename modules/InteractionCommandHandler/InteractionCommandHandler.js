@@ -2,6 +2,10 @@ const Discord = require('discord.js');
 const Module = require("@core/Module.js");
 const Command = require("@core/Command.js");
 const PowerLevels = require('@core/PowerLevels.js');
+const { safeReply } = require('@core/lib/InteractionHelpers.js');
+
+/** How often to evict expired per-user cooldown entries. */
+const COOLDOWN_SWEEP_MS = 60_000;
 
 module.exports = class InteractionCommandHandler extends Module {
     constructor(client) {
@@ -10,6 +14,58 @@ module.exports = class InteractionCommandHandler extends Module {
             info: "Adds interaction commands support.",
             events: ["clientReady", "interactionCreate"]
         });
+
+        /**
+         * Per-`(user, command)` cooldown expiries, in epoch ms.
+         * Key: `${userId}:${commandName}`. Bounded by lazy deletion on hit plus
+         * a periodic sweep (see `start`/`stop`).
+         * @type {Map<string, number>}
+         */
+        this._cooldowns = new Map();
+    }
+
+    async start(client) {
+        await super.start(client);
+        if (this._cooldownSweeper) clearInterval(this._cooldownSweeper);
+        this._cooldownSweeper = setInterval(() => this._sweepCooldowns(), COOLDOWN_SWEEP_MS);
+        this._cooldownSweeper.unref?.();
+    }
+
+    async stop(client) {
+        if (this._cooldownSweeper) {
+            clearInterval(this._cooldownSweeper);
+            this._cooldownSweeper = null;
+        }
+        await super.stop(client);
+    }
+
+    _sweepCooldowns() {
+        const now = Date.now();
+        for (const [key, expiry] of this._cooldowns) {
+            if (expiry <= now) this._cooldowns.delete(key);
+        }
+    }
+
+    /**
+     * Returns the remaining cooldown for this user+command in ms, or 0 if the
+     * command is off cooldown (in which case the cooldown is (re)armed).
+     * Owners bypass cooldowns entirely.
+     * @param {Discord.Interaction} interaction
+     * @param {Command} cmd
+     * @returns {number}
+     */
+    _cooldownRemaining(interaction, cmd) {
+        const seconds = Number(cmd.config.cooldown) || 0;
+        if (seconds <= 0) return 0;
+        if ((interaction.user.data?.powerlevel ?? 0) >= PowerLevels.OWNER) return 0;
+
+        const key = `${interaction.user.id}:${cmd.config.name}`;
+        const now = Date.now();
+        const expiry = this._cooldowns.get(key);
+        if (expiry && expiry > now) return expiry - now;
+
+        this._cooldowns.set(key, now + seconds * 1000);
+        return 0;
     }
 
     /**
@@ -41,6 +97,14 @@ module.exports = class InteractionCommandHandler extends Module {
                 return ctx?.stopPropagation('command not found');
             }
 
+            if (cmd.config.guildOnly && !interaction.guild) {
+                await this._safeReply(interaction, {
+                    content: this.t('errors.guild-only', interaction),
+                    flags: [Discord.MessageFlags.Ephemeral]
+                });
+                return ctx?.stopPropagation('guild only');
+            }
+
             if (interaction.user.data.powerlevel < cmd.config.minLevel) {
                 await this._safeReply(interaction, {
                     content: this.t('errors.insufficient-powerlevel', interaction, {
@@ -63,6 +127,17 @@ module.exports = class InteractionCommandHandler extends Module {
                     });
                     return ctx?.stopPropagation('guild override denied');
                 }
+            }
+
+            // Rate limit per (user, command). Checked after auth so denied
+            // users never arm a cooldown; owners bypass.
+            const cooldownMs = this._cooldownRemaining(interaction, cmd);
+            if (cooldownMs > 0) {
+                await this._safeReply(interaction, {
+                    content: this.t('errors.cooldown', interaction, { time: Math.ceil(cooldownMs / 1000) }),
+                    flags: [Discord.MessageFlags.Ephemeral]
+                });
+                return ctx?.stopPropagation('on cooldown');
             }
 
             const sub = interaction.options.getSubcommand?.(false);
@@ -95,17 +170,12 @@ module.exports = class InteractionCommandHandler extends Module {
      * already replied/deferred or has expired.
      */
     async _safeReply(interaction, payload) {
-        try {
-            if (interaction.deferred || interaction.replied)
-                return await interaction.followUp(payload);
-            return await interaction.reply(payload);
-        } catch (replyErr) {
+        return safeReply(interaction, payload, (replyErr) =>
             this.client.errorHandler?.capture(replyErr, {
                 source: 'safeReply',
                 command: interaction.commandName,
                 userId: interaction.user?.id,
                 severity: 'warn'
-            });
-        }
+            }));
     }
 }
