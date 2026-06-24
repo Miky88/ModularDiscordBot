@@ -5,6 +5,9 @@ const Logger = require('./Logger');
 
 const YAML_EXTS = ['.yml', '.yaml'];
 
+/** `{{ name }}` placeholder pattern — compiled once, reused for every interpolation. */
+const PLACEHOLDER = /\{\{\s*([\w.-]+)\s*\}\}/g;
+
 /**
  * Loads module-level strings from `/modules/<Module>/locales/<lang>.<yml|yaml>`.
  * Per-module strings are merged under `modules.<Module>` in the language
@@ -35,6 +38,8 @@ module.exports = class LocalizationManager {
         this._files = {};
         this.logger = new Logger('i18n');
         this._watchers = [];
+        /** Per-interaction resolved-language memo (GC-safe, no eviction). */
+        this._langCache = new WeakMap();
 
         this.load();
         if (this.autoSync) this.syncMissingKeys();
@@ -158,12 +163,12 @@ module.exports = class LocalizationManager {
     }
 
     _interpolate(str, vars = {}) {
-        if (str === undefined || str === null) return '';
-        const escapeRegExp = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        return Object.entries(vars).reduce((out, [k, v]) => {
-            const pattern = new RegExp(`{{\\s*${escapeRegExp(k)}\\s*}}`, 'g');
-            return out.replace(pattern, () => String(v));
-        }, String(str));
+        if (str == null) return '';
+        // Single pass over the string with one precompiled regex. The function
+        // replacer keeps `$`/`$&` in values literal; unmatched placeholders
+        // (no var, or an explicit null/undefined value) are left as-is.
+        return String(str).replace(PLACEHOLDER, (match, key) =>
+            vars[key] != null ? String(vars[key]) : match);
     }
 
     /**
@@ -181,6 +186,43 @@ module.exports = class LocalizationManager {
         if (sibling) return sibling;
 
         return this.languages[this.defaultLang] ? this.defaultLang : null;
+    }
+
+    /**
+     * Resolve the effective language for a Discord interaction, memoized for
+     * the lifetime of the interaction object. A single response often renders
+     * many translated strings; without this every `Module.t(key, interaction)`
+     * call would re-run the full guild-settings + user-record + locale
+     * resolution. The resolved language cannot change within one interaction,
+     * so the result is cached in a WeakMap keyed by the interaction.
+     *
+     * Resolution order: user-forced → guild default → Discord interaction
+     * locale → bot default. User language is read-only (`getUser`), so
+     * rendering never creates DB rows or triggers owner reconciliation as a
+     * side effect — that belongs in the command path, not in translation.
+     *
+     * @param {import('..')} client
+     * @param {import('discord.js').BaseInteraction} interaction
+     * @returns {string}
+     */
+    resolveInteractionLang(client, interaction) {
+        const cached = this._langCache.get(interaction);
+        if (cached) return cached;
+
+        const guildLang = interaction.guild
+            ? client.modules.getModule('Utility')?.settings?.get(interaction.guild.id)?.settings?.defaultServerLanguage
+            : null;
+        const userLang = client.database.getUser?.(interaction.user.id)?.language;
+
+        let lang = this.defaultLang;
+        const candidates = [userLang, guildLang, interaction.locale];
+        for (const candidate of candidates) {
+            const resolved = candidate && this.resolveLanguage(candidate);
+            if (resolved && this.languages[resolved]) { lang = resolved; break; }
+        }
+
+        this._langCache.set(interaction, lang);
+        return lang;
     }
 
     /**

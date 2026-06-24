@@ -92,24 +92,12 @@ module.exports = class Module {
         let key = `modules.${this.options.name}.${_key}`;
 
         if (interactionOrLang instanceof BaseInteraction) {
-            const interaction = interactionOrLang;
-            const i18n = this.client.i18n;
-
-            const utility = this.client.modules.getModule("Utility")?.settings;
-            const guildLang = interaction.guild
-                ? utility?.get(interaction.guild.id)?.settings?.defaultServerLanguage
-                : null;
-            const userData = this.client.database.forceUser(interaction.user.id);
-
-            // Resolution order: user-forced → guild default → Discord interaction locale → bot default.
-            let lang = i18n.defaultLang;
-            const candidates = [userData?.language, guildLang, interaction.locale];
-            for (const candidate of candidates) {
-                const resolved = candidate && i18n.resolveLanguage(candidate);
-                if (resolved && i18n.languages[resolved]) { lang = resolved; break; }
-            }
-
-            return i18n.t(key, lang, vars);
+            // Resolution order (user-forced → guild default → Discord locale →
+            // bot default) lives in LocalizationManager and is memoized per
+            // interaction, so rendering an embed with many t() calls resolves
+            // the language once rather than on every call.
+            const lang = this.client.i18n.resolveInteractionLang(this.client, interactionOrLang);
+            return this.client.i18n.t(key, lang, vars);
         } else {
             const lang = interactionOrLang || this.client.i18n.defaultLang;
             return this.client.i18n.t(key, lang, vars);
