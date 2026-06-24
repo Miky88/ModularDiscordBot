@@ -193,6 +193,8 @@ commands:
         nav-cmds-desc: Re-gate a slash command in this guild.
         nav-sets: Setting overrides
         nav-sets-desc: Re-gate a Module.key setting.
+        pick-placeholder: Pick a level to manage…
+        level-counts: "{{roles}} role(s) · {{users}} override(s)"
       levels:
         title: 👑 Levels
         description: >
@@ -340,5 +342,23 @@ commands:
         back: Back
         cancel: Cancel
         set-override: Set override
+        edit: Edit
+        commands: Commands
+        settings: Settings
       errors:
         closed: Closed.
+      level:
+        title: 🔐 {{name}}
+        summary: >
+          `{{id}}` · weight **{{weight}}**{{tag}}
+
+
+          Use the menus below to choose which **Discord roles** map to this
+          level and which **users** are forced to it (a user override beats
+          their roles). Higher weight = more access.
+        roles-field: Discord roles
+        no-roles: _(none yet — pick roles below)_
+        users-field: User overrides
+        no-users: _(none yet — pick users below)_
+        roles-placeholder: Set the Discord roles for this level…
+        users-placeholder: Force this level on specific users…
