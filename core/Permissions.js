@@ -2,6 +2,11 @@ const Logger = require('./Logger.js');
 const PowerLevels = require('./PowerLevels.js');
 const { PermissionsBitField } = require('discord.js');
 
+/** Deep clone a plain (JSON-shaped) record; used for snapshot-and-replace updates. */
+const clone = typeof structuredClone === 'function'
+    ? structuredClone
+    : (obj) => JSON.parse(JSON.stringify(obj));
+
 /**
  * Default level ladder seeded into every guild on first read. The `builtin`
  * tag is informational only (the UI marks which levels shipped by default vs
@@ -72,6 +77,22 @@ module.exports = class PermissionsManager {
     }
 
     /**
+     * Apply a mutation atomically. Clones the guild config, runs `fn` against
+     * the clone, then commits it in a single `update()`. If `fn` throws, the
+     * stored record is left untouched — snapshot-and-replace, never a partial
+     * in-place mutation, and `update()` is the one explicit commit point (Loki
+     * doesn't observe direct property mutations).
+     * @param {string} guildId
+     * @param {(draft: object) => void} fn
+     * @returns {object} The committed config.
+     */
+    _mutate(guildId, fn) {
+        const draft = clone(this.getConfig(guildId));
+        fn(draft);
+        return this._save(draft);
+    }
+
+    /**
      * Look up a level definition in a guild by ID.
      * @returns {{id:string,name:string,weight:number,builtin?:boolean,roles:string[]} | null}
      */
@@ -93,23 +114,22 @@ module.exports = class PermissionsManager {
      */
     setLevel(guildId, level) {
         if (!level || !level.id) throw new Error('Level must have an id.');
-        const cfg = this.getConfig(guildId);
-        const existing = cfg.levels.find(l => l.id === level.id);
-
-        if (existing) {
-            if (typeof level.name === 'string') existing.name = level.name;
-            if (typeof level.weight === 'number') existing.weight = level.weight;
-            if (Array.isArray(level.roles)) existing.roles = [...new Set(level.roles)];
-        } else {
-            cfg.levels.push({
-                id: level.id,
-                name: level.name || level.id,
-                weight: typeof level.weight === 'number' ? level.weight : 0,
-                builtin: false,
-                roles: Array.isArray(level.roles) ? [...new Set(level.roles)] : []
-            });
-        }
-        this._save(cfg);
+        const cfg = this._mutate(guildId, draft => {
+            const existing = draft.levels.find(l => l.id === level.id);
+            if (existing) {
+                if (typeof level.name === 'string') existing.name = level.name;
+                if (typeof level.weight === 'number') existing.weight = level.weight;
+                if (Array.isArray(level.roles)) existing.roles = [...new Set(level.roles)];
+            } else {
+                draft.levels.push({
+                    id: level.id,
+                    name: level.name || level.id,
+                    weight: typeof level.weight === 'number' ? level.weight : 0,
+                    builtin: false,
+                    roles: Array.isArray(level.roles) ? [...new Set(level.roles)] : []
+                });
+            }
+        });
         return cfg.levels.find(l => l.id === level.id);
     }
 
@@ -119,20 +139,17 @@ module.exports = class PermissionsManager {
      * @returns {boolean} true if deleted.
      */
     deleteLevel(guildId, levelId) {
-        const cfg = this.getConfig(guildId);
-        const target = cfg.levels.find(l => l.id === levelId);
-        if (!target) return false;
-
-        cfg.levels = cfg.levels.filter(l => l.id !== levelId);
-        // Strip references in overrides (orphan IDs would silently deny).
-        for (const [uid, lid] of Object.entries(cfg.userOverrides))
-            if (lid === levelId) delete cfg.userOverrides[uid];
-        for (const [cmd, lid] of Object.entries(cfg.commandOverrides))
-            if (lid === levelId) delete cfg.commandOverrides[cmd];
-        for (const [k, lid] of Object.entries(cfg.settingOverrides))
-            if (lid === levelId) delete cfg.settingOverrides[k];
-
-        this._save(cfg);
+        if (!this.getLevel(guildId, levelId)) return false;
+        this._mutate(guildId, draft => {
+            draft.levels = draft.levels.filter(l => l.id !== levelId);
+            // Strip references in overrides (orphan IDs would silently deny).
+            for (const [uid, lid] of Object.entries(draft.userOverrides))
+                if (lid === levelId) delete draft.userOverrides[uid];
+            for (const [cmd, lid] of Object.entries(draft.commandOverrides))
+                if (lid === levelId) delete draft.commandOverrides[cmd];
+            for (const [k, lid] of Object.entries(draft.settingOverrides))
+                if (lid === levelId) delete draft.settingOverrides[k];
+        });
         return true;
     }
 
@@ -141,57 +158,52 @@ module.exports = class PermissionsManager {
      * the resolver takes max weight across all matching bindings.
      */
     bindRole(guildId, levelId, roleId) {
-        const cfg = this.getConfig(guildId);
-        const level = cfg.levels.find(l => l.id === levelId);
-        if (!level) throw new Error(`Unknown level "${levelId}".`);
-        if (!level.roles.includes(roleId)) level.roles.push(roleId);
-        this._save(cfg);
-        return level;
+        return this._mutate(guildId, draft => {
+            const level = draft.levels.find(l => l.id === levelId);
+            if (!level) throw new Error(`Unknown level "${levelId}".`);
+            if (!level.roles.includes(roleId)) level.roles.push(roleId);
+        }).levels.find(l => l.id === levelId);
     }
 
     unbindRole(guildId, levelId, roleId) {
-        const cfg = this.getConfig(guildId);
-        const level = cfg.levels.find(l => l.id === levelId);
-        if (!level) throw new Error(`Unknown level "${levelId}".`);
-        level.roles = level.roles.filter(r => r !== roleId);
-        this._save(cfg);
-        return level;
+        return this._mutate(guildId, draft => {
+            const level = draft.levels.find(l => l.id === levelId);
+            if (!level) throw new Error(`Unknown level "${levelId}".`);
+            level.roles = level.roles.filter(r => r !== roleId);
+        }).levels.find(l => l.id === levelId);
     }
 
     setUserOverride(guildId, userId, levelId) {
-        const cfg = this.getConfig(guildId);
-        if (levelId == null) delete cfg.userOverrides[userId];
-        else {
-            if (!cfg.levels.find(l => l.id === levelId))
-                throw new Error(`Unknown level "${levelId}".`);
-            cfg.userOverrides[userId] = levelId;
-        }
-        this._save(cfg);
-        return cfg.userOverrides;
+        return this._mutate(guildId, draft => {
+            if (levelId == null) delete draft.userOverrides[userId];
+            else {
+                if (!draft.levels.find(l => l.id === levelId))
+                    throw new Error(`Unknown level "${levelId}".`);
+                draft.userOverrides[userId] = levelId;
+            }
+        }).userOverrides;
     }
 
     setCommandOverride(guildId, commandName, levelId) {
-        const cfg = this.getConfig(guildId);
-        if (levelId == null) delete cfg.commandOverrides[commandName];
-        else {
-            if (!cfg.levels.find(l => l.id === levelId))
-                throw new Error(`Unknown level "${levelId}".`);
-            cfg.commandOverrides[commandName] = levelId;
-        }
-        this._save(cfg);
-        return cfg.commandOverrides;
+        return this._mutate(guildId, draft => {
+            if (levelId == null) delete draft.commandOverrides[commandName];
+            else {
+                if (!draft.levels.find(l => l.id === levelId))
+                    throw new Error(`Unknown level "${levelId}".`);
+                draft.commandOverrides[commandName] = levelId;
+            }
+        }).commandOverrides;
     }
 
     setSettingOverride(guildId, settingKey, levelId) {
-        const cfg = this.getConfig(guildId);
-        if (levelId == null) delete cfg.settingOverrides[settingKey];
-        else {
-            if (!cfg.levels.find(l => l.id === levelId))
-                throw new Error(`Unknown level "${levelId}".`);
-            cfg.settingOverrides[settingKey] = levelId;
-        }
-        this._save(cfg);
-        return cfg.settingOverrides;
+        return this._mutate(guildId, draft => {
+            if (levelId == null) delete draft.settingOverrides[settingKey];
+            else {
+                if (!draft.levels.find(l => l.id === levelId))
+                    throw new Error(`Unknown level "${levelId}".`);
+                draft.settingOverrides[settingKey] = levelId;
+            }
+        }).settingOverrides;
     }
 
     /**

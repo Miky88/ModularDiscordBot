@@ -5,8 +5,6 @@ const Logger = require('./Logger.js');
 const PowerLevels = require('./PowerLevels.js');
 const DatabaseHandle = require('./DatabaseHandle.js');
 
-const userCache = new Map();
-
 const DEFAULT_DATA_DIR = 'data';
 const CORE_FILE = 'database.db';
 
@@ -25,7 +23,11 @@ module.exports = class Database {
 
         this.core = this.register('core', {
             file: CORE_FILE,
-            collections: ['users']
+            collections: ['users'],
+            // Unique index on `id`: O(1) `by('id')` lookups (no more linear
+            // scans, and no need for the old in-memory userCache) and a DB-level
+            // guard against duplicate user rows.
+            collectionOptions: { users: { unique: ['id'] } }
         });
     }
 
@@ -67,63 +69,61 @@ module.exports = class Database {
     get users() { return this.core.collection('users'); }
 
     /**
+     * Insert a user record, or return the existing one. Idempotent: the unique
+     * `id` index makes the lookup O(1) and guarantees a second call for the same
+     * id never creates a duplicate row (a raw insert would throw on the unique
+     * constraint).
      * @param {String} userID
+     * @returns {{ id: string, powerlevel: number, language: string | null }}
      */
     addUser(userID) {
-        const user = this.users.insert({
+        const existing = this.users.by('id', userID);
+        if (existing) return existing;
+        return this.users.insert({
             id: userID,
             powerlevel: PowerLevels.USER,
             language: null
         });
-        this.cacheUser(user);
+    }
+
+    /**
+     * @param {String} userID
+     * @returns {{ id: string, powerlevel: number, language: string | null } | null}
+     */
+    getUser(userID) {
+        return this.users.by('id', userID) || null;
+    }
+
+    /**
+     * Fetch a user, creating the record if absent, and reconcile their OWNER
+     * power level against the configured owners list. The whole path is
+     * synchronous (Loki is in-memory), so there's no await gap for a concurrent
+     * call to interleave, and `addUser` is idempotent — no duplicate rows.
+     * @param {String} userID
+     */
+    forceUser(userID) {
+        const user = this.getUser(userID) || this.addUser(userID);
+
+        const isOwner = this.client.config.get('owners').includes(userID);
+        if (user.powerlevel !== PowerLevels.OWNER && isOwner) {
+            user.powerlevel = PowerLevels.OWNER;
+            this.users.update(user);
+        } else if (user.powerlevel === PowerLevels.OWNER && !isOwner) {
+            user.powerlevel = PowerLevels.USER;
+            this.users.update(user);
+        }
         return user;
     }
 
     /**
-     * @param {import('discord.js').User | { id: string }} user
+     * Persist changes to a user record. Synchronous — Loki applies the update
+     * in memory and the autosave loop flushes it; callers may `await` it
+     * harmlessly.
+     * @param {{ id: string }} data
      */
-    cacheUser(user) {
-        userCache.set(user.id, user);
-    }
-
-    /**
-     * @param {String} userID
-     */
-    getUser(userID) {
-        const data = userCache.get(userID) || this.users.findOne({ id: userID });
-        if (data) this.cacheUser(data);
-        return data;
-    }
-
-    /**
-     * @param {String} userID
-     */
-    forceUser(userID) {
-        let user = this.getUser(userID);
-        if (user) {
-            const isOwner = this.client.config.get('owners').includes(userID);
-            if (user.powerlevel !== PowerLevels.OWNER && isOwner) {
-                user.powerlevel = PowerLevels.OWNER;
-                this.updateUser(user);
-            } else if (user.powerlevel === PowerLevels.OWNER && !isOwner) {
-                user.powerlevel = PowerLevels.USER;
-                this.updateUser(user);
-            }
-            return user;
-        }
-        return this.addUser(userID);
-    }
-
-    /**
-     * @param {*} data
-     */
-    async updateUser(data) {
-        delete data.user;
+    updateUser(data) {
         this.users.update(data);
-
-        const update = this.users.findOne({ id: data.id });
-        this.cacheUser(update);
-        return update;
+        return this.users.by('id', data.id);
     }
 
     /**
@@ -182,48 +182,61 @@ module.exports = class Database {
         // race with core's autosave.
         const reuseCore = path.resolve(source) === path.resolve(this.core.file);
         const legacy = reuseCore ? this.core.db : await this._loadStandalone(source);
-        const legacyCollections = legacy.listCollections().map(c => c.name);
-        this.logger.info(`Found ${legacyCollections.length} collection(s) in ${source}: ${legacyCollections.join(', ') || '(none)'}`);
 
-        for (const colName of legacyCollections) {
-            const moduleMatch = colName.match(/^module_(.+)$/);
-            const settingsMatch = colName.match(/^settings_(.+)$/);
-            if (!moduleMatch && !settingsMatch) {
-                report.skipped.push(colName);
-                continue;
+        // When reusing the live core handle, pause its 1s autosave for the whole
+        // migration. Otherwise a periodic flush could fire during one of the
+        // awaits below and persist a half-migrated state, or contend with the
+        // explicit save. Standalone sources are opened with autosave off, so this
+        // only matters for the core handle. Re-enabled in `finally` so a
+        // mid-migration throw can't leave the core DB unable to persist.
+        if (reuseCore) legacy.autosaveDisable();
+        try {
+            const legacyCollections = legacy.listCollections().map(c => c.name);
+            this.logger.info(`Found ${legacyCollections.length} collection(s) in ${source}: ${legacyCollections.join(', ') || '(none)'}`);
+
+            for (const colName of legacyCollections) {
+                const moduleMatch = colName.match(/^module_(.+)$/);
+                const settingsMatch = colName.match(/^settings_(.+)$/);
+                if (!moduleMatch && !settingsMatch) {
+                    report.skipped.push(colName);
+                    continue;
+                }
+
+                const moduleName = (moduleMatch || settingsMatch)[1];
+                const targetCollection = moduleMatch ? 'default' : 'settings';
+                const sourceCol = legacy.getCollection(colName);
+                const rows = sourceCol.find();
+
+                this.logger.info(`${dryRun ? '[dry-run] ' : ''}Migrating ${colName} (${rows.length} row${rows.length === 1 ? '' : 's'}) → ${moduleName}/${targetCollection}`);
+                report.migrated.push({ module: moduleName, collection: targetCollection, rows: rows.length });
+
+                if (dryRun) continue;
+
+                const handle = this.register(moduleName, { collections: [targetCollection] });
+                await handle.ready();
+                const targetCol = handle.collection(targetCollection);
+
+                for (const row of rows) {
+                    const { $loki, meta, ...clean } = row;
+                    targetCol.insert(clean);
+                }
+
+                if (removeOriginal) legacy.removeCollection(colName);
             }
 
-            const moduleName = (moduleMatch || settingsMatch)[1];
-            const targetCollection = moduleMatch ? 'default' : 'settings';
-            const sourceCol = legacy.getCollection(colName);
-            const rows = sourceCol.find();
-
-            this.logger.info(`${dryRun ? '[dry-run] ' : ''}Migrating ${colName} (${rows.length} row${rows.length === 1 ? '' : 's'}) → ${moduleName}/${targetCollection}`);
-            report.migrated.push({ module: moduleName, collection: targetCollection, rows: rows.length });
-
-            if (dryRun) continue;
-
-            const handle = this.register(moduleName, { collections: [targetCollection] });
-            await handle.ready();
-            const targetCol = handle.collection(targetCollection);
-
-            for (const row of rows) {
-                const { $loki, meta, ...clean } = row;
-                targetCol.insert(clean);
+            if (!dryRun) {
+                // Autosave is paused, so this explicit save is what writes the
+                // migrated/cleaned-up state to disk; the re-enabled timer takes
+                // over afterwards.
+                await new Promise((resolve, reject) => legacy.saveDatabase(err => err ? reject(err) : resolve()));
+                if (!reuseCore) await new Promise((resolve) => legacy.close(resolve));
             }
 
-            if (removeOriginal) legacy.removeCollection(colName);
+            this.logger.success(`Migration ${dryRun ? 'dry-run ' : ''}complete: ${report.migrated.length} collection(s) migrated, ${report.skipped.length} skipped.`);
+            return report;
+        } finally {
+            if (reuseCore) legacy.autosaveEnable();
         }
-
-        if (!dryRun) {
-            // Persist legacy changes (only matters if removeOriginal stripped collections).
-            // For the reused core handle, the next autosave tick will flush; we still save explicitly to make the cleanup observable immediately.
-            await new Promise((resolve, reject) => legacy.saveDatabase(err => err ? reject(err) : resolve()));
-            if (!reuseCore) await new Promise((resolve) => legacy.close(resolve));
-        }
-
-        this.logger.success(`Migration ${dryRun ? 'dry-run ' : ''}complete: ${report.migrated.length} collection(s) migrated, ${report.skipped.length} skipped.`);
-        return report;
     }
 
     /**

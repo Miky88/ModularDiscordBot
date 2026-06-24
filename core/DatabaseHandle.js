@@ -36,6 +36,7 @@ module.exports = class DatabaseHandle {
                 autoloadCallback: (err) => {
                     if (err) return reject(err);
                     for (const c of this._declared) this._ensure(c);
+                    this._applyAllIndexOptions();
                     this.logger.verbose(`Loaded (${this._declared.size} collection${this._declared.size === 1 ? '' : 's'})`);
                     resolve(this);
                 }
@@ -47,6 +48,52 @@ module.exports = class DatabaseHandle {
         let col = this.db.getCollection(collectionName);
         if (!col) col = this.db.addCollection(collectionName, this._collectionOptions[collectionName]);
         return col;
+    }
+
+    /**
+     * Apply declared `indices` / `unique` options to every collection, once,
+     * after autoload. Loki does NOT persist unique indexes (and only honours
+     * the `unique`/`indices` passed to addCollection for *new* collections), so
+     * a collection deserialized from an existing file needs its indexes
+     * (re)built here. Runs at load only — never on the per-access `_ensure`
+     * path — so it can't turn a hot `collection()` call into an O(N) rebuild.
+     * @private
+     */
+    _applyAllIndexOptions() {
+        for (const [name, options] of Object.entries(this._collectionOptions)) {
+            const col = this.db.getCollection(name);
+            if (col) this._applyIndexOptions(col, options);
+        }
+    }
+
+    /** @private */
+    _applyIndexOptions(col, options) {
+        if (!options) return;
+        for (const field of options.indices || []) col.ensureIndex(field);
+        for (const field of options.unique || []) {
+            this._dedupeBy(col, field);            // unique build throws on duplicates — pre-clean
+            col.ensureUniqueIndex(field);
+        }
+    }
+
+    /**
+     * Drop rows that share a value for `field`, keeping the first seen. Used to
+     * make an existing collection safe to put a unique index on. No-op (one
+     * cheap O(N) pass) once the data is already clean.
+     * @private
+     */
+    _dedupeBy(col, field) {
+        const seen = new Set();
+        const dupes = [];
+        for (const doc of col.data) {
+            const value = doc[field];
+            if (value == null) continue;
+            if (seen.has(value)) dupes.push(doc);
+            else seen.add(value);
+        }
+        if (!dupes.length) return;
+        for (const doc of dupes) col.remove(doc);
+        this.logger.warn(`De-duplicated '${col.name}': removed ${dupes.length} row(s) sharing '${field}'.`);
     }
 
     /**
