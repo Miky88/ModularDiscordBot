@@ -97,7 +97,9 @@ module.exports = class InteractionCommandHandler extends Module {
                 return ctx?.stopPropagation('command not found');
             }
 
-            if (cmd.config.guildOnly && !interaction.guild) {
+            const dmAllowed = cmd.config.contexts.includes(Discord.InteractionContextType.BotDM)
+                || cmd.config.contexts.includes(Discord.InteractionContextType.PrivateChannel);
+            if (!dmAllowed && !interaction.guild) {
                 await this._safeReply(interaction, {
                     content: this.t('errors.guild-only', interaction),
                     flags: [Discord.MessageFlags.Ephemeral]

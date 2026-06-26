@@ -8,110 +8,54 @@ commands:
       nouserindb: ":warning: Nessun utente nel database corrisponde alla tua ricerca"
   ping:
     name: ping
-    description: Controlla la latenza e responsività del bot.
+    description: Controlla la latenza e la reattività del bot.
     messages:
-      pinging: Pinging...
-      pong: ":ping_pong: Pong! La latenza è **{{latency}}ms**. La latenza API è
-        **{{apiLatency}}ms**"
+      pinging: Ping in corso...
+      pong: ":ping_pong: Pong! La latenza è **{{latency}}ms**. La latenza API è **{{apiLatency}}ms**"
   settings:
     name: settings
-    description: Gestisci le impostazioni del server corrente
-    options:
-      view:
-        name: view
-        description: Visualizza le impostazioni correnti
-      set:
-        name: set
-        description: Imposta un valore
-        options:
-          module:
-            name: module
-            description: Il modulo di cui visualizzare le impostazioni
-          key:
-            name: key
-            description: L’impostazione da visualizzare
-          value:
-            name: value
-            description: Il valore per filtrare le impostazioni
-      reset:
-        name: reset
-        description: Ripristina un’impostazione al valore predefinito
-        options:
-          module:
-            name: module
-            description: Il modulo di cui visualizzare le impostazioni
-          key:
-            name: key
-            description: L’impostazione da ripristinare
-          value:
-            name: value
-            description: Il valore per filtrare le impostazioni
-    embeds:
-      set:
-        title: Impostazione Aggiornata
-        description: commands.settings.embeds.set.description
-      add:
-        title: Impostazione Aggiunta
-        description: commands.settings.embeds.add.description
-      remove:
-        title: Impostazione Rimossa
-        description: commands.settings.embeds.remove.description
-      view:
-        settings: Impostazioni Correnti
-        nosettings:
-          title: Nessuna Impostazione Trovata
-          description: Non ci sono impostazioni configurate per questo modulo.
-        page: Pagina {{page}} di {{totalPages}}
-      reset:
-        title: Impostazione Ripristinata
-        description: L’impostazione è stata ripristinata al valore predefinito.
+    description: Visualizza e modifica le impostazioni del bot per questo server.
     ui:
       home:
         title: ⚙️ Impostazioni
-        description: >
-          Impostazioni del server, raggruppate per modulo. Scegli un modulo per
-          modificare le sue chiavi.
+        description: |
+          Personalizza il funzionamento del bot su questo server. Le impostazioni sono raggruppate per funzione — scegline una qui sotto per vedere cosa puoi modificare.
 
-
-          • Ogni chiave ha un **tipo** dichiarato (stringa, booleano, canale,
-          …); gli editor sottostanti si adattano al tipo.
-
-          • Per richiedere un livello specifico per una chiave individuale in
-          questo server
+          Ogni opzione mostra il suo valore attuale e ti offre l’editor giusto (un interruttore, un selettore di canale e così via) quando la modifichi.
         modules-with-settings: Moduli con impostazioni
         none: _(nessuno)_
         pick-placeholder: Scegli un modulo da modificare…
-        keys-suffix: "{{count}} chiavi"
-        overrides-suffix: "{{count}} sovrascritti"
+        keys-suffix: "{{count}} opzioni"
+        overrides-suffix: "{{count}} limiti"
       module:
         title: ⚙️ {{name}}
-        description: Scegli una chiave da modificare, ripristinare o ispezionare.
-        keys: Chiavi
-        no-keys: _(nessuna chiave)_
-        pick-placeholder: Scegli una chiave…
+        description: Scegli un’opzione qui sotto per visualizzarla o modificarla.
+        keys: Opzioni
+        no-keys: _(nessuna opzione)_
+        pick-placeholder: Scegli un’opzione…
         no-settings: Il modulo `{{name}}` non ha impostazioni.
       key:
         title: ⚙️ {{module}}.{{key}}
         no-description: _(nessuna descrizione)_
         type: Tipo
         default: Predefinito
-        current: Corrente
-        permission-override: Sovrascrizione permesso
-        permission-override-value: requires `{{level}}` (imposta con /permissions)
+        current: Attuale
+        permission-override: Limite di accesso
+        permission-override-value: richiede `{{level}}` (impostato con /permissions)
         unknown: Impostazione `{{module}}.{{key}}` sconosciuta.
       editors:
         enum-placeholder: Scegli un valore…
-        bool-true: On
-        bool-false: Off
+        bool-true: Sì
+        bool-false: "No"
         channel-placeholder: Scegli un canale…
         role-placeholder: Scegli un ruolo…
         user-placeholder: Scegli un utente…
         edit-button: Modifica valore
         array-add-button: Aggiungi valore
-        array-add-channel: Aggiungi canale…
-        array-add-role: Aggiungi ruolo…
-        array-add-user: Aggiungi utente…
-        array-remove: Rimuovi valore…
+        array-add-channel: Aggiungi un canale…
+        array-add-role: Aggiungi un ruolo…
+        array-add-user: Aggiungi un utente…
+        array-remove: Rimuovi un valore…
       modals:
         edit-title: Modifica {{key}}
         edit-label: Nuovo valore ({{type}})
@@ -121,7 +65,7 @@ commands:
         unset: _non impostato_
         empty: _vuoto_
       buttons:
-        reset: Reimposta al predefinito
+        reset: Ripristina predefinito
         back: Indietro
         refresh: Ricarica
         close: Chiudi
@@ -134,7 +78,7 @@ commands:
     description: Visualizza statistiche e informazioni sul bot.
     embed:
       title: STATISTICHE
-      memusage: ⚙️ Utilizzo Memoria
+      memusage: ⚙️ Utilizzo memoria
       uptime: ⏱️ Tempo di attività
       versions: 🔢 Versioni
       creationdate: 🎂 Data di creazione
@@ -148,217 +92,94 @@ commands:
     messages:
       invalidLang: ":warning: La lingua specificata non è supportata."
       success: ":flag_it: La tua lingua preferita è stata impostata su **Italiano**!"
-      reset: ":globe_with_meridians: D'ora in poi la tua lingua sarà sincronizzata con
-        la lingua predefinita!"
+      reset: ":globe_with_meridians: D'ora in poi la tua lingua sarà sincronizzata con la lingua predefinita!"
   permissions:
     name: permissions
-    description: Manage per-guild permission levels and role bindings.
+    description: Scegli chi può usare i comandi del bot su questo server.
     ui:
       home:
-        title: 🔐 Permissions
-        description: >
-          Per-guild permission system. Admins define **levels** (a ladder of
-          named tiers with numeric weights), then bind Discord roles to those
-          levels. Module-side commands and settings stay open by default; you
-          can re-gate individual ones via overrides.
+        title: 🔐 Permessi
+        description: |
+          Scegli chi può usare il bot su questo server.
 
+          Crea dei **livelli** (come Helper, Moderatore o Admin) e collega i tuoi ruoli Discord ad essi. Quasi tutto è aperto a tutti per impostazione predefinita — usa i pulsanti **Comandi** e **Impostazioni** per limitare elementi specifici a un livello.
 
-          **Resolver order** (first match wins):
-
-          `1.` Bot OWNER
-
-          `2.` Guild owner
-
-          `3.` Discord `Administrator` permission
-
-          `4.` Member's effective level (max over bound roles + user override) ≥
-          the level required by an override (if any). With no override set,
-          access is allowed.
-        current-ladder: Current ladder
-        user-overrides: User overrides
-        command-overrides: Command overrides
-        setting-overrides: Setting overrides
-        none: _(none)_
-        no-levels: _(no levels)_
-        footer: "Tip: pick a section below to manage levels, role bindings, or
-          overrides."
-        nav-placeholder: What would you like to manage?
-        nav-levels: Levels
-        nav-levels-desc: Create, rename, reweight, delete levels.
-        nav-roles: Role bindings
-        nav-roles-desc: Bind or unbind roles to levels.
-        nav-users: User overrides
-        nav-users-desc: Force a specific level on a user.
-        nav-cmds: Command overrides
-        nav-cmds-desc: Re-gate a slash command in this guild.
-        nav-sets: Setting overrides
-        nav-sets-desc: Re-gate a Module.key setting.
-        pick-placeholder: Pick a level to manage…
-        level-counts: "{{roles}} role(s) · {{users}} override(s)"
-      levels:
-        title: 👑 Levels
-        description: >
-          Levels are tiers of access with numeric **weights**. Higher weight =
-          more access.
-
-
-          • **Default levels** (`member`, `helper`, `moderator`, `admin`) are
-          seeded into every guild on first use, but they're yours — rename,
-          reweight, or delete them freely.
-
-          • **Custom levels** (e.g. `senior_mod` at weight 7 between `moderator`
-          and `admin`) can be created with any ID and weight.
-
-          • Levels alone do nothing — bind Discord roles to them in the **Role
-          bindings** section, or assign individual users via **User overrides**.
-
-          • Deleting a level automatically clears any overrides referencing it.
-        current-ladder: Current ladder
-        no-levels: _(no levels)_
-        no-roles-bound: _(no roles bound)_
-        default-tag: " *(default)*"
-        edit-placeholder: Edit a level…
-        delete-title: 🗑️ Delete level
-        delete-description: Pick a level to delete. Any overrides referencing it will be
-          cleared automatically.
-        delete-placeholder: Pick a level to delete…
-        none-to-delete: No levels to delete.
-        weight-fmt: weight {{weight}}
-        weight-fmt-default: weight {{weight}} • default
-        modal-create-title: Create a level
-        modal-edit-title: Edit {{name}}
-        modal-id-label: Level ID (lowercase, no spaces)
-        modal-id-placeholder: senior_mod
-        modal-name-label: Display name
-        modal-name-placeholder: Senior Moderator
-        modal-weight-label: Weight (higher = more access)
-        modal-weight-placeholder: "7"
-        empty-id-error: Level ID cannot be empty.
-        weight-not-int-error: Weight must be an integer.
-        unknown-level-error: Unknown level "{{level}}".
-      roles:
-        title: 👥 Role bindings
-        intro: >
-          Bind Discord roles to levels. A member's **effective level** is the
-          **highest weight** across every level any of their roles is bound to.
-
-
-          • A role may be bound to multiple levels — the resolver picks the
-          strongest.
-
-          • Removing a role from a level only changes this binding; the Discord
-          role itself is untouched.
-
-          • To force a specific user to a level regardless of their roles, use
-          **User overrides**.
-        focused-line: "**Selected:** `{{id}}` — {{name}} (weight {{weight}})"
-        bound-list: "Bound: {{roles}}"
-        no-roles-bound: _(no roles bound yet)_
-        all-levels: All levels
-        none: _none_
-        bind-placeholder: Bind a role to {{name}}…
-        unbind-placeholder: Unbind a role from {{name}}…
-        level-pick-placeholder: Choose a level to manage…
-        level-switch-placeholder: Switch to a different level…
-        level-pick-desc: "{{count}} role(s) • weight {{weight}}"
-      users:
-        title: 👤 User overrides
-        description: >
-          Force a specific level on an individual user, **bypassing role
-          bindings**. When set, the user's effective level becomes the override
-          regardless of which roles they have.
-
-
-          • Useful for: testing, granting access to someone without giving them
-          a role, or temporarily downgrading a user.
-
-          • Clear an override to fall back to normal role-based resolution.
-        active-overrides: Active overrides
-        none: _(none)_
-        selected-user: Selected user
-        selected-user-current: " (currently `{{level}}`)"
-        selected-user-empty: " *(no override yet)*"
-        pick-user-placeholder: Pick a user to set/clear an override…
-        clear: — Clear override —
-        clear-desc: Remove this user's override.
-        assign-placeholder: Assign a level (or clear)…
-      cmds:
-        title: ⚡ Command overrides
-        description: >
-          By default, slash commands are gated only by Discord's native
-          `defaultMemberPermissions` (visible in **Server Settings →
-          Integrations → this bot**). This screen lets you add an additional
-          **level requirement** on top, in this guild only.
-
-
-          • Example: gate `/kick` behind `moderator` — anyone with a role bound
-          to `moderator` (or higher) can use it.
-
-          • Set with the **Set override** button (command name + level ID).
-
-          • Clear an override to revert to Discord-native default.
-
-          • Discord `Administrator`, the guild owner, and the bot OWNER always
-          bypass overrides.
-        active-overrides: Active overrides
-        none: _(none)_
-        clear-placeholder: Clear an override…
-        clear-desc: currently `{{level}}`
-        modal-title: Set command override
-        modal-command-label: Command name (without /)
-        modal-command-placeholder: kick
-        modal-level-label: Level ID
-        modal-level-placeholder: moderator
-      sets:
-        title: ⚙️ Setting overrides
-        description: >
-          Re-gate individual settings by their `Module.key` path. By default,
-          anyone who can run `/settings` can edit any key — set an override here
-          to require a specific level for one particular key in this guild.
-
-
-          • Example: `Utility.defaultServerLanguage` → `admin` so only admins
-          change the server's fallback language, even if mods can otherwise use
-          `/settings`.
-
-          • Use **Set override** with a `Module.key` path (autocomplete in
-          `/settings` shows the available keys per module).
-
-          • Clear an override to revert to the default `/settings` gate.
-        active-overrides: Active overrides
-        none: _(none)_
-        clear-placeholder: Clear an override…
-        clear-desc: currently `{{level}}`
-        modal-title: Set setting override
-        modal-key-label: Setting key (Module.key)
-        modal-key-placeholder: Utility.defaultServerLanguage
-        modal-level-label: Level ID
-        modal-level-placeholder: moderator
-      buttons:
-        create: Create level
-        delete: Delete level
-        refresh: Refresh
-        close: Close
-        back: Back
-        cancel: Cancel
-        set-override: Set override
-        edit: Edit
-        commands: Commands
-        settings: Settings
-      errors:
-        closed: Closed.
+          Gli amministratori del server, il proprietario del server e il proprietario del bot hanno sempre accesso completo.
+        current-ladder: Livelli attuali
+        command-overrides: Limiti comandi
+        setting-overrides: Limiti impostazioni
+        no-levels: _(ancora nessun livello)_
+        pick-placeholder: Scegli un livello da gestire…
+        level-counts: "{{roles}} ruolo/i · {{users}} membro/i"
       level:
         title: 🔐 {{name}}
-        summary: >
-          `{{id}}` · weight **{{weight}}**{{tag}}
+        summary: |
+          `{{id}}` · peso **{{weight}}**{{tag}}
 
+          Chiunque abbia i ruoli qui sotto viene trattato come questo livello. Puoi anche aggiungere direttamente persone specifiche — utile per concedere l’accesso senza un ruolo. Un peso più alto significa più accesso.
+        roles-field: Ruoli Discord
+        no-roles: _(ancora nessuno — scegli i ruoli qui sotto)_
+        users-field: Membri
+        no-users: _(ancora nessuno — scegli i membri qui sotto)_
+        roles-placeholder: Scegli i ruoli Discord per questo livello…
+        users-placeholder: Aggiungi membri specifici a questo livello…
+      levels:
+        default-tag: " *(predefinito)*"
+        weight-fmt: peso {{weight}}
+        weight-fmt-default: peso {{weight}} • predefinito
+        modal-create-title: Crea un livello
+        modal-edit-title: Modifica {{name}}
+        modal-id-label: ID livello (minuscolo, senza spazi)
+        modal-id-placeholder: senior_mod
+        modal-name-label: Nome visualizzato
+        modal-name-placeholder: Moderatore Senior
+        modal-weight-label: Peso (più alto = più accesso)
+        modal-weight-placeholder: "7"
+        empty-id-error: L’ID del livello non può essere vuoto.
+        weight-not-int-error: Il peso deve essere un numero intero.
+        unknown-level-error: Livello "{{level}}" sconosciuto.
+      cmds:
+        title: ⚡ Limiti comandi
+        description: |
+          Per impostazione predefinita, ogni comando è disponibile a chiunque possa normalmente usarlo. Qui puoi richiedere un livello per comandi specifici su questo server.
 
-          Use the menus below to choose which **Discord roles** map to this
-          level and which **users** are forced to it (a user override beats
-          their roles). Higher weight = more access.
-        roles-field: Discord roles
-        no-roles: _(none yet — pick roles below)_
-        users-field: User overrides
-        no-users: _(none yet — pick users below)_
-        roles-placeholder: Set the Discord roles for this level…
-        users-placeholder: Force this level on specific users…
+          Ad esempio, limita **/kick** al tuo livello Moderatore così solo i moderatori possono usarlo. Rimuovi un limite in qualsiasi momento per riaprire il comando. Gli amministratori del server, il proprietario del server e il proprietario del bot non sono mai interessati.
+        active-overrides: Limiti attivi
+        none: _(nessuno)_
+        clear-placeholder: Rimuovi un limite…
+        clear-desc: richiede `{{level}}`
+        modal-title: Limita un comando
+        modal-command-label: Comando
+        modal-command-placeholder: Scegli un comando…
+        modal-level-label: Livello
+        modal-level-placeholder: Scegli un livello…
+        no-items: Nessun comando disponibile da limitare.
+      sets:
+        title: ⚙️ Limiti impostazioni
+        description: |
+          Per impostazione predefinita, chiunque possa aprire **/settings** può modificare qualsiasi opzione. Qui puoi richiedere un livello per una singola impostazione su questo server.
+
+          Ad esempio, limita l’impostazione della lingua del server al tuo livello Admin così solo gli admin possono cambiarla. Rimuovi un limite in qualsiasi momento per riaprirla.
+        active-overrides: Limiti attivi
+        none: _(nessuno)_
+        clear-placeholder: Rimuovi un limite…
+        clear-desc: richiede `{{level}}`
+        modal-title: Limita un’impostazione
+        modal-key-label: Impostazione
+        modal-key-placeholder: Scegli un’impostazione…
+        modal-level-label: Livello
+        modal-level-placeholder: Scegli un livello…
+        no-items: Nessuna impostazione disponibile da limitare.
+      buttons:
+        create: Crea livello
+        delete: Elimina livello
+        edit: Modifica
+        commands: Comandi
+        settings: Impostazioni
+        refresh: Ricarica
+        close: Chiudi
+        back: Indietro
+        set-override: Aggiungi un limite
+      errors:
+        closed: Chiuso.
+        incomplete: Scegli tutte le opzioni.

@@ -12,8 +12,7 @@ module.exports = class SettingsCommand extends Command {
         super(client, module, {
             name: 'settings',
             description: 'View or edit per-guild settings.',
-            defaultMemberPermissions: [PermissionsBitField.Flags.ManageGuild],
-            guildOnly: true
+            defaultMemberPermissions: [PermissionsBitField.Flags.ManageGuild]
         });
     }
 

@@ -1,4 +1,4 @@
-let { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js')
+let { EmbedBuilder, ApplicationCommandOptionType, InteractionContextType } = require('discord.js')
 const Command = require('@structures/Command.js');
 const PowerLevels = require('@structures/PowerLevels.js');
 
@@ -8,6 +8,7 @@ module.exports = class PermsCommand extends Command {
             name: 'perms',
             description: 'Shows yours or another user\'s perms',
             minLevel: PowerLevels.BLACKLISTED,
+            contexts: [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel],
             options: [
                 {
                     name: "user",

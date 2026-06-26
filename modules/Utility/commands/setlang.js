@@ -1,5 +1,5 @@
 const Command = require('@structures/Command.js');
-const { ApplicationCommandOptionType, MessageFlags } = require('discord.js');
+const { ApplicationCommandOptionType, MessageFlags, InteractionContextType } = require('discord.js');
 
 module.exports = class SetLangCommand extends Command {
     constructor(client, module) {
@@ -7,6 +7,7 @@ module.exports = class SetLangCommand extends Command {
             name: 'setlang',
             description: 'Set your preferred language for the bot',
             cooldown: 3,
+            contexts: [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel],
             options: [
                 {
                     type: ApplicationCommandOptionType.String,

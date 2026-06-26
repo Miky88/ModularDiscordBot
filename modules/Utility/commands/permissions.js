@@ -11,7 +11,6 @@ module.exports = class PermissionsCommand extends Command {
         super(client, module, {
             name: 'permissions',
             description: 'Manage per-guild permission levels and role bindings.',
-            guildOnly: true,
             defaultMemberPermissions: [PermissionsBitField.Flags.Administrator]
         });
     }

@@ -1,4 +1,4 @@
-const { ApplicationCommandType } = require('discord.js');
+const { ApplicationCommandType, InteractionContextType } = require('discord.js');
 const Logger = require('./Logger.js');
 const PowerLevels = require('./PowerLevels.js');
 
@@ -11,13 +11,13 @@ module.exports = class Command {
         cooldown = 0,
         minLevel = PowerLevels.USER,
         defaultMemberPermissions = null, // Array — Discord-native default visibility/usage gate
-        guildOnly = false,
+        contexts = [InteractionContextType.Guild], // Where the command can be invoked; guild-only by default
         moduleName = 'Unspecified'
     }) {
         /** @type {import('../index.js')} */
         this.client = client
         this.module = module
-        this.config = { name, description, cooldown, minLevel, defaultMemberPermissions, guildOnly, moduleName };
+        this.config = { name, description, cooldown, minLevel, defaultMemberPermissions, contexts, moduleName };
 
         this.data = {
             name,
@@ -90,7 +90,8 @@ module.exports = class Command {
                 descriptionLocalizations: descriptionLocalizations,
                 options
             }),
-            defaultMemberPermissions
+            defaultMemberPermissions,
+            contexts: this.config.contexts,
         };
     }
 }

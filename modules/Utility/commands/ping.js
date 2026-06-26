@@ -1,11 +1,13 @@
 const Command = require('@structures/Command.js');
+const { InteractionContextType } = require('discord.js');
 
 module.exports = class PingCommand extends Command {
     constructor(client, module) {
         super(client, module, {
             name: 'ping',
             description: 'Checks if the bot responds',
-            cooldown: 3
+            cooldown: 3,
+            contexts: [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel]
         });
     }
 
