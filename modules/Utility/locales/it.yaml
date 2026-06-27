@@ -19,60 +19,67 @@ commands:
       home:
         title: ⚙️ Impostazioni
         description: |
-          Personalizza il funzionamento del bot su questo server. Le impostazioni sono raggruppate per funzione — scegline una qui sotto per vedere cosa puoi modificare.
+          Personalizza il funzionamento del bot su questo server. Le impostazioni sono raggruppate per funzione — aprine una qui sotto per vedere cosa puoi modificare.
 
           Ogni opzione mostra il suo valore attuale e ti offre l’editor giusto (un interruttore, un selettore di canale e così via) quando la modifichi.
-        modules-with-settings: Moduli con impostazioni
         none: _(nessuno)_
-        pick-placeholder: Scegli un modulo da modificare…
-        keys-suffix: "{{count}} opzioni"
-        overrides-suffix: "{{count}} limiti"
+        module-summary: "{{keys}} impostazioni · {{commands}} comandi"
       module:
         title: ⚙️ {{name}}
-        description: Scegli un’opzione qui sotto per visualizzarla o modificarla.
-        keys: Opzioni
+        description: Le impostazioni di questo modulo (sopra) e i permessi dei suoi comandi (sotto).
+        settings-field: Impostazioni
         no-keys: _(nessuna opzione)_
-        pick-placeholder: Scegli un’opzione…
         no-settings: Il modulo `{{name}}` non ha impostazioni.
+        unknown: Modulo `{{name}}` sconosciuto.
       key:
-        title: ⚙️ {{module}}.{{key}}
-        no-description: _(nessuna descrizione)_
-        type: Tipo
-        default: Predefinito
         current: Attuale
-        permission-override: Limite di accesso
-        permission-override-value: richiede `{{level}}` (impostato con /permissions)
         unknown: Impostazione `{{module}}.{{key}}` sconosciuta.
       editors:
-        enum-placeholder: Scegli un valore…
         bool-true: Sì
         bool-false: "No"
-        channel-placeholder: Scegli un canale…
-        role-placeholder: Scegli un ruolo…
-        user-placeholder: Scegli un utente…
-        edit-button: Modifica valore
-        array-add-button: Aggiungi valore
-        array-add-channel: Aggiungi un canale…
-        array-add-role: Aggiungi un ruolo…
-        array-add-user: Aggiungi un utente…
-        array-remove: Rimuovi un valore…
       modals:
         edit-title: Modifica {{key}}
-        edit-label: Nuovo valore ({{type}})
-        array-add-title: Aggiungi a {{key}}
-        array-add-label: Valore da aggiungere
+        edit-label: Valore ({{type}})
+        array-hint: Un valore per riga.
+        reset-label: Ripristina predefinito?
+        reset-yes: Sì
+        reset-no: "No"
       values:
         unset: _non impostato_
         empty: _vuoto_
+      pagination: "Pagina {{page}}/{{pages}}"
       buttons:
-        reset: Ripristina predefinito
         back: Indietro
         refresh: Ricarica
         close: Chiudi
+        open: Apri
+        edit: Modifica
       errors:
         closed: Chiuso.
         unknown-setting: Impostazione sconosciuta.
-        no-settings-module: Il modulo `{{module}}` non ha impostazioni.
+      cmdperms:
+        home:
+          commands-field: Comandi
+          readonly: sola lettura
+          none: _(nessun comando)_
+          all-commands: Tutti i comandi (predefinito dell'integrazione)
+          view-placeholder: Vedi un comando nel dettaglio…
+        default:
+          everyone: tutti
+          admins-only: solo amministratori
+          requires: "richiede {{perms}}"
+        detail:
+          title: "🔐 /{{name}}"
+          default: Predefinito
+          no-overrides: Nessun override
+        all-channels: Tutti i canali
+        pagination: "Pagina {{page}}/{{pages}}"
+        buttons:
+          refresh: Ricarica
+          open-integrations: Apri Integrazioni
+          back: Indietro
+        errors:
+          fetch-failed: Impossibile leggere i permessi in tempo reale da Discord — mostro quanto disponibile. Prova a ricaricare.
   stats:
     name: stats
     description: Visualizza statistiche e informazioni sul bot.
@@ -93,93 +100,3 @@ commands:
       invalidLang: ":warning: La lingua specificata non è supportata."
       success: ":flag_it: La tua lingua preferita è stata impostata su **Italiano**!"
       reset: ":globe_with_meridians: D'ora in poi la tua lingua sarà sincronizzata con la lingua predefinita!"
-  permissions:
-    name: permissions
-    description: Scegli chi può usare i comandi del bot su questo server.
-    ui:
-      home:
-        title: 🔐 Permessi
-        description: |
-          Scegli chi può usare il bot su questo server.
-
-          Crea dei **livelli** (come Helper, Moderatore o Admin) e collega i tuoi ruoli Discord ad essi. Quasi tutto è aperto a tutti per impostazione predefinita — usa i pulsanti **Comandi** e **Impostazioni** per limitare elementi specifici a un livello.
-
-          Gli amministratori del server, il proprietario del server e il proprietario del bot hanno sempre accesso completo.
-        current-ladder: Livelli attuali
-        command-overrides: Limiti comandi
-        setting-overrides: Limiti impostazioni
-        no-levels: _(ancora nessun livello)_
-        pick-placeholder: Scegli un livello da gestire…
-        level-counts: "{{roles}} ruolo/i · {{users}} membro/i"
-      level:
-        title: 🔐 {{name}}
-        summary: |
-          `{{id}}` · peso **{{weight}}**{{tag}}
-
-          Chiunque abbia i ruoli qui sotto viene trattato come questo livello. Puoi anche aggiungere direttamente persone specifiche — utile per concedere l’accesso senza un ruolo. Un peso più alto significa più accesso.
-        roles-field: Ruoli Discord
-        no-roles: _(ancora nessuno — scegli i ruoli qui sotto)_
-        users-field: Membri
-        no-users: _(ancora nessuno — scegli i membri qui sotto)_
-        roles-placeholder: Scegli i ruoli Discord per questo livello…
-        users-placeholder: Aggiungi membri specifici a questo livello…
-      levels:
-        default-tag: " *(predefinito)*"
-        weight-fmt: peso {{weight}}
-        weight-fmt-default: peso {{weight}} • predefinito
-        modal-create-title: Crea un livello
-        modal-edit-title: Modifica {{name}}
-        modal-id-label: ID livello (minuscolo, senza spazi)
-        modal-id-placeholder: senior_mod
-        modal-name-label: Nome visualizzato
-        modal-name-placeholder: Moderatore Senior
-        modal-weight-label: Peso (più alto = più accesso)
-        modal-weight-placeholder: "7"
-        empty-id-error: L’ID del livello non può essere vuoto.
-        weight-not-int-error: Il peso deve essere un numero intero.
-        unknown-level-error: Livello "{{level}}" sconosciuto.
-      cmds:
-        title: ⚡ Limiti comandi
-        description: |
-          Per impostazione predefinita, ogni comando è disponibile a chiunque possa normalmente usarlo. Qui puoi richiedere un livello per comandi specifici su questo server.
-
-          Ad esempio, limita **/kick** al tuo livello Moderatore così solo i moderatori possono usarlo. Rimuovi un limite in qualsiasi momento per riaprire il comando. Gli amministratori del server, il proprietario del server e il proprietario del bot non sono mai interessati.
-        active-overrides: Limiti attivi
-        none: _(nessuno)_
-        clear-placeholder: Rimuovi un limite…
-        clear-desc: richiede `{{level}}`
-        modal-title: Limita un comando
-        modal-command-label: Comando
-        modal-command-placeholder: Scegli un comando…
-        modal-level-label: Livello
-        modal-level-placeholder: Scegli un livello…
-        no-items: Nessun comando disponibile da limitare.
-      sets:
-        title: ⚙️ Limiti impostazioni
-        description: |
-          Per impostazione predefinita, chiunque possa aprire **/settings** può modificare qualsiasi opzione. Qui puoi richiedere un livello per una singola impostazione su questo server.
-
-          Ad esempio, limita l’impostazione della lingua del server al tuo livello Admin così solo gli admin possono cambiarla. Rimuovi un limite in qualsiasi momento per riaprirla.
-        active-overrides: Limiti attivi
-        none: _(nessuno)_
-        clear-placeholder: Rimuovi un limite…
-        clear-desc: richiede `{{level}}`
-        modal-title: Limita un’impostazione
-        modal-key-label: Impostazione
-        modal-key-placeholder: Scegli un’impostazione…
-        modal-level-label: Livello
-        modal-level-placeholder: Scegli un livello…
-        no-items: Nessuna impostazione disponibile da limitare.
-      buttons:
-        create: Crea livello
-        delete: Elimina livello
-        edit: Modifica
-        commands: Comandi
-        settings: Impostazioni
-        refresh: Ricarica
-        close: Chiudi
-        back: Indietro
-        set-override: Aggiungi un limite
-      errors:
-        closed: Chiuso.
-        incomplete: Scegli tutte le opzioni.

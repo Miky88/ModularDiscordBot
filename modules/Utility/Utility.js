@@ -1,5 +1,4 @@
 const Module = require("@structures/Module.js");
-const PermissionsUI = require("./lib/PermissionsUI.js");
 const SettingsUI = require("./lib/SettingsUI.js");
 
 module.exports = class Utility extends Module {
@@ -17,7 +16,6 @@ module.exports = class Utility extends Module {
             }
         });
 
-        this.permissionsUI = new PermissionsUI(this);
         this.settingsUI = new SettingsUI(this);
     }
 
@@ -26,10 +24,10 @@ module.exports = class Utility extends Module {
      * @param {import('discord.js').Interaction} interaction
      */
     async interactionCreate(client, interaction) {
-        // Component / modal interactions belonging to one of the GUIs.
+        // Component / modal interactions belonging to the settings GUI (which now
+        // also routes the `settings:cperm:*` command-permission sub-views).
         if (interaction.isMessageComponent?.() || interaction.isModalSubmit?.()) {
             const id = interaction.customId || '';
-            if (id.startsWith('perms:'))    return this.permissionsUI.handle(interaction);
             if (id.startsWith('settings:')) return this.settingsUI.handle(interaction);
         }
 

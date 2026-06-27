@@ -19,150 +19,67 @@ commands:
       home:
         title: ⚙️ Settings
         description: |
-          Customise how the bot works on this server. Settings are grouped by feature — pick one below to see what you can change.
+          Customise how the bot works on this server. Settings are grouped by feature — open one below to see what you can change.
 
           Each option shows its current value, and you get the right kind of editor (a toggle, a channel picker, and so on) when you change it.
-        modules-with-settings: Modules with settings
         none: _(none)_
-        pick-placeholder: Pick a module to edit…
-        keys-suffix: "{{count}} key(s)"
-        overrides-suffix: "{{count}} override(s)"
+        module-summary: "{{keys}} setting(s) · {{commands}} command(s)"
       module:
         title: "⚙️ {{name}}"
-        description: Choose an option below to view or change it.
-        keys: Keys
+        description: This module's settings (above) and its command permissions (below).
+        settings-field: Settings
         no-keys: _(no keys)_
-        pick-placeholder: Pick a key…
         no-settings: "Module `{{name}}` has no settings."
+        unknown: "No such module `{{name}}`."
       key:
-        title: "⚙️ {{module}}.{{key}}"
-        no-description: _(no description)_
-        type: Type
-        default: Default
         current: Current
-        permission-override: Permission override
-        permission-override-value: "requires `{{level}}` (set via /permissions)"
         unknown: "No such setting `{{module}}.{{key}}`."
       editors:
-        enum-placeholder: Pick a value…
         bool-true: "True"
         bool-false: "False"
-        channel-placeholder: Pick a channel…
-        role-placeholder: Pick a role…
-        user-placeholder: Pick a user…
-        edit-button: Edit value
-        array-add-button: Add value
-        array-add-channel: Add a channel…
-        array-add-role: Add a role…
-        array-add-user: Add a user…
-        array-remove: Remove a value…
       modals:
         edit-title: "Edit {{key}}"
-        edit-label: "New value ({{type}})"
-        array-add-title: "Add to {{key}}"
-        array-add-label: Value to add
+        edit-label: "Value ({{type}})"
+        array-hint: One value per line.
+        reset-label: Reset to default?
+        reset-yes: "Yes"
+        reset-no: "No"
       values:
         unset: _unset_
         empty: _empty_
+      pagination: "Page {{page}}/{{pages}}"
       buttons:
-        reset: Reset to default
         back: Back
         refresh: Refresh
         close: Close
+        open: Open
+        edit: Edit
       errors:
         closed: Closed.
         unknown-setting: Unknown setting.
-        no-settings-module: "Module `{{module}}` has no settings."
-  permissions:
-    name: permissions
-    description: Choose who can use the bot's commands on this server.
-    ui:
-      home:
-        title: 🔐 Permissions
-        description: |
-          Choose who can use the bot on this server.
-
-          Create **levels** (like Helper, Moderator or Admin) and link your Discord roles to them. Almost everything is open to everyone by default — use the **Commands** and **Settings** buttons to limit specific ones to a level.
-
-          Server admins, the server owner and the bot owner always have full access.
-        current-ladder: Current levels
-        command-overrides: Command limits
-        setting-overrides: Setting limits
-        no-levels: _(no levels yet)_
-        pick-placeholder: Pick a level to manage…
-        level-counts: "{{roles}} role(s) · {{users}} member(s)"
-      level:
-        title: "🔐 {{name}}"
-        summary: |
-          `{{id}}` · weight **{{weight}}**{{tag}}
-
-          Anyone with the roles below is treated as this level. You can also add specific people directly — handy for granting access without a role. A higher weight means more access.
-        roles-field: Discord roles
-        no-roles: _(none yet — pick roles below)_
-        users-field: Members
-        no-users: _(none yet — pick members below)_
-        roles-placeholder: Choose the Discord roles for this level…
-        users-placeholder: Add specific members to this level…
-      levels:
-        default-tag: " *(default)*"
-        weight-fmt: "weight {{weight}}"
-        weight-fmt-default: "weight {{weight}} • default"
-        modal-create-title: Create a level
-        modal-edit-title: "Edit {{name}}"
-        modal-id-label: "Level ID (lowercase, no spaces)"
-        modal-id-placeholder: senior_mod
-        modal-name-label: Display name
-        modal-name-placeholder: Senior Moderator
-        modal-weight-label: "Weight (higher = more access)"
-        modal-weight-placeholder: "7"
-        empty-id-error: Level ID cannot be empty.
-        weight-not-int-error: Weight must be a whole number.
-        unknown-level-error: 'Unknown level "{{level}}".'
-      cmds:
-        title: ⚡ Command limits
-        description: |
-          By default, every command is open to anyone who can normally use it. Here you can require a level for specific commands on this server.
-
-          For example, limit **/kick** to your Moderator level so only mods can use it. Remove a limit any time to open the command back up. Server admins, the server owner and the bot owner are never affected.
-        active-overrides: Active limits
-        none: _(none)_
-        clear-placeholder: Remove a limit…
-        clear-desc: "needs `{{level}}`"
-        modal-title: Limit a command
-        modal-command-label: Command
-        modal-command-placeholder: Pick a command…
-        modal-level-label: Level
-        modal-level-placeholder: Pick a level…
-        no-items: No commands available to limit.
-      sets:
-        title: ⚙️ Setting limits
-        description: |
-          By default, anyone who can open **/settings** can change any option. Here you can require a level for a single setting on this server.
-
-          For example, limit the server's language setting to your Admin level so only admins can change it. Remove a limit any time to open it back up.
-        active-overrides: Active limits
-        none: _(none)_
-        clear-placeholder: Remove a limit…
-        clear-desc: "needs `{{level}}`"
-        modal-title: Limit a setting
-        modal-key-label: Setting
-        modal-key-placeholder: Pick a setting…
-        modal-level-label: Level
-        modal-level-placeholder: Pick a level…
-        no-items: No settings available to limit.
-      buttons:
-        create: Create level
-        delete: Delete level
-        edit: Edit
-        commands: Commands
-        settings: Settings
-        refresh: Refresh
-        close: Close
-        back: Back
-        set-override: Add a limit
-      errors:
-        closed: Closed.
-        incomplete: Please choose all options.
+      cmdperms:
+        home:
+          commands-field: Commands
+          readonly: read-only
+          none: _(no commands)_
+          all-commands: All commands (integration default)
+          view-placeholder: View a command in detail…
+        default:
+          everyone: everyone
+          admins-only: administrators only
+          requires: "requires {{perms}}"
+        detail:
+          title: "🔐 /{{name}}"
+          default: Default
+          no-overrides: No overrides
+        all-channels: All channels
+        pagination: "Page {{page}}/{{pages}}"
+        buttons:
+          refresh: Refresh
+          open-integrations: Open Integrations
+          back: Back
+        errors:
+          fetch-failed: Couldn't read the live permissions from Discord — showing what's available. Try Refresh.
   stats:
     name: stats
     description: View bot statistics and information.

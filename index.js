@@ -9,7 +9,6 @@ const ConfigurationManager = require('./structures/ConfigurationManager.js');
 const Utils = require('./structures/Utils.js');
 const LocalizationManager = require('./structures/LocalizationManager.js');
 const ErrorHandler = require('./structures/ErrorHandler.js');
-const PermissionsManager = require('./structures/Permissions.js');
 const Logger = require('./structures/Logger.js');
 BigInt.prototype.toJSON = function () { return this.toString() } // MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
 
@@ -53,7 +52,6 @@ class BotClient extends Client {
 
         this.errorHandler = new ErrorHandler(this, config.get('errorReporting'));
         this.database = new Database(this);
-        this.permissions = new PermissionsManager(this);
     }
 };
 

@@ -1,17 +1,35 @@
 const {
-    EmbedBuilder, ActionRowBuilder, ButtonBuilder, ButtonStyle,
+    ContainerBuilder, SectionBuilder, TextDisplayBuilder, SeparatorBuilder,
+    ActionRowBuilder, ButtonBuilder, ButtonStyle,
     StringSelectMenuBuilder, ChannelSelectMenuBuilder, RoleSelectMenuBuilder, UserSelectMenuBuilder,
-    ModalBuilder, TextInputBuilder, TextInputStyle,
+    ModalBuilder, LabelBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
-const { safeUpdate, safeError, truncate, errorPanel } = require('@structures/lib/InteractionHelpers.js');
+const { safeUpdate, safeError, truncate, errorContainer, paginate, navRow } = require('@structures/lib/InteractionHelpers.js');
+const CommandPermissionsView = require('./CommandPermissionsView.js');
+
+/** Accent bar colour for the settings containers (Discord blurple). */
+const ACCENT = 0x5865F2;
+/** Section page sizes — kept modest so a screen stays under the v2 40-component cap. */
+const MODULES_PER_PAGE = 8;
+const KEYS_PER_PAGE = 6;
+/** Sentinel from `_readModalValue`: leave the value unchanged (don't call set). */
+const NO_CHANGE = Symbol('no-change');
 
 /**
- * In-Discord GUI for per-guild settings.
+ * In-Discord GUI for per-guild settings — the single panel behind `/settings`,
+ * built with **Components v2** (accent containers, Sections with inline button
+ * accessories, inline selects). Every payload carries `MessageFlags.IsComponentsV2`
+ * and contains no embeds/content.
  *
- *   home  → list of modules with settings
- *   mod   → keys in a module with current values
- *   key   → key detail with type-aware editor
+ *   home  → modules (with settings and/or commands) as Sections, each with an Open button
+ *   mod   → a module's settings keys (Sections + inline Edit) above, command
+ *           permissions (read-only) below
+ *   edit  → a key's Edit button opens a modal directly (a type-driven value
+ *           input + a "Reset to default?" Yes/No select); its submit applies the
+ *           change and re-renders the module screen — there is no key screen
+ *   cperm → one command's permission detail (read-only; delegated to
+ *           CommandPermissionsView), reached from the module screen's command select
  *
  * Custom-id convention: `settings:<screen>[:<arg>...]`. All user-facing
  * strings flow through the locale system — see
@@ -24,6 +42,7 @@ module.exports = class SettingsUI {
     constructor(utilityModule) {
         this.module = utilityModule;
         this.client = utilityModule.client;
+        this.cmdperms = new CommandPermissionsView(utilityModule);
     }
 
     /** Localize a UI string under `commands.settings.ui.<key>`. */
@@ -32,7 +51,7 @@ module.exports = class SettingsUI {
     }
 
     async open(interaction) {
-        await interaction.reply({ ...this._home(interaction), flags: MessageFlags.Ephemeral });
+        await interaction.reply({ ...this._home(interaction), flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral });
     }
 
     /**
@@ -45,24 +64,14 @@ module.exports = class SettingsUI {
 
         try {
             switch (screen) {
-                case 'home':         return safeUpdate(interaction, this._home(interaction));
-                case 'close':        return interaction.update({ content: this._t('errors.closed', interaction), embeds: [], components: [] });
-                case 'mod_pick':     return safeUpdate(interaction, this._moduleScreen(interaction, interaction.values[0]));
-                case 'mod':          return safeUpdate(interaction, this._moduleScreen(interaction, args[0]));
-                case 'key_pick':     return safeUpdate(interaction, this._keyScreen(interaction, args[0], interaction.values[0]));
-                case 'key':          return safeUpdate(interaction, this._keyScreen(interaction, args[0], args[1]));
-                case 'edit_btn':     return this._showEditModal(interaction, args[0], args[1]);
-                case 'edit_modal':   return this._submitSet(interaction, args[0], args[1], interaction.fields.getTextInputValue('value'));
-                case 'bool':         return this._submitSet(interaction, args[0], args[1], args[2] === 'true');
-                case 'enum_set':     return this._submitSet(interaction, args[0], args[1], interaction.values[0]);
-                case 'channel_set':  return this._submitSet(interaction, args[0], args[1], interaction.values[0]);
-                case 'role_set':     return this._submitSet(interaction, args[0], args[1], interaction.values[0]);
-                case 'user_set':     return this._submitSet(interaction, args[0], args[1], interaction.values[0]);
-                case 'arr_add_btn':  return this._showArrayAddModal(interaction, args[0], args[1]);
-                case 'arr_add_modal':return this._submitAdd(interaction, args[0], args[1], interaction.fields.getTextInputValue('value'));
-                case 'arr_add_sel':  return this._submitAdd(interaction, args[0], args[1], interaction.values[0]);
-                case 'arr_remove':   return this._submitRemove(interaction, args[0], args[1], interaction.values[0]);
-                case 'reset':        return this._submitReset(interaction, args[0], args[1]);
+                case 'home':         return safeUpdate(interaction, this._home(interaction, Number(args[0]) || 0));
+                case 'close':        return interaction.update({ components: [new TextDisplayBuilder().setContent(this._t('errors.closed', interaction))], flags: MessageFlags.IsComponentsV2 });
+                case 'cperm':        return this.cmdperms.handle(interaction, args);
+                case 'mod':          return this._openModule(interaction, args[0], Number(args[1]) || 0, Number(args[2]) || 0);
+                // A key's Edit button opens the unified editor modal directly (no
+                // intermediate screen); its submit applies the change in place.
+                case 'edit':         return this._editModal(interaction, args[0], args[1], Number(args[2]) || 0, Number(args[3]) || 0);
+                case 'editsub':      return this._submitEdit(interaction, args[0], args[1], Number(args[2]) || 0, Number(args[3]) || 0);
             }
         } catch (err) {
             this.client.errorHandler?.capture(err, { source: 'SettingsUI', userId: interaction.user?.id });
@@ -71,283 +80,244 @@ module.exports = class SettingsUI {
         return true;
     }
 
-    _home(interaction) {
-        const guildId = interaction.guild.id;
-        const modules = [...this.client.settings.entries()];
-        const cfg = this.client.permissions.getConfig(guildId);
+    _home(interaction, page = 0) {
+        const modules = this.client.modules.enabledModules()
+            .filter(m => m.settings || m.commands.size > 0)
+            .sort((a, b) => a.options.name.localeCompare(b.options.name));
 
-        const lines = modules.map(([name, mgr]) => {
-            const keyCount = mgr.keys().length;
-            const overrideCount = Object.keys(cfg.settingOverrides).filter(k => k.startsWith(name + '.')).length;
-            const keyText = this._t('home.keys-suffix', interaction, { count: keyCount });
-            const overrideText = overrideCount ? ` · ${this._t('home.overrides-suffix', interaction, { count: overrideCount })}` : '';
-            return `**${name}** — ${keyText}${overrideText}`;
+        const summary = (m) => this._t('home.module-summary', interaction, {
+            keys: m.settings ? m.settings.keys().length : 0,
+            commands: m.commands.size
         });
 
-        const embed = new EmbedBuilder()
-            .setTitle(this._t('home.title', interaction))
-            .setDescription(this._t('home.description', interaction))
-            .addFields({ name: this._t('home.modules-with-settings', interaction), value: lines.join('\n') || this._t('home.none', interaction) });
+        const container = new ContainerBuilder().setAccentColor(ACCENT);
+        container.addTextDisplayComponents(new TextDisplayBuilder().setContent(
+            `## ${this._t('home.title', interaction)}\n${this._t('home.description', interaction)}`
+        ));
+        container.addSeparatorComponents(new SeparatorBuilder());
 
-        const components = [];
         if (modules.length > 0) {
-            components.push(new ActionRowBuilder().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId('settings:mod_pick')
-                    .setPlaceholder(this._t('home.pick-placeholder', interaction))
-                    .addOptions(modules.slice(0, 25).map(([name, mgr]) => ({
-                        label: name,
-                        description: this._t('home.keys-suffix', interaction, { count: mgr.keys().length }),
-                        value: name
-                    })))
-            ));
+            const { pageItems, page: current, pageCount } = paginate(modules, page, MODULES_PER_PAGE);
+            for (const m of pageItems) {
+                container.addSectionComponents(new SectionBuilder()
+                    .addTextDisplayComponents(new TextDisplayBuilder().setContent(`**${m.options.name}**\n-# ${summary(m)}`))
+                    .setButtonAccessory(new ButtonBuilder().setCustomId(`settings:mod:${m.options.name}`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.open', interaction)).setEmoji('➡️')));
+            }
+            const nav = navRow(p => `settings:home:${p}`, current, pageCount);
+            if (nav) {
+                container.addActionRowComponents(nav);
+                container.addTextDisplayComponents(new TextDisplayBuilder().setContent(`-# ${this._t('pagination', interaction, { page: current + 1, pages: pageCount })}`));
+            }
+        } else {
+            container.addTextDisplayComponents(new TextDisplayBuilder().setContent(this._t('home.none', interaction)));
         }
-        components.push(new ActionRowBuilder().addComponents(
+
+        container.addSeparatorComponents(new SeparatorBuilder());
+        container.addActionRowComponents(new ActionRowBuilder().addComponents(
             new ButtonBuilder().setCustomId('settings:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.refresh', interaction)).setEmoji('🔄'),
             new ButtonBuilder().setCustomId('settings:close').setStyle(ButtonStyle.Danger).setLabel(this._t('buttons.close', interaction)).setEmoji('❌')
         ));
 
-        return { content: '', embeds: [embed], components };
+        return { flags: MessageFlags.IsComponentsV2, components: [container] };
     }
 
-    _moduleScreen(interaction, moduleName) {
+    /** Defer + render the (async, perms-fetching) module screen in place. */
+    async _openModule(interaction, moduleName, keyPage, cmdPage) {
+        await interaction.deferUpdate();
+        return interaction.editReply(await this._moduleScreen(interaction, moduleName, keyPage, cmdPage));
+    }
+
+    /**
+     * One screen per module: settings keys (above) and that module's native
+     * command permissions (below), each independently paginated on its own axis
+     * of the screen's custom-id (`settings:mod:<module>:<keyPage>:<cmdPage>`).
+     * Async because the command-permissions block reads live from Discord.
+     */
+    async _moduleScreen(interaction, moduleName, keyPage = 0, cmdPage = 0) {
         const guildId = interaction.guild.id;
-        const mgr = this.client.settings.get(moduleName);
-        if (!mgr) return this._errorPanel(interaction, this._t('module.no-settings', interaction, { name: moduleName }));
+        const mod = this.client.modules.getModule(moduleName);
+        if (!mod) return this._errorPanel(interaction, this._t('module.unknown', interaction, { name: moduleName }));
 
-        const schema = mgr.schema;
-        const record = mgr.get(guildId);
-        const keys = Object.keys(schema);
+        const container = new ContainerBuilder().setAccentColor(ACCENT);
+        container.addTextDisplayComponents(new TextDisplayBuilder().setContent(
+            `## ${this._t('module.title', interaction, { name: moduleName })}\n${this._t('module.description', interaction)}`
+        ));
 
-        const lines = keys.map(k => {
-            const v = record.settings[k];
-            return `\`${k}\` — \`${schema[k].type}\` = ${this._format(interaction, v)}`;
-        });
+        // Settings keys (above) — Sections with inline Edit buttons.
+        container.addSeparatorComponents(new SeparatorBuilder());
+        const mgr = mod.settings;
+        if (mgr) {
+            const schema = mgr.schema;
+            const record = mgr.get(guildId);
+            const keys = Object.keys(schema);
 
-        const embed = new EmbedBuilder()
-            .setTitle(this._t('module.title', interaction, { name: moduleName }))
-            .setDescription(this._t('module.description', interaction))
-            .addFields({ name: this._t('module.keys', interaction), value: lines.join('\n') || this._t('module.no-keys', interaction) });
-
-        const components = [];
-        if (keys.length > 0) {
-            components.push(new ActionRowBuilder().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId(`settings:key_pick:${moduleName}`)
-                    .setPlaceholder(this._t('module.pick-placeholder', interaction))
-                    .addOptions(keys.slice(0, 25).map(k => ({
-                        label: k,
-                        description: truncate(schema[k].description || schema[k].type, 100),
-                        value: k
-                    })))
-            ));
+            if (keys.length > 0) {
+                const { pageItems, page, pageCount } = paginate(keys, keyPage, KEYS_PER_PAGE);
+                container.addTextDisplayComponents(new TextDisplayBuilder().setContent(this._heading(this._t('module.settings-field', interaction), interaction, page, pageCount)));
+                for (const k of pageItems) {
+                    container.addSectionComponents(new SectionBuilder()
+                        .addTextDisplayComponents(new TextDisplayBuilder().setContent(`\`${k}\` · \`${schema[k].type}\`\n${this._t('key.current', interaction)}: ${this._format(interaction, record.settings[k])}`))
+                        .setButtonAccessory(new ButtonBuilder().setCustomId(`settings:edit:${moduleName}:${k}:${page}:${cmdPage}`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.edit', interaction)).setEmoji('✏️')));
+                }
+                const nav = navRow(p => `settings:mod:${moduleName}:${p}:${cmdPage}`, page, pageCount);
+                if (nav) container.addActionRowComponents(nav);
+            } else {
+                container.addTextDisplayComponents(new TextDisplayBuilder().setContent(`## ${this._t('module.settings-field', interaction)}\n${this._t('module.no-keys', interaction)}`));
+            }
+        } else {
+            container.addTextDisplayComponents(new TextDisplayBuilder().setContent(`## ${this._t('module.settings-field', interaction)}\n${this._t('module.no-settings', interaction, { name: moduleName })}`));
         }
-        components.push(new ActionRowBuilder().addComponents(
+
+        // Command permissions (below) — delegated to CommandPermissionsView.
+        const cmdButtons = [];
+        if (mod.commands.size > 0) {
+            container.addSeparatorComponents(new SeparatorBuilder());
+            cmdButtons.push(...await this.cmdperms.sectionInto(container, interaction, { moduleName, keyPage, cmdPage }));
+        }
+
+        container.addSeparatorComponents(new SeparatorBuilder());
+        container.addActionRowComponents(new ActionRowBuilder().addComponents(
+            ...cmdButtons,
             new ButtonBuilder().setCustomId('settings:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
         ));
 
-        return { embeds: [embed], components };
+        return { flags: MessageFlags.IsComponentsV2, components: [container] };
     }
 
-    _keyScreen(interaction, moduleName, key) {
-        const guildId = interaction.guild.id;
-        const mgr = this.client.settings.get(moduleName);
-        if (!mgr || !mgr.has(key)) return this._errorPanel(interaction, this._t('key.unknown', interaction, { module: moduleName, key }));
-
-        const def = mgr.schema[key];
-        const value = mgr.getKey(guildId, key);
-        const cfg = this.client.permissions.getConfig(guildId);
-        const overrideKey = `${moduleName}.${key}`;
-        const override = cfg.settingOverrides[overrideKey];
-
-        const embed = new EmbedBuilder()
-            .setTitle(this._t('key.title', interaction, { module: moduleName, key }))
-            .setDescription(def.description || this._t('key.no-description', interaction))
-            .addFields(
-                { name: this._t('key.type', interaction),    value: `\`${def.type}\``, inline: true },
-                { name: this._t('key.default', interaction), value: this._format(interaction, def.default), inline: true },
-                { name: this._t('key.current', interaction), value: this._format(interaction, value), inline: true }
-            );
-        if (override) {
-            embed.addFields({
-                name: this._t('key.permission-override', interaction),
-                value: this._t('key.permission-override-value', interaction, { level: override }),
-                inline: false
-            });
-        }
-
-        const components = [
-            ...this._editorComponents(interaction, moduleName, key, def, value),
-            new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId(`settings:reset:${moduleName}:${key}`).setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.reset', interaction)).setEmoji('↩️'),
-                new ButtonBuilder().setCustomId(`settings:mod:${moduleName}`).setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
-            )
-        ];
-        return { embeds: [embed], components };
+    /** A markdown `##` section heading, with a small "Page x/y" subline when paginated. */
+    _heading(label, interaction, page, pageCount) {
+        return pageCount > 1 ? `## ${label}\n-# ${this._t('pagination', interaction, { page: page + 1, pages: pageCount })}` : `## ${label}`;
     }
 
-    /** Type-driven editor row(s). */
-    _editorComponents(interaction, moduleName, key, def, value) {
-        const type = def.type;
-
-        const arrMatch = String(type).match(/^array<(.+)>$/);
-        if (arrMatch) return this._arrayEditor(interaction, moduleName, key, arrMatch[1], value);
-
-        if (String(type).startsWith('enum:')) {
-            const choices = String(type).slice(5).split('|');
-            return [new ActionRowBuilder().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId(`settings:enum_set:${moduleName}:${key}`)
-                    .setPlaceholder(this._t('editors.enum-placeholder', interaction))
-                    .addOptions(choices.slice(0, 25).map(c => ({ label: c, value: c, default: c === value })))
-            )];
-        }
-
-        if (type === 'boolean') {
-            return [new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId(`settings:bool:${moduleName}:${key}:true`).setStyle(value === true ? ButtonStyle.Success : ButtonStyle.Secondary).setLabel(this._t('editors.bool-true', interaction)),
-                new ButtonBuilder().setCustomId(`settings:bool:${moduleName}:${key}:false`).setStyle(value === false ? ButtonStyle.Danger : ButtonStyle.Secondary).setLabel(this._t('editors.bool-false', interaction))
-            )];
-        }
-
-        if (type === 'channel') return [new ActionRowBuilder().addComponents(
-            new ChannelSelectMenuBuilder().setCustomId(`settings:channel_set:${moduleName}:${key}`)
-                .setPlaceholder(this._t('editors.channel-placeholder', interaction)).setMinValues(1).setMaxValues(1)
-        )];
-        if (type === 'role') return [new ActionRowBuilder().addComponents(
-            new RoleSelectMenuBuilder().setCustomId(`settings:role_set:${moduleName}:${key}`)
-                .setPlaceholder(this._t('editors.role-placeholder', interaction)).setMinValues(1).setMaxValues(1)
-        )];
-        if (type === 'user') return [new ActionRowBuilder().addComponents(
-            new UserSelectMenuBuilder().setCustomId(`settings:user_set:${moduleName}:${key}`)
-                .setPlaceholder(this._t('editors.user-placeholder', interaction)).setMinValues(1).setMaxValues(1)
-        )];
-
-        // Text-based scalars (string / number / integer / snowflake) → modal.
-        return [new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-                .setCustomId(`settings:edit_btn:${moduleName}:${key}`)
-                .setStyle(ButtonStyle.Primary)
-                .setLabel(this._t('editors.edit-button', interaction))
-                .setEmoji('✏️')
-        )];
-    }
-
-    _arrayEditor(interaction, moduleName, key, innerType, value) {
-        const components = [];
-        const arr = Array.isArray(value) ? value : [];
-
-        if (innerType === 'channel') {
-            components.push(new ActionRowBuilder().addComponents(
-                new ChannelSelectMenuBuilder().setCustomId(`settings:arr_add_sel:${moduleName}:${key}`)
-                    .setPlaceholder(this._t('editors.array-add-channel', interaction)).setMinValues(1).setMaxValues(1)
-            ));
-        } else if (innerType === 'role') {
-            components.push(new ActionRowBuilder().addComponents(
-                new RoleSelectMenuBuilder().setCustomId(`settings:arr_add_sel:${moduleName}:${key}`)
-                    .setPlaceholder(this._t('editors.array-add-role', interaction)).setMinValues(1).setMaxValues(1)
-            ));
-        } else if (innerType === 'user') {
-            components.push(new ActionRowBuilder().addComponents(
-                new UserSelectMenuBuilder().setCustomId(`settings:arr_add_sel:${moduleName}:${key}`)
-                    .setPlaceholder(this._t('editors.array-add-user', interaction)).setMinValues(1).setMaxValues(1)
-            ));
-        } else {
-            components.push(new ActionRowBuilder().addComponents(
-                new ButtonBuilder().setCustomId(`settings:arr_add_btn:${moduleName}:${key}`)
-                    .setStyle(ButtonStyle.Primary).setLabel(this._t('editors.array-add-button', interaction)).setEmoji('➕')
-            ));
-        }
-
-        if (arr.length > 0) {
-            components.push(new ActionRowBuilder().addComponents(
-                new StringSelectMenuBuilder()
-                    .setCustomId(`settings:arr_remove:${moduleName}:${key}`)
-                    .setPlaceholder(this._t('editors.array-remove', interaction))
-                    .addOptions(arr.slice(0, 25).map(v => ({
-                        label: truncate(String(v), 100),
-                        value: String(v)
-                    })))
-            ));
-        }
-        return components;
-    }
-
-    async _showEditModal(interaction, moduleName, key) {
+    /**
+     * Open the unified editor modal for one key — a single dynamic input chosen
+     * by the key's type, plus a "Reset to default?" Yes/No select (default No).
+     * No intermediate screen: the modal opens straight from the key's Edit button.
+     * `keyPage`/`cmdPage` are threaded through the modal custom-id so the submit
+     * can re-render the same module-screen page.
+     */
+    async _editModal(interaction, moduleName, key, keyPage, cmdPage) {
         const mgr = this.client.settings.get(moduleName);
         if (!mgr || !mgr.has(key)) return safeError(interaction, this._t('errors.unknown-setting', interaction));
         const def = mgr.schema[key];
-        const current = mgr.getKey(interaction.guild.id, key);
+        const value = mgr.getKey(interaction.guild.id, key);
 
         const modal = new ModalBuilder()
-            .setCustomId(`settings:edit_modal:${moduleName}:${key}`)
-            .setTitle(this._t('modals.edit-title', interaction, { key: truncate(key, 40) }));
-        modal.addComponents(new ActionRowBuilder().addComponents(
-            new TextInputBuilder()
-                .setCustomId('value')
-                .setLabel(this._t('modals.edit-label', interaction, { type: truncate(def.type, 40) }))
-                .setStyle(def.type === 'string' ? TextInputStyle.Paragraph : TextInputStyle.Short)
-                .setRequired(true)
-                .setMaxLength(2000)
-                .setValue(current == null ? '' : String(current))
-        ));
+            .setCustomId(`settings:editsub:${moduleName}:${key}:${keyPage}:${cmdPage}`)
+            .setTitle(truncate(this._t('modals.edit-title', interaction, { key }), 45))
+            .addLabelComponents(
+                this._valueLabel(interaction, def, value),
+                this._resetLabel(interaction)
+            );
         await interaction.showModal(modal);
     }
 
-    async _showArrayAddModal(interaction, moduleName, key) {
-        const modal = new ModalBuilder()
-            .setCustomId(`settings:arr_add_modal:${moduleName}:${key}`)
-            .setTitle(this._t('modals.array-add-title', interaction, { key: truncate(key, 40) }));
-        modal.addComponents(new ActionRowBuilder().addComponents(
-            new TextInputBuilder()
-                .setCustomId('value').setLabel(this._t('modals.array-add-label', interaction))
-                .setStyle(TextInputStyle.Short).setRequired(true).setMaxLength(2000)
+    /**
+     * The dynamic value input, wrapped in a Label, chosen by the key's type:
+     * text input for scalars, a string-select for boolean/enum, a native picker
+     * for channel/role/user, and (for arrays) a multi-select or a one-per-line
+     * paragraph that edits the whole list. Prefilled with the current value.
+     */
+    _valueLabel(interaction, def, value) {
+        const type = String(def.type);
+        const label = new LabelBuilder().setLabel(truncate(this._t('modals.edit-label', interaction, { type }), 45));
+        if (def.description) label.setDescription(truncate(def.description, 100));
+
+        // Channel/role/user pickers allow an empty selection (minValues 0), so
+        // they must be marked optional — Discord rejects required + min_values 0.
+        const arr = type.match(/^array<(.+)>$/);
+        if (arr) {
+            const inner = arr[1];
+            if (inner === 'channel') return label.setChannelSelectMenuComponent(new ChannelSelectMenuBuilder().setCustomId('value').setRequired(false).setMinValues(0).setMaxValues(25).setDefaultChannels(...this._ids(value)));
+            if (inner === 'role')    return label.setRoleSelectMenuComponent(new RoleSelectMenuBuilder().setCustomId('value').setRequired(false).setMinValues(0).setMaxValues(25).setDefaultRoles(...this._ids(value)));
+            if (inner === 'user')    return label.setUserSelectMenuComponent(new UserSelectMenuBuilder().setCustomId('value').setRequired(false).setMinValues(0).setMaxValues(25).setDefaultUsers(...this._ids(value)));
+            label.setDescription(truncate(this._t('modals.array-hint', interaction), 100));
+            return label.setTextInputComponent(new TextInputBuilder().setCustomId('value').setStyle(TextInputStyle.Paragraph).setRequired(false).setMaxLength(4000).setValue((Array.isArray(value) ? value : []).join('\n')));
+        }
+
+        if (type === 'boolean') return label.setStringSelectMenuComponent(new StringSelectMenuBuilder().setCustomId('value').setMinValues(1).setMaxValues(1).addOptions(
+            { label: this._t('editors.bool-true', interaction), value: 'true', default: value === true },
+            { label: this._t('editors.bool-false', interaction), value: 'false', default: value === false }
         ));
-        await interaction.showModal(modal);
+        if (type.startsWith('enum:')) {
+            const choices = type.slice(5).split('|');
+            return label.setStringSelectMenuComponent(new StringSelectMenuBuilder().setCustomId('value').setMinValues(1).setMaxValues(1)
+                .addOptions(choices.slice(0, 25).map(c => ({ label: c, value: c, default: c === value }))));
+        }
+        if (type === 'channel') return label.setChannelSelectMenuComponent(new ChannelSelectMenuBuilder().setCustomId('value').setRequired(false).setMinValues(0).setMaxValues(1).setDefaultChannels(...this._ids(value)));
+        if (type === 'role')    return label.setRoleSelectMenuComponent(new RoleSelectMenuBuilder().setCustomId('value').setRequired(false).setMinValues(0).setMaxValues(1).setDefaultRoles(...this._ids(value)));
+        if (type === 'user')    return label.setUserSelectMenuComponent(new UserSelectMenuBuilder().setCustomId('value').setRequired(false).setMinValues(0).setMaxValues(1).setDefaultUsers(...this._ids(value)));
+
+        // Text-based scalars (string / number / integer / snowflake).
+        return label.setTextInputComponent(new TextInputBuilder().setCustomId('value')
+            .setStyle(type === 'string' ? TextInputStyle.Paragraph : TextInputStyle.Short)
+            .setRequired(false).setMaxLength(type === 'string' ? 4000 : 100)
+            .setValue(value == null ? '' : String(value)));
     }
 
-    async _submitSet(interaction, moduleName, key, value) {
+    /** The "Reset to default?" Yes/No select (default No), wrapped in a Label. */
+    _resetLabel(interaction) {
+        return new LabelBuilder()
+            .setLabel(truncate(this._t('modals.reset-label', interaction), 45))
+            .setStringSelectMenuComponent(new StringSelectMenuBuilder().setCustomId('reset').setMinValues(1).setMaxValues(1).addOptions(
+                { label: this._t('modals.reset-no', interaction), value: 'no', default: true },
+                { label: this._t('modals.reset-yes', interaction), value: 'yes' }
+            ));
+    }
+
+    /** Snowflake id(s) from a stored value (single or array), for select defaults. */
+    _ids(value) {
+        if (value == null || value === '') return [];
+        return (Array.isArray(value) ? value : [value]).filter(Boolean);
+    }
+
+    /**
+     * Apply an editor-modal submission: reset to default if "Yes" was picked,
+     * otherwise read the type-appropriate value and set it. `NO_CHANGE` (an empty
+     * scalar input or untouched-empty single picker) leaves the value as-is —
+     * clearing a value is done via Reset. Then re-render the module screen.
+     */
+    async _submitEdit(interaction, moduleName, key, keyPage, cmdPage) {
         const mgr = this.client.settings.get(moduleName);
-        if (!mgr) return safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
+        if (!mgr || !mgr.has(key)) return safeError(interaction, this._t('key.unknown', interaction, { module: moduleName, key }));
+
+        const reset = interaction.fields.getStringSelectValues('reset')[0];
         try {
-            mgr.set(interaction.guild.id, key, value, { actor: interaction.member });
+            if (reset === 'yes') {
+                mgr.reset(interaction.guild.id, key);
+            } else {
+                const value = this._readModalValue(interaction, mgr.schema[key]);
+                if (value !== NO_CHANGE) mgr.set(interaction.guild.id, key, value);
+            }
         } catch (err) {
             return safeError(interaction, err.message);
         }
-        return safeUpdate(interaction, this._keyScreen(interaction, moduleName, key));
+        return this._openModule(interaction, moduleName, keyPage, cmdPage);
     }
 
-    async _submitAdd(interaction, moduleName, key, value) {
-        const mgr = this.client.settings.get(moduleName);
-        if (!mgr) return safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
-        try {
-            mgr.add(interaction.guild.id, key, value, { actor: interaction.member });
-        } catch (err) {
-            return safeError(interaction, err.message);
-        }
-        return safeUpdate(interaction, this._keyScreen(interaction, moduleName, key));
-    }
+    /** Read the modal's `value` component as the typed new value (or `NO_CHANGE`). */
+    _readModalValue(interaction, def) {
+        const f = interaction.fields;
+        const type = String(def.type);
 
-    async _submitRemove(interaction, moduleName, key, value) {
-        const mgr = this.client.settings.get(moduleName);
-        if (!mgr) return safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
-        try {
-            mgr.remove(interaction.guild.id, key, value, { actor: interaction.member });
-        } catch (err) {
-            return safeError(interaction, err.message);
+        const arr = type.match(/^array<(.+)>$/);
+        if (arr) {
+            const inner = arr[1];
+            if (inner === 'channel') return [...f.getSelectedChannels('value').keys()];
+            if (inner === 'role')    return [...f.getSelectedRoles('value').keys()];
+            if (inner === 'user')    return [...f.getSelectedUsers('value').keys()];
+            return f.getTextInputValue('value').split(/\r?\n/).map(s => s.trim()).filter(s => s.length);
         }
-        return safeUpdate(interaction, this._keyScreen(interaction, moduleName, key));
-    }
 
-    async _submitReset(interaction, moduleName, key) {
-        const mgr = this.client.settings.get(moduleName);
-        if (!mgr) return safeError(interaction, this._t('errors.no-settings-module', interaction, { module: moduleName }));
-        try {
-            mgr.reset(interaction.guild.id, key, { actor: interaction.member });
-        } catch (err) {
-            return safeError(interaction, err.message);
-        }
-        return safeUpdate(interaction, this._keyScreen(interaction, moduleName, key));
+        if (type === 'boolean')      return f.getStringSelectValues('value')[0] === 'true';
+        if (type.startsWith('enum:')) return f.getStringSelectValues('value')[0];
+        if (type === 'channel')      return [...f.getSelectedChannels('value').keys()][0] ?? NO_CHANGE;
+        if (type === 'role')         return [...f.getSelectedRoles('value').keys()][0] ?? NO_CHANGE;
+        if (type === 'user')         return [...f.getSelectedUsers('value').keys()][0] ?? NO_CHANGE;
+
+        const raw = f.getTextInputValue('value');
+        if (type !== 'string' && raw.trim() === '') return NO_CHANGE; // clear a scalar via Reset, not an empty field
+        return raw;
     }
 
     _format(interaction, v) {
@@ -358,10 +328,9 @@ module.exports = class SettingsUI {
     }
 
     _errorPanel(interaction, message) {
-        return errorPanel({
+        return errorContainer({
             message,
-            title: this._t('home.title', interaction),
-            homeId: 'settings:home',
+            backId: 'settings:home',
             backLabel: this._t('buttons.back', interaction)
         });
     }

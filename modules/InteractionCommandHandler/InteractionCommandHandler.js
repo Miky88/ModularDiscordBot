@@ -117,19 +117,10 @@ module.exports = class InteractionCommandHandler extends Module {
                 return ctx?.stopPropagation('insufficient powerlevel');
             }
 
-            // Per-guild custom-level override (admin-applied via /permissions).
-            // No module-side gate — Discord's `defaultMemberPermissions` is the
-            // baseline; this only kicks in when an admin has set `commandOverrides[name]`.
-            if (interaction.guild) {
-                const ok = client.permissions.check(interaction.member, { commandName: cmd.config.name });
-                if (!ok) {
-                    await this._safeReply(interaction, {
-                        content: this.t('errors.guild-override-denied', interaction),
-                        flags: [Discord.MessageFlags.Ephemeral]
-                    });
-                    return ctx?.stopPropagation('guild override denied');
-                }
-            }
+            // Command access is governed entirely by Discord's native per-command
+            // permissions (defaultMemberPermissions + the admin-managed overrides
+            // shown read-only by /permissions). Discord enforces those server-side
+            // before the interaction ever reaches us — there is no bot-side gate.
 
             // Rate limit per (user, command). Checked after auth so denied
             // users never arm a cooldown; owners bypass.

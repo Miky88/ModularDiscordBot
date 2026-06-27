@@ -85,10 +85,11 @@ function mkValidator(spec) {
  *   }
  *
  * Storage shape: one record per guild — `{ id: guildId, settings: { key: value } }`.
- * Live in the `settings` collection of the module's database handle. Module-side
- * gating is intentionally absent: the `/settings` command itself is gated by
- * Discord-native permissions, and admins delegate per-key access by setting
- * `settingOverrides` via `/permissions override setting`.
+ * Live in the `settings` collection of the module's database handle. There is no
+ * per-key gating: access is governed entirely by who can run the `/settings`
+ * command, which is gated by Discord-native permissions (ManageGuild by default,
+ * refinable in Server Settings → Integrations). Anyone who can open `/settings`
+ * may edit any key.
  */
 module.exports = class SettingsManager {
     /**
@@ -207,32 +208,15 @@ module.exports = class SettingsManager {
     }
 
     /**
-     * Override-driven authorization. The `/settings` command itself is gated
-     * by Discord-native permissions; this layer only enforces an admin-set
-     * `settingOverrides[Module.key]` if one exists. No module-side defaults.
-     * Pass `actor` as a GuildMember to enable the check; null/undefined skips.
-     */
-    _authorize(key, actor) {
-        if (!actor) return;
-        const ok = this.client.permissions.check(actor, {
-            settingKey: `${this.module.options.name}.${key}`
-        });
-        if (!ok) throw new Error(`Missing permission to modify "${key}" in this guild.`);
-    }
-
-    /**
      * Set a key to a value. Validates against the schema; coerces strings
-     * (e.g. `"true"` → `true` for boolean keys). If `actor` is supplied, the
-     * key's `requires` permission is enforced.
+     * (e.g. `"true"` → `true` for boolean keys). Access is governed by the
+     * `/settings` command's Discord-native gating; there is no per-key check.
      * @param {string} guildId
      * @param {string} key
      * @param {*} value
-     * @param {object} [options]
-     * @param {import('discord.js').GuildMember} [options.actor]
      */
-    set(guildId, key, value, options = {}) {
+    set(guildId, key, value) {
         const coerced = this._validate(key, value);
-        this._authorize(key, options.actor);
 
         const record = this.get(guildId);
         record.settings[key] = coerced;
@@ -245,10 +229,9 @@ module.exports = class SettingsManager {
      * Append `value` to an array-typed key. Errors if the key isn't an array
      * type. Duplicates are allowed unless caller filters.
      */
-    add(guildId, key, value, options = {}) {
+    add(guildId, key, value) {
         if (!String(this._schema[key]?.type).startsWith('array<'))
             throw new Error(`"${key}" is not an array setting.`);
-        this._authorize(key, options.actor);
 
         const innerSpec = this._schema[key].type.match(/^array<(.+)>$/)[1];
         const innerValidator = mkValidator(innerSpec);
@@ -265,10 +248,9 @@ module.exports = class SettingsManager {
     }
 
     /** Remove `value` from an array-typed key. */
-    remove(guildId, key, value, options = {}) {
+    remove(guildId, key, value) {
         if (!String(this._schema[key]?.type).startsWith('array<'))
             throw new Error(`"${key}" is not an array setting.`);
-        this._authorize(key, options.actor);
 
         const innerSpec = this._schema[key].type.match(/^array<(.+)>$/)[1];
         const innerValidator = mkValidator(innerSpec);
@@ -284,9 +266,8 @@ module.exports = class SettingsManager {
     }
 
     /** Reset a single key to its default. */
-    reset(guildId, key, options = {}) {
+    reset(guildId, key) {
         if (!this.has(key)) throw new Error(`Unknown setting "${key}".`);
-        this._authorize(key, options.actor);
 
         const record = this.get(guildId);
         record.settings[key] = this._cloneDefault(this._schema[key].default);
@@ -296,8 +277,7 @@ module.exports = class SettingsManager {
     }
 
     /** Reset every key in this module to defaults. */
-    factoryReset(guildId, options = {}) {
-        for (const key of this.keys()) this._authorize(key, options.actor);
+    factoryReset(guildId) {
         const record = this.get(guildId);
         record.settings = this.defaults();
         this._collection().update(record);
