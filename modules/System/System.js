@@ -57,7 +57,7 @@ module.exports = class System extends Module {
 
         // If the bot got rebooted with reboot command, this will edit the message once ready
         try {
-            const { id, channel } = require("./../reboot.json");
+            const { id, channel } = require("../../reboot.json");
             const c = client.channels.cache.get(channel);
             await c.messages.fetch();
             const m = c.messages.cache.get(id);
