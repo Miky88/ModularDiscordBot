@@ -47,6 +47,14 @@ commands:
       values:
         unset: _unset_
         empty: _empty_
+      node:
+        object-desc: Edit each field, or open a nested list.
+        items: "{{count}} item(s)"
+        fields: "{{count}} field(s)"
+        empty: _(empty — add one below)_
+        item-n: "Item {{n}}"
+        gone: That item no longer exists — it may have been removed.
+        reset-confirm: Reset this to its default? This can't be undone.
       pagination: "Page {{page}}/{{pages}}"
       buttons:
         back: Back
@@ -54,6 +62,11 @@ commands:
         close: Close
         open: Open
         edit: Edit
+        add: Add
+        reset: Reset
+        cancel: Cancel
+        confirm-delete: Confirm delete
+        confirm-reset: Confirm reset
       errors:
         closed: Closed.
         unknown-setting: Unknown setting.

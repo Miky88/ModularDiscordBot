@@ -7,6 +7,7 @@ const {
 } = require('discord.js');
 const { safeUpdate, safeError, truncate, errorContainer, paginate, navRow } = require('@structures/lib/InteractionHelpers.js');
 const CommandPermissionsView = require('./CommandPermissionsView.js');
+const SettingsNodeEditor = require('./SettingsNodeEditor.js');
 
 /** Accent bar colour for the settings containers (Discord blurple). */
 const ACCENT = 0x5865F2;
@@ -43,6 +44,11 @@ module.exports = class SettingsUI {
         this.module = utilityModule;
         this.client = utilityModule.client;
         this.cmdperms = new CommandPermissionsView(utilityModule);
+        this.nodeEditor = new SettingsNodeEditor(utilityModule, this);
+        // Re-exported so SettingsNodeEditor can reuse the leaf-modal value reader
+        // and compute which module-screen page a key sits on (for its Back button).
+        this.NO_CHANGE = NO_CHANGE;
+        this.KEYS_PER_PAGE = KEYS_PER_PAGE;
     }
 
     /** Localize a UI string under `commands.settings.ui.<key>`. */
@@ -68,10 +74,14 @@ module.exports = class SettingsUI {
                 case 'close':        return interaction.update({ components: [new TextDisplayBuilder().setContent(this._t('errors.closed', interaction))], flags: MessageFlags.IsComponentsV2 });
                 case 'cperm':        return this.cmdperms.handle(interaction, args);
                 case 'mod':          return this._openModule(interaction, args[0], Number(args[1]) || 0, Number(args[2]) || 0);
-                // A key's Edit button opens the unified editor modal directly (no
-                // intermediate screen); its submit applies the change in place.
+                // A flat key's Edit button opens the unified editor modal directly
+                // (no intermediate screen); its submit applies the change in place.
                 case 'edit':         return this._editModal(interaction, args[0], args[1], Number(args[2]) || 0, Number(args[3]) || 0);
                 case 'editsub':      return this._submitEdit(interaction, args[0], args[1], Number(args[2]) || 0, Number(args[3]) || 0);
+                // Structural keys (object/list) drill into the nested node editor.
+                case 'node': case 'nedit': case 'nsub': case 'nadd':
+                case 'ndel': case 'ndelc': case 'nmove': case 'nreset': case 'nresetc':
+                    return this.nodeEditor.handle(interaction, screen, args);
             }
         } catch (err) {
             this.client.errorHandler?.capture(err, { source: 'SettingsUI', userId: interaction.user?.id });
@@ -155,9 +165,15 @@ module.exports = class SettingsUI {
                 const { pageItems, page, pageCount } = paginate(keys, keyPage, KEYS_PER_PAGE);
                 container.addTextDisplayComponents(new TextDisplayBuilder().setContent(this._heading(this._t('module.settings-field', interaction), interaction, page, pageCount)));
                 for (const k of pageItems) {
+                    // Structural keys (object/list) drill into the node editor with an
+                    // Open button; flat keys keep the in-place Edit modal.
+                    const structural = schema[k].type === 'object' || schema[k].type === 'list';
+                    const accessory = structural
+                        ? new ButtonBuilder().setCustomId(`settings:node:${moduleName}:${k}:-:0`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.open', interaction)).setEmoji('➡️')
+                        : new ButtonBuilder().setCustomId(`settings:edit:${moduleName}:${k}:${page}:${cmdPage}`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.edit', interaction)).setEmoji('✏️');
                     container.addSectionComponents(new SectionBuilder()
-                        .addTextDisplayComponents(new TextDisplayBuilder().setContent(`\`${k}\` · \`${schema[k].type}\`\n${this._t('key.current', interaction)}: ${this._format(interaction, record.settings[k])}`))
-                        .setButtonAccessory(new ButtonBuilder().setCustomId(`settings:edit:${moduleName}:${k}:${page}:${cmdPage}`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.edit', interaction)).setEmoji('✏️')));
+                        .addTextDisplayComponents(new TextDisplayBuilder().setContent(`\`${k}\` · \`${schema[k].type}\`\n${this._t('key.current', interaction)}: ${this._summary(interaction, schema[k], record.settings[k])}`))
+                        .setButtonAccessory(accessory));
                 }
                 const nav = navRow(p => `settings:mod:${moduleName}:${p}:${cmdPage}`, page, pageCount);
                 if (nav) container.addActionRowComponents(nav);
@@ -325,6 +341,16 @@ module.exports = class SettingsUI {
         if (Array.isArray(v)) return v.length ? v.map(x => `\`${x}\``).join(', ') : this._t('values.empty', interaction);
         if (typeof v === 'boolean') return v ? '`true`' : '`false`';
         return `\`${truncate(String(v), 200)}\``;
+    }
+
+    /**
+     * Module-screen value cell: a one-line summary for structural keys (a list's
+     * item count, an object's field count) and the usual `_format` for flat keys.
+     */
+    _summary(interaction, def, v) {
+        if (def.type === 'list') return this._t('node.items', interaction, { count: Array.isArray(v) ? v.length : 0 });
+        if (def.type === 'object') return this._t('node.fields', interaction, { count: def.fields ? Object.keys(def.fields).length : 0 });
+        return this._format(interaction, v);
     }
 
     _errorPanel(interaction, message) {

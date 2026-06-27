@@ -103,7 +103,19 @@ module.exports = class Example extends Module {
                     type: 'array<user>',
                     default: [],
                     description: 'Users with VIP perks.'
-                }
+                },
+
+                welcomeCard: {
+                    type: 'object',
+                    description: 'Appearance of the welcome card.',
+                    fields: {
+                        enabled: { type: 'boolean', default: true, description: 'Show a welcome card on join.' },
+                        title: { type: 'string', default: 'Welcome!', description: 'Card heading.' },
+                        accent: { type: 'enum:blurple|green|red|gold', default: 'blurple', description: 'Accent colour.' },
+                        channel: { type: 'channel', default: null, description: 'Where the card is posted.' },
+                        mentionRoles: { type: 'array<role>', default: [], description: 'Roles pinged with the card.' }
+                    }
+                },
             }
         })
     }

@@ -47,6 +47,14 @@ commands:
       values:
         unset: _non impostato_
         empty: _vuoto_
+      node:
+        object-desc: Modifica ogni campo oppure apri una lista annidata.
+        items: "{{count}} elemento/i"
+        fields: "{{count}} campo/i"
+        empty: _(vuoto — aggiungine uno qui sotto)_
+        item-n: "Elemento {{n}}"
+        gone: Questo elemento non esiste più — potrebbe essere stato rimosso.
+        reset-confirm: Ripristinare il valore predefinito? L'operazione non è reversibile.
       pagination: "Pagina {{page}}/{{pages}}"
       buttons:
         back: Indietro
@@ -54,6 +62,11 @@ commands:
         close: Chiudi
         open: Apri
         edit: Modifica
+        add: Aggiungi
+        reset: Ripristina
+        cancel: Annulla
+        confirm-delete: Conferma eliminazione
+        confirm-reset: Conferma ripristino
       errors:
         closed: Chiuso.
         unknown-setting: Impostazione sconosciuta.
