@@ -1,6 +1,6 @@
-const Command = require('../../structures/Command.js');
+const Command = require('@structures/Command.js');
 const { ApplicationCommandOptionType, EmbedBuilder, userMention, User, UserContextMenuCommandInteraction } = require('discord.js');
-const PowerLevels = require('../../structures/PowerLevels.js');
+const PowerLevels = require('@structures/PowerLevels.js');
 
 module.exports = class SetLevelCommand extends Command {
     constructor(client, module) {
@@ -28,7 +28,7 @@ module.exports = class SetLevelCommand extends Command {
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      */
     async run(client, interaction) {
@@ -39,7 +39,6 @@ module.exports = class SetLevelCommand extends Command {
         if (!data) {
             return await interaction.reply(this.t('messages.usernotfound', interaction));
         }
-        if (interaction.user.data.powerlevel < 0 && data.user.id !== interaction.user.id) return;
 
         if (interaction.user.data.powerlevel <= data.powerlevel)
             return await interaction.reply(this.t('messages.nopermission', interaction));

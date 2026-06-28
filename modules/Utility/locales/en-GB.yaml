@@ -1,0 +1,115 @@
+commands:
+  perms:
+    name: perms
+    description: Check the permissions of a user or role in the current channel.
+    options:
+      user: The user to check permissions for.
+    messages:
+      nouserindb: ":warning: There's no user in database matching your query"
+  ping:
+    name: ping
+    description: Check the bot's latency and responsiveness.
+    messages:
+      pinging: "Pinging..."
+      pong: ":ping_pong: Pong! Latency is **{{latency}}ms**. API Latency is **{{apiLatency}}ms**"
+  settings:
+    name: settings
+    description: View and change the bot's settings for this server.
+    ui:
+      home:
+        title: ⚙️ Settings
+        description: |
+          Customise how the bot works on this server. Settings are grouped by feature — open one below to see what you can change.
+
+          Each option shows its current value, and you get the right kind of editor (a toggle, a channel picker, and so on) when you change it.
+        none: _(none)_
+        module-summary: "{{keys}} setting(s) · {{commands}} command(s)"
+      module:
+        title: "⚙️ {{name}}"
+        description: This module's settings (above) and its command permissions (below).
+        settings-field: Settings
+        no-keys: _(no keys)_
+        no-settings: "Module `{{name}}` has no settings."
+        unknown: "No such module `{{name}}`."
+      key:
+        current: Current
+        unknown: "No such setting `{{module}}.{{key}}`."
+      editors:
+        bool-true: "True"
+        bool-false: "False"
+      modals:
+        edit-title: "Edit {{key}}"
+        edit-label: "Value ({{type}})"
+        array-hint: One value per line.
+        reset-label: Reset to default?
+        reset-yes: "Yes"
+        reset-no: "No"
+      values:
+        unset: _unset_
+        empty: _empty_
+      node:
+        object-desc: Edit each field, or open a nested list.
+        items: "{{count}} item(s)"
+        fields: "{{count}} field(s)"
+        empty: _(empty — add one below)_
+        item-n: "Item {{n}}"
+        gone: That item no longer exists — it may have been removed.
+        reset-confirm: Reset this to its default? This can't be undone.
+      pagination: "Page {{page}}/{{pages}}"
+      buttons:
+        back: Back
+        refresh: Refresh
+        close: Close
+        open: Open
+        edit: Edit
+        add: Add
+        reset: Reset
+        cancel: Cancel
+        confirm-delete: Confirm delete
+        confirm-reset: Confirm reset
+      errors:
+        closed: Closed.
+        unknown-setting: Unknown setting.
+      cmdperms:
+        home:
+          commands-field: Commands
+          readonly: read-only
+          none: _(no commands)_
+          all-commands: All commands (integration default)
+          view-placeholder: View a command in detail…
+        default:
+          everyone: everyone
+          admins-only: administrators only
+          requires: "requires {{perms}}"
+        detail:
+          title: "🔐 /{{name}}"
+          default: Default
+          no-overrides: No overrides
+        all-channels: All channels
+        pagination: "Page {{page}}/{{pages}}"
+        buttons:
+          refresh: Refresh
+          open-integrations: Open Integrations
+          back: Back
+        errors:
+          fetch-failed: Couldn't read the live permissions from Discord — showing what's available. Try Refresh.
+  stats:
+    name: stats
+    description: View bot statistics and information.
+    embed:
+      title: "STATISTICS"
+      memusage: "⚙️ Memory Usage"
+      uptime: "⏱️ Uptime"
+      versions: "🔢 Versions"
+      creationdate: "🎂 Creation date"
+  setlang:
+    name: setlang
+    description: Set your preferred language for the bot
+    options:
+      language:
+        name: language
+        description: The language you want to set
+    messages:
+      invalidLang: ":warning: The specified language is not supported."
+      success: ":flag_gb: Your preferred language has been set to **English**!"
+      reset: ":globe_with_meridians: From now on your language will be synchronized to the default language!"

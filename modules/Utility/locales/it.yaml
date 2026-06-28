@@ -1,0 +1,115 @@
+commands:
+  perms:
+    name: perms
+    description: Controlla i permessi di un utente o ruolo nel canale corrente.
+    options:
+      user: L’utente di cui controllare i permessi.
+    messages:
+      nouserindb: ":warning: Nessun utente nel database corrisponde alla tua ricerca"
+  ping:
+    name: ping
+    description: Controlla la latenza e la reattività del bot.
+    messages:
+      pinging: Ping in corso...
+      pong: ":ping_pong: Pong! La latenza è **{{latency}}ms**. La latenza API è **{{apiLatency}}ms**"
+  settings:
+    name: settings
+    description: Visualizza e modifica le impostazioni del bot per questo server.
+    ui:
+      home:
+        title: ⚙️ Impostazioni
+        description: |
+          Personalizza il funzionamento del bot su questo server. Le impostazioni sono raggruppate per funzione — aprine una qui sotto per vedere cosa puoi modificare.
+
+          Ogni opzione mostra il suo valore attuale e ti offre l’editor giusto (un interruttore, un selettore di canale e così via) quando la modifichi.
+        none: _(nessuno)_
+        module-summary: "{{keys}} impostazioni · {{commands}} comandi"
+      module:
+        title: ⚙️ {{name}}
+        description: Le impostazioni di questo modulo (sopra) e i permessi dei suoi comandi (sotto).
+        settings-field: Impostazioni
+        no-keys: _(nessuna opzione)_
+        no-settings: Il modulo `{{name}}` non ha impostazioni.
+        unknown: Modulo `{{name}}` sconosciuto.
+      key:
+        current: Attuale
+        unknown: Impostazione `{{module}}.{{key}}` sconosciuta.
+      editors:
+        bool-true: Sì
+        bool-false: "No"
+      modals:
+        edit-title: Modifica {{key}}
+        edit-label: Valore ({{type}})
+        array-hint: Un valore per riga.
+        reset-label: Ripristina predefinito?
+        reset-yes: Sì
+        reset-no: "No"
+      values:
+        unset: _non impostato_
+        empty: _vuoto_
+      node:
+        object-desc: Modifica ogni campo oppure apri una lista annidata.
+        items: "{{count}} elemento/i"
+        fields: "{{count}} campo/i"
+        empty: _(vuoto — aggiungine uno qui sotto)_
+        item-n: "Elemento {{n}}"
+        gone: Questo elemento non esiste più — potrebbe essere stato rimosso.
+        reset-confirm: Ripristinare il valore predefinito? L'operazione non è reversibile.
+      pagination: "Pagina {{page}}/{{pages}}"
+      buttons:
+        back: Indietro
+        refresh: Ricarica
+        close: Chiudi
+        open: Apri
+        edit: Modifica
+        add: Aggiungi
+        reset: Ripristina
+        cancel: Annulla
+        confirm-delete: Conferma eliminazione
+        confirm-reset: Conferma ripristino
+      errors:
+        closed: Chiuso.
+        unknown-setting: Impostazione sconosciuta.
+      cmdperms:
+        home:
+          commands-field: Comandi
+          readonly: sola lettura
+          none: _(nessun comando)_
+          all-commands: Tutti i comandi (predefinito dell'integrazione)
+          view-placeholder: Vedi un comando nel dettaglio…
+        default:
+          everyone: tutti
+          admins-only: solo amministratori
+          requires: "richiede {{perms}}"
+        detail:
+          title: "🔐 /{{name}}"
+          default: Predefinito
+          no-overrides: Nessun override
+        all-channels: Tutti i canali
+        pagination: "Pagina {{page}}/{{pages}}"
+        buttons:
+          refresh: Ricarica
+          open-integrations: Apri Integrazioni
+          back: Indietro
+        errors:
+          fetch-failed: Impossibile leggere i permessi in tempo reale da Discord — mostro quanto disponibile. Prova a ricaricare.
+  stats:
+    name: stats
+    description: Visualizza statistiche e informazioni sul bot.
+    embed:
+      title: STATISTICHE
+      memusage: ⚙️ Utilizzo memoria
+      uptime: ⏱️ Tempo di attività
+      versions: 🔢 Versioni
+      creationdate: 🎂 Data di creazione
+  setlang:
+    name: setlang
+    description: Imposta la tua lingua preferita per il bot
+    options:
+      language:
+        name: language
+        description: La lingua che vuoi impostare
+    messages:
+      invalidLang: ":warning: La lingua specificata non è supportata."
+      success: ":flag_it: La tua lingua preferita è stata impostata su **Italiano**!"
+      reset: ":globe_with_meridians: D'ora in poi la tua lingua sarà sincronizzata con la lingua predefinita!"

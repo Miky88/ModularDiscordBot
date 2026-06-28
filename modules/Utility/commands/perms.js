@@ -1,6 +1,6 @@
-let { EmbedBuilder, ApplicationCommandOptionType } = require('discord.js')
-const Command = require('../../structures/Command.js');
-const PowerLevels = require('../../structures/PowerLevels.js');
+let { EmbedBuilder, ApplicationCommandOptionType, InteractionContextType } = require('discord.js')
+const Command = require('@structures/Command.js');
+const PowerLevels = require('@structures/PowerLevels.js');
 
 module.exports = class PermsCommand extends Command {
     constructor(client, module) {
@@ -8,6 +8,7 @@ module.exports = class PermsCommand extends Command {
             name: 'perms',
             description: 'Shows yours or another user\'s perms',
             minLevel: PowerLevels.BLACKLISTED,
+            contexts: [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel],
             options: [
                 {
                     name: "user",
@@ -21,7 +22,7 @@ module.exports = class PermsCommand extends Command {
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').ChatInputCommandInteraction} interaction 
      */
     async run(client, interaction) {
@@ -30,7 +31,6 @@ module.exports = class PermsCommand extends Command {
 
         const data = await client.database.forceUser(user.id);
         if (!data) return await interaction.reply(this.t('messages.nouserindb', interaction));
-        if (interaction.user.data.powerlevel < 0 && data.user.id !== interaction.user.id) return;
 
         const embed = new EmbedBuilder()
             .setTitle(`${user.discriminator ? user.tag : user.username}`)
@@ -41,7 +41,6 @@ module.exports = class PermsCommand extends Command {
                     value: `${Object.entries(PowerLevels).find(l => l[1] == data.powerlevel)[0]}`
                 },
             ])
-            // .setDescription(`todo`)
             .setColor("Random")
 
         await interaction.reply({ embeds: [embed] });

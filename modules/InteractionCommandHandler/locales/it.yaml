@@ -1,0 +1,9 @@
+errors:
+  command-not-found: ":no_entry: Comando non trovato"
+  insufficient-powerlevel: ":no_entry: Non hai i permessi per usare questo
+    comando. Il livello richiesto è **{{level}}**."
+  execution-error: ":no_entry: Ops, si è verificato un errore durante l'esecuzione
+    del comando. Contatta gli sviluppatori del bot."
+  cooldown: ":hourglass_flowing_sand: Aspetta **{{time}}s** prima di usare di nuovo
+    questo comando."
+  guild-only: ":no_entry: Questo comando può essere usato solo in un server."

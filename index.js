@@ -1,5 +1,6 @@
 // Imports
 require('dotenv').config();
+require("module-alias/register");
 
 const { Client, Collection, GatewayIntentBits, Partials } = require('discord.js');
 const ModuleManager = require('./structures/ModuleManager.js');
@@ -7,6 +8,8 @@ const Database = require('./structures/Database.js');
 const ConfigurationManager = require('./structures/ConfigurationManager.js');
 const Utils = require('./structures/Utils.js');
 const LocalizationManager = require('./structures/LocalizationManager.js');
+const ErrorHandler = require('./structures/ErrorHandler.js');
+const Logger = require('./structures/Logger.js');
 BigInt.prototype.toJSON = function () { return this.toString() } // MDN https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/BigInt#use_within_json
 
 // Discord
@@ -17,8 +20,24 @@ class BotClient extends Client {
             owners: ["311929179186790400", "422418878459674624"],
             systemServer: ["1313550337474429001"],
             intents: Object.keys(GatewayIntentBits).filter(i => isNaN(i)),
-            partials: ['Reaction', 'Message']
+            partials: ['Reaction', 'Message'],
+            verbose: false,
+            errorReporting: {
+                channelId: null,
+                notifyOwners: false,
+                dedupWindowMs: 60000,
+                exitOnUncaught: true,
+                reportQueueMax: 20,
+                reportThrottleMs: 1000
+            },
+            i18n: {
+                defaultLang: 'en-GB',
+                referenceLanguage: 'en-GB',
+                autoSync: true,
+                hotReload: false
+            }
         });
+        Logger.verboseEnabled = !!config.get('verbose');
         super({
             intents: config.get('intents').map(i => GatewayIntentBits[i]),
             partials: config.get('partials').map(i => Partials[i])
@@ -27,18 +46,27 @@ class BotClient extends Client {
         this.commands = new Collection();
         this.settings = new Collection();
         this.utils = new Utils();
-        this.moduleManager = new ModuleManager(this);
+        this.modules = new ModuleManager(this);
         this.config = config;
-        this.i18n = new LocalizationManager();
+        this.i18n = new LocalizationManager(config.get('i18n'));
 
+        this.errorHandler = new ErrorHandler(this, config.get('errorReporting'));
         this.database = new Database(this);
-        this.moduleManager.init();
     }
 };
 
 
-const client = new BotClient();
-
-client.login(process.env.TOKEN);
+(async () => {
+    let client;
+    try {
+        client = new BotClient();
+        await client.modules.init();
+        await client.login(process.env.TOKEN);
+    } catch (err) {
+        console.error('[boot] Fatal error during startup:', err?.stack || err);
+        client?.errorHandler?.capture(err, { source: 'boot', fatal: true });
+        process.exit(1);
+    }
+})();
 
 module.exports = BotClient;

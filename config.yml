@@ -9,6 +9,7 @@ intents:
   - GuildMembers
   - GuildModeration
   - GuildBans
+  - GuildExpressions
   - GuildEmojisAndStickers
   - GuildIntegrations
   - GuildWebhooks
@@ -30,3 +31,14 @@ intents:
 partials:
   - Reaction
   - Message
+errorReporting:
+  channelId: null
+  notifyOwners: false
+  dedupWindowMs: 60000
+  exitOnUncaught: true
+i18n:
+  defaultLang: en-GB
+  referenceLanguage: en-GB
+  autoSync: true
+  hotReload: false
+verbose: false

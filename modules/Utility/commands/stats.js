@@ -1,6 +1,6 @@
-const Command = require('../../structures/Command.js');
+const Command = require('@structures/Command.js');
 
-const { version } = require("discord.js");
+const { version, InteractionContextType } = require("discord.js");
 const moment = require("moment");
 require("moment-duration-format");
 const { EmbedBuilder } = require('discord.js');
@@ -10,13 +10,14 @@ module.exports = class StatsCommand extends Command {
         super(client, module, {
             name: 'stats',
             description: 'See some fancy bot statistics',
-            cooldown: 3
+            cooldown: 3,
+            contexts: [InteractionContextType.Guild, InteractionContextType.BotDM, InteractionContextType.PrivateChannel]
         });
     }
 
     /**
      * 
-     * @param {import('../../index.js')} client 
+     * @param {import('../../../index.js')} client 
      * @param {import('discord.js').CommandInteraction} interaction 
      */
     async run(client, interaction) {

@@ -1,0 +1,6 @@
+errors:
+  command-not-found: ":no_entry: Command not found"
+  insufficient-powerlevel: ":no_entry: You don't have permission to use this command. The required permission level is **{{level}}**."
+  guild-only: ":no_entry: This command can only be used in a server."
+  cooldown: ":hourglass_flowing_sand: Please wait **{{time}}s** before using this command again."
+  execution-error: ":no_entry: Uh-oh, there was an error trying to execute the command, please contact bot developers."

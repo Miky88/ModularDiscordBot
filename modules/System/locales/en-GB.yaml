@@ -1,0 +1,107 @@
+commands:
+  eval:
+    name: eval
+    description: Execute arbitrary JavaScript code.
+    options:
+      code: The JavaScript code to execute.
+      ephemeral: Reply only visible to you (default true).
+    ui:
+      output-header: "🧪 Eval — Output"
+      error-header: "❌ Eval — Error"
+      empty: (no output)
+      truncated: "⚠️ Output truncated — showing {{shown}}/{{total}} characters. The full output was logged to the console."
+      not-allowed: ":no_entry: Only bot owners can use these controls."
+      expired: ":hourglass: This eval session expired — run `/eval` again."
+      buttons:
+        edit: Edit
+        retry: Retry
+        publish: Send publicly
+      modal:
+        title: Edit & re-run
+        code-label: JavaScript
+  exec:
+    name: exec
+    description: Execute a system command.
+    options:
+      command: The system command to execute.
+  modman:
+    name: modman
+    description: Manage bot modules (load, unload, reload, enable/disable).
+    ui:
+      home:
+        title: 🧩 Module Manager
+        description: |
+          Inspect, enable/disable, reload, or unload modules. Picking a module from the dropdown opens its detail view with action buttons.
+
+          **Status badges**
+          ✅ loaded & enabled · 🟡 loaded & disabled · ⛔ on disk, not loaded · ⚠ load failed
+        failed-summary: "**Failed loads:**"
+        all-modules: All modules
+        none: _(none on disk)_
+        footer: "{{loaded}} loaded · {{available}} available · {{failed}} failed"
+        pick-placeholder: Pick a module to inspect…
+      detail:
+        no-description: _(no description)_
+        status: Status
+        version: Version
+        events: Events
+        dependencies: Dependencies
+        dependents: Dependents
+        commands: Commands
+        last-error: Last error
+        none: _(none)_
+        not-found: "Cannot inspect `{{name}}`: {{error}}"
+      status:
+        load-failed: Load failed
+        not-loaded: On disk, not loaded
+        enabled: Loaded & enabled
+        disabled: Loaded but disabled
+      buttons:
+        reload: Reload
+        load: Load
+        enable: Enable
+        disable: Disable
+        unload: Unload
+        back: Back
+        cancel: Cancel
+        force-unload: Force unload
+        load-module: Load module
+        reload-all: Reload all
+        refresh: Refresh
+        close: Close
+      unload:
+        title: 🗑️ Unload `{{name}}`
+        cascade-warning: |
+          Other modules depend on this one:
+          {{deps}}
+
+          Force-unload will cascade and unload them all in dependency order.
+        failed: "Unload failed: **{{code}}** — {{error}}"
+      reload-all:
+        title: 🔁 Reload all
+        none: _(no modules loaded)_
+      load-modal:
+        title: Load module
+        name-label: Module name (matches folder under modules/)
+        name-placeholder: Example
+      errors:
+        action-failed: "`{{action}}` failed for `{{name}}`: **{{code}}** — {{error}}"
+        load-failed: "Load failed: **{{code}}** — {{error}}"
+        closed: Closed.
+  reboot:
+    name: reboot
+    description: Reboots the bot if running under PM2 or a process manager.
+    messages:
+      rebooting: ":hourglass_flowing_sand: Rebooting..."
+  setlevel:
+    name: setlevel
+    description: Set the power level of a user.
+    messages:
+      nopermission: ":x: You can't set this user's powerlevel."
+      success: ":white_check_mark: Successfully set powerlevel for {{user}} to: {{level}}"
+      error: ":x: An internal error occurred"
+  update:
+    name: update
+    description: Update the bot to the latest version from the Git repository, and reboots the bot
+    messages:
+      noreboot: "Unknown command `reboot`, aborting."

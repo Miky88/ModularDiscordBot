@@ -1,7 +1,6 @@
 const { parse, stringify } = require('yaml')
 const Module = require('./Module.js')
 const fs = require('fs')
-const { Client } = require('discord.js')
 
 module.exports = class ConfigurationManager {
     /**
@@ -26,14 +25,15 @@ module.exports = class ConfigurationManager {
         this.file = parse(fs.readFileSync(this.path, 'utf8'))
 
         // Check if config file has all the required fields
+        let mutated = false;
         for (const key in this.defaultConfig) {
-            if (!this.file[key]) {
+            if (this.file[key] === undefined || this.file[key] === null) {
                 this.file[key] = this.defaultConfig[key]
+                mutated = true;
             }
         }
 
-        // Re-write config file if it doesn't have all the required fields
-        if (Object.keys(this.file).length !== Object.keys(this.defaultConfig).length) {
+        if (mutated) {
             fs.writeFileSync(this.path, stringify(this.file))
         }
     }

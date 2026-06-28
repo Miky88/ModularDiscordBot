@@ -1,0 +1,170 @@
+commands:
+  eval:
+    name: eval
+    description: Esegue codice JavaScript arbitrario.
+    options:
+      code: Il codice JavaScript da eseguire.
+      ephemeral: Risposta visibile solo a te (predefinito true).
+    ui:
+      output-header: 🧪 Eval — Output
+      error-header: ❌ Eval — Errore
+      empty: (nessun output)
+      truncated: ⚠️ Output troncato — mostrati {{shown}}/{{total}} caratteri. L'output
+        completo è stato registrato nella console.
+      not-allowed: ":no_entry: Solo i proprietari del bot possono usare questi controlli."
+      expired: ":hourglass: Questa sessione di eval è scaduta — esegui di nuovo
+        `/eval`."
+      buttons:
+        edit: Modifica
+        retry: Riprova
+        publish: Invia pubblicamente
+      modal:
+        title: Modifica ed esegui
+        code-label: JavaScript
+  exec:
+    name: exec
+    description: Esegue un comando di sistema.
+    options:
+      command: Il comando di sistema da eseguire.
+  modman:
+    name: modman
+    description: Gestisci i moduli (carica, scarica, ricarica).
+    options:
+      load:
+        name: load
+        description: Carica un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      unload:
+        name: unload
+        description: Scarica un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      reload:
+        name: reload
+        description: Ricarica un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      enable:
+        name: enable
+        description: Abilita un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      disable:
+        name: disable
+        description: Disabilita un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      info:
+        name: info
+        description: Ottieni informazioni su un modulo
+        options:
+          module:
+            name: module
+            description: Modulo su cui eseguire l’azione
+      list:
+        name: list
+        description: Ottieni la lista dei moduli caricati
+    ui:
+      home:
+        title: 🧩 Module Manager
+        description: >
+          Inspect, enable/disable, reload, or unload modules. Picking a module
+          from the dropdown opens its detail view with action buttons.
+
+
+          **Status badges**
+
+          ✅ loaded & enabled · 🟡 loaded & disabled · ⛔ on disk, not loaded · ⚠
+          load failed
+        failed-summary: "**Failed loads:**"
+        all-modules: All modules
+        none: _(none on disk)_
+        footer: "{{loaded}} loaded · {{available}} available · {{failed}} failed"
+        pick-placeholder: Pick a module to inspect…
+      detail:
+        no-description: _(no description)_
+        status: Status
+        version: Version
+        events: Events
+        dependencies: Dependencies
+        dependents: Dependents
+        commands: Commands
+        last-error: Last error
+        none: _(none)_
+        not-found: "Cannot inspect `{{name}}`: {{error}}"
+      status:
+        load-failed: Load failed
+        not-loaded: On disk, not loaded
+        enabled: Loaded & enabled
+        disabled: Loaded but disabled
+      buttons:
+        reload: Reload
+        load: Load
+        enable: Enable
+        disable: Disable
+        unload: Unload
+        back: Back
+        cancel: Cancel
+        force-unload: Force unload
+        load-module: Load module
+        reload-all: Reload all
+        refresh: Refresh
+        close: Close
+      unload:
+        title: 🗑️ Unload `{{name}}`
+        cascade-warning: |
+          Other modules depend on this one:
+          {{deps}}
+
+          Force-unload will cascade and unload them all in dependency order.
+        failed: "Unload failed: **{{code}}** — {{error}}"
+      reload-all:
+        title: 🔁 Reload all
+        none: _(no modules loaded)_
+      load-modal:
+        title: Load module
+        name-label: Module name (matches folder under modules/)
+        name-placeholder: Example
+      errors:
+        action-failed: "`{{action}}` failed for `{{name}}`: **{{code}}** — {{error}}"
+        load-failed: "Load failed: **{{code}}** — {{error}}"
+        closed: Closed.
+  reboot:
+    name: reboot
+    description: Riavvia il bot se in esecuzione tramite PM2 o un process manager.
+    messages:
+      rebooting: ":hourglass_flowing_sand: Riavvio in corso..."
+  setlevel:
+    name: setlevel
+    description: Imposta il power level di un utente.
+    messages:
+      nopermission: ":x: Non puoi impostare il power level di questo utente."
+      success: ":white_check_mark: Power level di {{user}} impostato a: {{level}}"
+      error: ":x: Si è verificato un errore interno"
+  update:
+    name: update
+    description: Aggiorna il bot all’ultima versione dal repository Git e riavvia il bot
+    messages:
+      noreboot: Comando `reboot` sconosciuto, annullo l'operazione.
+  settings:
+    ui:
+      home:
+        title: commands.settings.ui.home.title
+        description: commands.settings.ui.home.description
+        pick-placeholder: commands.settings.ui.home.pick-placeholder
+        modules-with-settings: commands.settings.ui.home.modules-with-settings
+        keys-suffix: commands.settings.ui.home.keys-suffix
+      buttons:
+        refresh: commands.settings.ui.buttons.refresh
+        close: commands.settings.ui.buttons.close
