@@ -14,7 +14,7 @@ be loaded, enabled, disabled or reloaded at runtime without restarting the bot.
    in the repo root (bot owners, intents, language, error reporting, …) — stop
    the bot, edit that file, then start it again.
 
-Trouble? Open an issue or join the Discord: https://discord.gg/SJgMCrd
+Trouble? Open an issue or join the Discord: https://discord.com/invite/rr3PUE7Jc8
 
 > **Path aliases:** the code uses `@structures/*` → `structures/` and
 > `@modules/*` → `modules/` (via `module-alias`). Use them in your `require`s.
