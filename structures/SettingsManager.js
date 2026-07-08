@@ -73,9 +73,10 @@ function withValidate(spec, core) {
  *   - `object` — a fixed set of named `fields` (a sub-schema)
  *   - `list`   — a variable-length sequence of `item`s (objects or scalars)
  *
- * Structural rule (see SETTINGS_NESTED.md §2): an `object` never nests directly
- * inside another `object` — a grouping of objects is always a `list`. This is
- * enforced here at build time.
+ * Structural types nest to any depth in any combination — `object` fields may
+ * be scalars, `array<scalar>`, `list`s, or nested `object`s. An object field
+ * with an explicit `default: null` stays unset until edited (used for optional
+ * sub-objects); otherwise it materialises its own fields' defaults.
  */
 function mkValidator(def) {
     if (typeof def === 'function') return def;
@@ -84,32 +85,40 @@ function mkValidator(def) {
 
     if (type === 'object') {
         const fields = spec.fields || {};
-        // Build-time guards: enforce the no-object-in-object rule and the
-        // reserved-character rule on field names (both from §2/§3).
-        for (const [name, fdef] of Object.entries(fields)) {
+        // Build-time guard: the reserved-character rule on field names (§3).
+        // Objects may nest directly in objects (§2): a field whose default is
+        // `null` stays unset until edited; otherwise it materialises its own
+        // fields' defaults.
+        for (const name of Object.keys(fields)) {
             if (/[:.]/.test(name))
                 throw new Error(`Field name "${name}" must not contain ':' or '.' — reserved by the settings UI path encoding (SETTINGS_NESTED §3).`);
-            if (String(normDef(fdef).type) === 'object')
-                throw new Error(`Field "${name}": an object cannot nest directly in an object — use a list (SETTINGS_NESTED §2).`);
         }
         const entries = Object.entries(fields).map(([name, fdef]) => {
             const ftype = String(normDef(fdef).type);
             return {
                 name,
+                type: ftype,
                 validate: mkValidator(fdef),
-                structural: ftype === 'list' || /^array<.+>$/.test(ftype),
+                structural: ftype === 'object' || ftype === 'list' || /^array<.+>$/.test(ftype),
                 default: normDef(fdef).default
             };
         });
         return withValidate(spec, (v) => {
             if (typeof v !== 'object' || Array.isArray(v) || v == null) return { ok: false, error: 'expected an object' };
             const out = {};
-            for (const { name, validate, structural, default: dflt } of entries) {
+            for (const { name, type: ftype, validate, structural, default: dflt } of entries) {
                 let raw = (name in v && v[name] != null) ? v[name] : dflt;
                 if (raw == null) {
-                    // An unset scalar/enum stays null; an unset list/array becomes empty.
+                    // Unset: scalar/enum → null; list/array → empty; object with an
+                    // explicit `null` default stays null, else materialises its
+                    // fields' defaults (validating `{}` fills them recursively).
                     if (!structural) { out[name] = null; continue; }
-                    raw = [];
+                    if (ftype === 'object') {
+                        if (dflt === null) { out[name] = null; continue; }
+                        raw = {};
+                    } else {
+                        raw = [];
+                    }
                 }
                 const r = validate(raw);
                 if (!r.ok) return { ok: false, error: `${name}: ${r.error}` };

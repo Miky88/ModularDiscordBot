@@ -26,12 +26,13 @@ const normDef = (d) => (typeof d === 'string' ? { type: d } : (d || {}));
  * owns the module/home screens and the flat-key modal, and delegates every
  * `settings:node`/`settings:n*` interaction here.
  *
- * Two screen kinds, which alternate as you drill (objects never nest in objects,
- * so an OBJECT screen only ever opens LIST screens and vice-versa — §2/§8):
+ * Two screen kinds, which nest in any combination as you drill (an OBJECT screen
+ * may open LIST *or* OBJECT screens; a LIST opens OBJECT screens — §2/§8):
  *
  *   OBJECT screen — a fixed set of fields. Scalars/enums/`array<scalar>` get an
  *                   inline ✏️ Edit (the same path-aware modal SettingsUI uses for
- *                   flat keys); nested `list` fields get a ➡️ Open into a LIST screen.
+ *                   flat keys); nested `list`/`object` fields get a ➡️ Open into
+ *                   their own screen.
  *   LIST screen   — a variable sequence of items (objects, usually). Each row has
  *                   Open / move / delete; an Add button appends an item from its
  *                   item-def defaults. Paginated; deletes use a one-step confirm.
@@ -153,11 +154,15 @@ module.exports = class SettingsNodeEditor {
             const fdef = normDef(rawFdef);
             const fpath = [...path, name];
             const isList = fdef.type === 'list';
+            const isObject = fdef.type === 'object';
+            const isStructural = isList || isObject;
             const display = isList
                 ? this._t('node.items', interaction, { count: Array.isArray(value[name]) ? value[name].length : 0 })
-                : this.ui._format(interaction, value[name]);
+                : isObject
+                    ? this._t('node.fields', interaction, { count: Object.keys(fdef.fields || {}).length })
+                    : this.ui._format(interaction, value[name]);
 
-            const accessory = isList
+            const accessory = isStructural
                 ? new ButtonBuilder().setCustomId(`settings:node:${moduleName}:${key}:${this._enc(fpath)}:0`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.open', interaction)).setEmoji('➡️')
                 : new ButtonBuilder().setCustomId(`settings:nedit:${moduleName}:${key}:${this._enc(fpath)}:${cur}`).setStyle(ButtonStyle.Primary).setLabel(this._t('buttons.edit', interaction)).setEmoji('✏️');
 
