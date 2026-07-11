@@ -4,6 +4,7 @@ const fs = require('fs');
 const Logger = require('./Logger.js');
 const PowerLevels = require('./PowerLevels.js');
 const DatabaseHandle = require('./DatabaseHandle.js');
+const AtomicFsAdapter = require('./AtomicFsAdapter.js');
 
 const DEFAULT_DATA_DIR = 'data';
 const BOT_FILE = 'database.db';
@@ -250,6 +251,10 @@ module.exports = class Database {
             const db = new Loki(file, {
                 autoload: true,
                 autosave: false,
+                // Same crash-safety as the registered handles: migration rewrites
+                // this file (removeOriginal) and a half-written legacy db is the
+                // one thing we can't reconstruct.
+                adapter: new AtomicFsAdapter({ logger: this.logger }),
                 autoloadCallback: (err) => err ? reject(err) : resolve(db)
             });
         });

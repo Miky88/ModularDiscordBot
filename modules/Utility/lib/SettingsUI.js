@@ -5,7 +5,7 @@ const {
     ModalBuilder, LabelBuilder, TextInputBuilder, TextInputStyle,
     MessageFlags
 } = require('discord.js');
-const { safeUpdate, safeError, truncate, errorContainer, paginate, navRow } = require('@structures/lib/InteractionHelpers.js');
+const { safeUpdate, safeError, truncate, escapeMarkdown, errorContainer, paginate, navRow } = require('@structures/lib/InteractionHelpers.js');
 const CommandPermissionsView = require('./CommandPermissionsView.js');
 const SettingsNodeEditor = require('./SettingsNodeEditor.js');
 
@@ -340,7 +340,9 @@ module.exports = class SettingsUI {
         if (v == null || v === '') return this._t('values.unset', interaction);
         if (Array.isArray(v)) return v.length ? v.map(x => `\`${x}\``).join(', ') : this._t('values.empty', interaction);
         if (typeof v === 'boolean') return v ? '`true`' : '`false`';
-        return `\`${truncate(String(v), 200)}\``;
+        // Escaped plain text (not a code span): a raw value may itself contain
+        // backticks / markdown, which would break an enclosing `` `…` `` span.
+        return escapeMarkdown(truncate(String(v), 200));
     }
 
     /**

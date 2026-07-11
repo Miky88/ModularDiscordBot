@@ -69,6 +69,24 @@ function truncate(s, max, ellipsis = '…') {
 }
 
 /**
+ * Backslash-escape Discord markdown so arbitrary content (setting values, user
+ * text) renders literally when interpolated into message text — otherwise a
+ * stray `` ` ``, `*`, `_`, `~` or `|` corrupts the surrounding layout. Newlines
+ * are collapsed to spaces so the value stays on one line in compact UI cells.
+ *
+ * NOTE: backslash escapes do NOT work inside a code span (`` `…` ``) — Discord
+ * treats everything there literally including the backslash. Use this for
+ * plain-text interpolation, not inside backticks.
+ * @param {*} s
+ * @returns {string}
+ */
+function escapeMarkdown(s) {
+    return String(s ?? '')
+        .replace(/\r?\n/g, ' ')
+        .replace(/([\\`*_~|])/g, '\\$1');
+}
+
+/**
  * Build a one-button "back to home" error panel payload. The title and button
  * label are passed in already-localized; `homeId` is the per-GUI customId
  * (e.g. `settings:home`).
@@ -186,4 +204,4 @@ function errorContainer({ message, backId, backLabel, accentColor = 0xE74C3C }) 
     return { flags: MessageFlags.IsComponentsV2, components: [container] };
 }
 
-module.exports = { safeUpdate, safeReply, safeError, truncate, errorPanel, errorContainer, paginate, navRow, pagedSelectRows, SELECT_PAGE_SIZE };
+module.exports = { safeUpdate, safeReply, safeError, truncate, escapeMarkdown, errorPanel, errorContainer, paginate, navRow, pagedSelectRows, SELECT_PAGE_SIZE };

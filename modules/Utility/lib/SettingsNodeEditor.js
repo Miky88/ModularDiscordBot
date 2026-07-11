@@ -3,7 +3,7 @@ const {
     ActionRowBuilder, ButtonBuilder, ButtonStyle,
     ModalBuilder, MessageFlags
 } = require('discord.js');
-const { safeUpdate, safeError, truncate, errorContainer, paginate, navRow } = require('@structures/lib/InteractionHelpers.js');
+const { safeUpdate, safeError, truncate, escapeMarkdown, errorContainer, paginate, navRow } = require('@structures/lib/InteractionHelpers.js');
 
 /** Accent bar colour, matching the rest of the settings GUI (Discord blurple). */
 const ACCENT = 0x5865F2;
@@ -291,15 +291,16 @@ module.exports = class SettingsNodeEditor {
         return parts.join(' › ');
     }
 
-    /** A list item's row title: its `label` field (objects) or the value (scalars), else "Item n". */
+    /** A list item's row title: its `label` field (objects) or the value (scalars), else "Item n".
+     *  Escaped because it's rendered inside `**…**` — a raw value may contain markdown. */
     _itemLabel(interaction, listDef, item, index) {
         const itemDef = normDef(listDef.item);
         const fallback = this._t('node.item-n', interaction, { n: index + 1 });
         if (itemDef.type === 'object') {
             const raw = listDef.label && item ? item[listDef.label] : null;
-            return (raw != null && String(raw).trim() !== '') ? truncate(String(raw), 80) : fallback;
+            return (raw != null && String(raw).trim() !== '') ? escapeMarkdown(truncate(String(raw), 80)) : fallback;
         }
-        return (item == null || item === '') ? fallback : truncate(String(item), 80);
+        return (item == null || item === '') ? fallback : escapeMarkdown(truncate(String(item), 80));
     }
 
     // ── Leaf editing (reuses SettingsUI's modal field builders, path-aware) ────

@@ -2,6 +2,7 @@ const Loki = require('lokijs');
 const path = require('path');
 const fs = require('fs');
 const Logger = require('./Logger.js');
+const AtomicFsAdapter = require('./AtomicFsAdapter.js');
 
 /**
  * Wraps a single Loki database file and the named collections inside it.
@@ -32,6 +33,11 @@ module.exports = class DatabaseHandle {
                 autoload: true,
                 autosave: true,
                 autosaveInterval: 1000,
+                // Crash-safe writes: fsync'd temp file swapped in by rename, with
+                // a .bak generation to recover from. Loki's stock adapter neither
+                // fsyncs nor recovers. `throttledSaves` (default) keeps saves for
+                // this file serialized, which the adapter relies on.
+                adapter: new AtomicFsAdapter({ logger: this.logger }),
                 ...lokiOptions,
                 autoloadCallback: (err) => {
                     if (err) return reject(err);
