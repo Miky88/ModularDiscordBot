@@ -2,6 +2,18 @@ const Logger = require('./Logger.js');
 
 const SNOWFLAKE = /^\d{17,20}$/;
 
+/** Full custom-emoji mention: `<:name:id>` / `<a:name:id>` (names are 2–32 word chars). */
+const CUSTOM_EMOJI = /^<a?:\w{2,32}:\d{17,20}>$/;
+/**
+ * Code points that may legitimately appear inside a single Unicode emoji token:
+ * pictographs, regional-indicator (flag) letters, skin-tone modifiers, the ZWJ
+ * (U+200D) and variation selector (U+FE0F) that join sequences, and the keycap
+ * combiner (U+20E3) plus the digit / `#` / `*` bases it attaches to.
+ */
+const EMOJI_PARTS = /[\p{Extended_Pictographic}\p{Regional_Indicator}\p{Emoji_Modifier}‍️⃣#*0-9]/gu;
+/** A token must carry one of these to actually be an emoji (rejects bare digits / `#` / `*`). */
+const EMOJI_SIGNAL = /[\p{Extended_Pictographic}\p{Regional_Indicator}⃣]/u;
+
 /**
  * Type validators / coercers. Each entry is a function that accepts the raw
  * input (often a string from a slash command), returns
@@ -32,6 +44,21 @@ const TYPES = {
         const s = String(v).replace(/[<#@&!>]/g, '');
         if (!SNOWFLAKE.test(s)) return { ok: false, error: `expected Discord ID, got "${v}"` };
         return { ok: true, value: s };
+    },
+    /**
+     * A Discord emoji usable with `.setEmoji()`: a raw Unicode emoji (incl. VS16 /
+     * ZWJ sequences, flags and keycaps) or a full custom mention `<:name:id>` /
+     * `<a:name:id>`. Rejects the values that break Components at send time with
+     * COMPONENT_INVALID_EMOJI — shortcodes (`:fire:`), bare custom names / ids, and
+     * arbitrary text. Custom-emoji *renderability* (the bot actually sharing that
+     * emoji) is a render-time concern and intentionally not checked here.
+     */
+    emoji: (v) => {
+        const s = String(v).trim();
+        if (!s) return { ok: false, error: 'expected an emoji, got an empty value' };
+        if (CUSTOM_EMOJI.test(s)) return { ok: true, value: s };
+        if (EMOJI_SIGNAL.test(s) && s.replace(EMOJI_PARTS, '') === '') return { ok: true, value: s };
+        return { ok: false, error: `expected a Unicode emoji or a custom emoji like <:name:id>, got "${v}"` };
     }
 };
 TYPES.channel = TYPES.snowflake;
@@ -68,7 +95,7 @@ function withValidate(spec, core) {
  * the two structural types can see their `fields` / `item` sub-schemas.
  *
  * Supported `type`s:
- *   - scalars: string number integer boolean snowflake channel role user
+ *   - scalars: string number integer boolean snowflake channel role user emoji
  *   - `enum:a|b|c`, `array<innerScalar>`
  *   - `object` — a fixed set of named `fields` (a sub-schema)
  *   - `list`   — a variable-length sequence of `item`s (objects or scalars)
