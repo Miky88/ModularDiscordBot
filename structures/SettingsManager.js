@@ -406,6 +406,13 @@ module.exports = class SettingsManager {
     }
 
     /**
+     * Public, non-persisting validation: returns the coerced value for `key` or
+     * throws with a human-readable reason. Used by settings import to dry-run a
+     * value against the live schema before deciding whether to apply it.
+     */
+    validate(key, value) { return this._validate(key, value); }
+
+    /**
      * Set a key to a value. Validates against the schema; coerces strings
      * (e.g. `"true"` → `true` for boolean keys). For structural keys the *whole*
      * nested value is validated, so writing any nested leaf re-checks integrity.

@@ -70,6 +70,48 @@ commands:
       errors:
         closed: Chiuso.
         unknown-setting: Impostazione sconosciuta.
+      io:
+        scope:
+          all: tutti i moduli
+        buttons:
+          export-all: Esporta
+          export: Esporta
+          import: Importa
+          apply: Applica
+          cancel: Annulla
+        export:
+          ready: "📤 Ecco l'esportazione delle impostazioni (**{{scope}}**, {{count}} modulo/i). Importala su un altro server — anche di un bot diverso — con il pulsante **Importa**."
+        import:
+          title-all: Importa impostazioni
+          title-module: "Importa impostazioni di {{name}}"
+          file-label: File impostazioni (.json)
+          file-desc: Carica un file creato con il pulsante Esporta.
+          cancelled: ↩️ Importazione annullata — nessuna modifica effettuata.
+        report:
+          title: 📥 Anteprima importazione
+          source: "Da {{bot}} · {{count}} modulo/i nel file"
+          replace-warning: "Modalità sostituzione: per ogni modulo importato, le chiavi non presenti nel file vengono ripristinate ai valori predefiniti. Controlla qui sotto, poi Applica."
+          module-missing: "`{{name}}` — non presente su questo bot, ignorato."
+          module-counts: "applica {{apply}} · ripristina {{reset}} · ignora {{skip}}"
+          module-version: "creato per {{name}} v{{from}}, questo bot usa la v{{to}}"
+          key-unknown: impostazione inesistente qui
+          key-type: "tipo cambiato ({{from}} → {{to}})"
+          key-invalid: "non valido — {{error}}"
+          more-keys: "+{{count}} altra/e chiave/i ignorata/e"
+          more-modules: "+{{count}} altro/i modulo/i nel file"
+          totals: "Totale — applica {{apply}} · ripristina {{reset}} · ignora {{skip}}"
+        apply:
+          summary: "✅ Importazione completata — {{apply}} applicate, {{reset}} ripristinate, {{skip}} ignorate, {{missing}} modulo/i non presente/i su questo bot."
+        errors:
+          module-unknown: "Modulo `{{name}}` sconosciuto."
+          nothing-to-export: Non c'è nulla da esportare.
+          no-file: Nessun file caricato.
+          too-large: "Il file è troppo grande (massimo {{max}} KB)."
+          not-json: Il file non è un JSON valido.
+          wrong-format: Non sembra un'esportazione di impostazioni di questo bot.
+          wrong-version: "Versione di esportazione non supportata ({{version}})."
+          fetch-failed: Impossibile scaricare il file caricato — riprova.
+          expired: Questa anteprima di importazione è scaduta — carica di nuovo il file.
       cmdperms:
         home:
           commands-field: Comandi

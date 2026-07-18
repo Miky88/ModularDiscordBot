@@ -70,6 +70,48 @@ commands:
       errors:
         closed: Closed.
         unknown-setting: Unknown setting.
+      io:
+        scope:
+          all: all modules
+        buttons:
+          export-all: Export
+          export: Export
+          import: Import
+          apply: Apply
+          cancel: Cancel
+        export:
+          ready: "📤 Here's your settings export (**{{scope}}**, {{count}} module(s)). Import it on another server — even a different bot — with the **Import** button."
+        import:
+          title-all: Import settings
+          title-module: "Import {{name}} settings"
+          file-label: Settings file (.json)
+          file-desc: Upload a file made with the Export button.
+          cancelled: ↩️ Import cancelled — nothing was changed.
+        report:
+          title: 📥 Import preview
+          source: "From {{bot}} · {{count}} module(s) in file"
+          replace-warning: "Replace mode: for each imported module, keys not in the file are reset to their defaults. Review below, then Apply."
+          module-missing: "`{{name}}` — not on this bot, skipped."
+          module-counts: "apply {{apply}} · reset {{reset}} · skip {{skip}}"
+          module-version: "made for {{name}} v{{from}}, this bot runs v{{to}}"
+          key-unknown: no such setting here
+          key-type: "type changed ({{from}} → {{to}})"
+          key-invalid: "invalid — {{error}}"
+          more-keys: "+{{count}} more key(s) skipped"
+          more-modules: "+{{count}} more module(s) in file"
+          totals: "Total — apply {{apply}} · reset {{reset}} · skip {{skip}}"
+        apply:
+          summary: "✅ Import complete — {{apply}} applied, {{reset}} reset to default, {{skip}} skipped, {{missing}} module(s) not on this bot."
+        errors:
+          module-unknown: "No such module `{{name}}`."
+          nothing-to-export: There's nothing to export.
+          no-file: No file was uploaded.
+          too-large: "That file is too large (max {{max}} KB)."
+          not-json: That file isn't valid JSON.
+          wrong-format: That doesn't look like a settings export from this bot.
+          wrong-version: "Unsupported export version ({{version}})."
+          fetch-failed: Couldn't download the uploaded file — please try again.
+          expired: This import preview has expired — please upload the file again.
       cmdperms:
         home:
           commands-field: Commands

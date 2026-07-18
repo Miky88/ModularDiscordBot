@@ -8,6 +8,7 @@ const {
 const { safeUpdate, safeError, truncate, escapeMarkdown, errorContainer, paginate, navRow } = require('@structures/lib/InteractionHelpers.js');
 const CommandPermissionsView = require('./CommandPermissionsView.js');
 const SettingsNodeEditor = require('./SettingsNodeEditor.js');
+const SettingsPortability = require('./SettingsPortability.js');
 
 /** Accent bar colour for the settings containers (Discord blurple). */
 const ACCENT = 0x5865F2;
@@ -45,6 +46,7 @@ module.exports = class SettingsUI {
         this.client = utilityModule.client;
         this.cmdperms = new CommandPermissionsView(utilityModule);
         this.nodeEditor = new SettingsNodeEditor(utilityModule, this);
+        this.portability = new SettingsPortability(utilityModule, this);
         // Re-exported so SettingsNodeEditor can reuse the leaf-modal value reader
         // and compute which module-screen page a key sits on (for its Back button).
         this.NO_CHANGE = NO_CHANGE;
@@ -82,6 +84,9 @@ module.exports = class SettingsUI {
                 case 'node': case 'nedit': case 'nsub': case 'nadd':
                 case 'ndel': case 'ndelc': case 'nmove': case 'nreset': case 'nresetc':
                     return this.nodeEditor.handle(interaction, screen, args);
+                // Import / Export (all modules or one) — delegated to SettingsPortability.
+                case 'export': case 'import': case 'importsub': case 'ioapply': case 'iocancel':
+                    return this.portability.handle(interaction, screen, args);
             }
         } catch (err) {
             this.client.errorHandler?.capture(err, { source: 'SettingsUI', userId: interaction.user?.id });
@@ -125,6 +130,8 @@ module.exports = class SettingsUI {
         container.addSeparatorComponents(new SeparatorBuilder());
         container.addActionRowComponents(new ActionRowBuilder().addComponents(
             new ButtonBuilder().setCustomId('settings:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.refresh', interaction)).setEmoji('🔄'),
+            new ButtonBuilder().setCustomId('settings:export').setStyle(ButtonStyle.Secondary).setLabel(this._t('io.buttons.export-all', interaction)).setEmoji('📤'),
+            new ButtonBuilder().setCustomId('settings:import').setStyle(ButtonStyle.Secondary).setLabel(this._t('io.buttons.import', interaction)).setEmoji('📥'),
             new ButtonBuilder().setCustomId('settings:close').setStyle(ButtonStyle.Danger).setLabel(this._t('buttons.close', interaction)).setEmoji('❌')
         ));
 
@@ -192,6 +199,10 @@ module.exports = class SettingsUI {
         }
 
         container.addSeparatorComponents(new SeparatorBuilder());
+        container.addActionRowComponents(new ActionRowBuilder().addComponents(
+            new ButtonBuilder().setCustomId(`settings:export:${moduleName}`).setStyle(ButtonStyle.Secondary).setLabel(this._t('io.buttons.export', interaction)).setEmoji('📤'),
+            new ButtonBuilder().setCustomId(`settings:import:${moduleName}`).setStyle(ButtonStyle.Secondary).setLabel(this._t('io.buttons.import', interaction)).setEmoji('📥')
+        ));
         container.addActionRowComponents(new ActionRowBuilder().addComponents(
             ...cmdButtons,
             new ButtonBuilder().setCustomId('settings:home').setStyle(ButtonStyle.Secondary).setLabel(this._t('buttons.back', interaction)).setEmoji('⬅️')
